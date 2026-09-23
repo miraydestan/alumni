@@ -1,0 +1,26 @@
+@Alumni_HostAddress = http://localhost:5067
+
+GET {{Alumni_HostAddress}}/
+Accept: text/html
+
+###
+GET {{Alumni_HostAddress}}/hello
+Accept: text/plain
+
+###
+GET {{Alumni_HostAddress}}/hello/miray
+Accept: text/plain
+
+###
+GET {{Alumni_HostAddress}}/sum/5/3
+Accept: text/plain
+
+###
+GET {{Alumni_HostAddress}}/sum/10/20
+Accept: text/plain
+
+###
+GET {{Alumni_HostAddress}}/about
+Accept: text/html
+
+###
