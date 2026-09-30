@@ -6,7 +6,7 @@ The **Alumni Tracking System** is a web-based application designed to help unive
 
 The system will allow users to manage alumni records together with related information such as departments, graduation details, and professional experiences. It will also provide search and filtering capabilities for easier access to alumni information.
 
-The application will be developed incrementally, with new features and improvements introduced throughout the development process.
+The application is being developed incrementally, with new features and improvements introduced throughout the development process.
 
 ---
 
@@ -15,19 +15,19 @@ The application will be developed incrementally, with new features and improveme
 The following technologies and architectural decisions were selected based on the requirements of the system:
 
 1. **ASP.NET Core MVC:**
-   ASP.NET Core MVC will be used to build the web application and provide a clear separation between the user interface, application logic, and request handling.
+   ASP.NET Core MVC is used to build the web application and provide a clear separation between the user interface, application logic, and request handling.
 
 2. **Entity Framework Core:**
-   Entity Framework Core will be used as the ORM to manage communication between the application and the database. It will also be used to manage relationships between entities.
+   Entity Framework Core is planned to be used as the ORM to manage communication between the application and the database.
 
 3. **PostgreSQL:**
-   PostgreSQL will be used as the relational database management system because the system contains related data such as alumni, departments, graduation information, and job experiences.
+   PostgreSQL is planned to be used as the relational database management system for storing alumni and related information.
 
 4. **Layered Application Structure:**
-   Controllers, services, and data access responsibilities will be separated to make the application easier to maintain and extend.
+   Controllers, services, and data access responsibilities will be separated as the application grows to make the system easier to maintain and extend.
 
 5. **Docker:**
-   Docker and Docker Compose will be used to provide a consistent development environment and simplify application and database setup.
+   Docker and Docker Compose are planned to be used to provide a consistent development environment and simplify application and database setup.
 
 ---
 
@@ -37,7 +37,7 @@ The following technologies and architectural decisions were selected based on th
 
 **C# with ASP.NET Core**
 
-ASP.NET Core is used to build the web application, handle requests, implement CRUD operations, and provide authentication and authorization.
+ASP.NET Core is used to build the web application, handle HTTP requests, and implement API endpoints.
 
 ### Frontend
 
@@ -49,13 +49,25 @@ Razor Views, HTML5, CSS3, and Bootstrap will be used to create the web-based use
 
 **PostgreSQL**
 
-PostgreSQL is used as the relational database for storing alumni and related information.
+PostgreSQL is planned to be used as the relational database for storing alumni and related information.
 
 ### ORM
 
 **Entity Framework Core**
 
-Entity Framework Core is used to communicate with PostgreSQL and manage database entities and relationships.
+Entity Framework Core is planned to be used to communicate with PostgreSQL and manage database entities and relationships.
+
+### API Documentation
+
+**Swagger / OpenAPI**
+
+Swagger is used to document and test the API endpoints.
+
+Swagger UI:
+
+```text
+http://localhost:5067/swagger
+```
 
 ### Containerization
 
@@ -68,6 +80,32 @@ Docker will be used to provide a consistent development environment for the appl
 **Git & GitHub**
 
 Git and GitHub are used for version control and tracking the development process.
+
+---
+
+## 🔌 Current API Endpoints
+
+The following API endpoints are currently implemented.
+
+### Health
+
+| Method | Endpoint      | Description                   |
+| ------ | ------------- | ----------------------------- |
+| GET    | `/api/health` | Returns the API health status |
+| POST   | `/api/health` | Returns the API health status |
+
+### Users
+
+The Users API currently uses an **in-memory list** for development and testing. No database is used at this stage.
+
+| Method | Endpoint          | Description          |
+| ------ | ----------------- | -------------------- |
+| GET    | `/api/users`      | Returns all users    |
+| GET    | `/api/users/{id}` | Returns a user by ID |
+| POST   | `/api/users`      | Creates a new user   |
+| PUT    | `/api/users/{id}` | Updates a user       |
+| PATCH  | `/api/users/{id}` | Updates a user       |
+| DELETE | `/api/users/{id}` | Deletes a user       |
 
 ---
 
@@ -84,6 +122,9 @@ The system is planned to support:
 * Basic dashboard statistics
 * A web-based user interface
 * Relational database management
+* Persistent data storage with PostgreSQL
+* Entity Framework Core database integration
+* Docker-based application and database setup
 
 ---
 
@@ -109,9 +150,7 @@ The architecture will evolve as the application grows.
 
 ---
 
-## 🐳 How to Run
-
-The final goal is to make the application and database runnable through Docker Compose.
+## 🚀 How to Run
 
 ### 1. Clone the Repository
 
@@ -120,35 +159,60 @@ git clone https://github.com/miraydestan/alumni.git
 cd alumni
 ```
 
-### 2. Start the Application
+### 2. Run the Application
 
-After the Docker configuration is completed, the application will be started with:
+```bash
+dotnet run
+```
+
+The application is currently available at:
+
+```text
+http://localhost:5067
+```
+
+### 3. Open Swagger
+
+```text
+http://localhost:5067/swagger
+```
+
+Swagger provides an interface for viewing and testing the available API endpoints.
+
+### Future Docker Setup
+
+After Docker and PostgreSQL integration are completed, the application will be started with:
 
 ```bash
 docker compose up --build
 ```
 
-Detailed setup and usage instructions will be added as the project develops.
-
 ---
 
-## 📂 Planned Project Structure
+## 📂 Current Project Structure
 
 ```text
 alumni/
 │
-├── Controllers/          # Handles HTTP requests
-├── Models/               # Application and database models
-├── Data/                 # Database context and configuration
-├── Services/             # Business logic
-├── Views/                # Razor Views
-├── wwwroot/              # CSS, JavaScript and static files
+├── Controllers/
+│   ├── HealthController.cs
+│   ├── UsersController.cs
+│   └── ...
 │
-├── Migrations/           # Entity Framework Core migrations
-├── Dockerfile            # Application container configuration
-├── docker-compose.yml    # Application and PostgreSQL configuration
-├── Program.cs            # Application entry point
-└── README.md             # Project documentation
+├── Models/
+│   ├── User.cs
+│   └── ...
+│
+├── Views/
+│   └── ...
+│
+├── wwwroot/
+│   └── ...
+│
+├── Alumni.csproj
+├── Alumni.http
+├── Program.cs
+└── README.md
 ```
 
 ---
@@ -157,7 +221,32 @@ alumni/
 
 **In Development**
 
-The initial repository and technology stack have been established. The application will be developed incrementally, starting with the database structure and core alumni management features.
+### Currently Completed
+
+* ASP.NET Core project setup
+* Basic API routing
+* Health check endpoints
+* User model
+* User CRUD API endpoints
+* In-memory user storage for development
+* Swagger / OpenAPI integration
+* GitHub repository and version control setup
+
+### Planned
+
+* Alumni entity and CRUD operations
+* PostgreSQL database integration
+* Entity Framework Core integration
+* Department management
+* Graduation information
+* Job and professional experience management
+* Search and filtering
+* Authentication and authorization
+* Dashboard statistics
+* Razor Views and Bootstrap UI improvements
+* Docker and Docker Compose setup
+
+The README and Swagger documentation will be updated as new features and API endpoints are added.
 
 ---
 
