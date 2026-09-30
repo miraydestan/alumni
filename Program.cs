@@ -5,6 +5,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -14,10 +16,13 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-// Route root and about requests to HomeController views
+// Route root and about requests to HomeController views, and ensure /swagger opens Swagger UI
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path.Value;
@@ -28,6 +33,11 @@ app.Use(async (context, next) =>
     else if (path.Equals("/about", StringComparison.OrdinalIgnoreCase))
     {
         context.Request.Path = "/Home/About";
+    }
+    else if (path.Equals("/swagger", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Response.Redirect("/swagger/index.html", permanent: false);
+        return;
     }
     await next();
 });

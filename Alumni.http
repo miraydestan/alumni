@@ -24,3 +24,41 @@ GET {{Alumni_HostAddress}}/about
 Accept: text/html
 
 ###
+GET {{Alumni_HostAddress}}/api/health
+Accept: application/json
+
+###
+POST {{Alumni_HostAddress}}/api/users
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Miray Destan",
+  "email": "miray@example.com"
+}
+
+###
+GET {{Alumni_HostAddress}}/api/users
+Accept: application/json
+
+###
+PUT {{Alumni_HostAddress}}/api/users/1
+Content-Type: application/json
+
+{
+  "name": "Miray Destan Updated",
+  "email": "miray.updated@example.com"
+}
+
+###
+GET {{Alumni_HostAddress}}/api/users/1
+Accept: application/json
+
+###
+DELETE {{Alumni_HostAddress}}/api/users/1
+
+
+
+
+
+
