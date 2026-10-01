@@ -149,6 +149,7 @@ This structure separates the presentation layer, application logic, and database
 The architecture will evolve as the application grows.
 
 ---
+## 🚀 How to Run
 
 ## 🚀 How to Run
 
@@ -174,10 +175,11 @@ http://localhost:5067
 ### 3. Open Swagger
 
 ```text
-http://localhost:5067/swagger
+http://localhost:5067/api/swagger
 ```
 
 Swagger provides an interface for viewing and testing the available API endpoints.
+
 
 ### Future Docker Setup
 
