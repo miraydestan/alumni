@@ -66,9 +66,8 @@ Swagger is used to document and test the API endpoints.
 Swagger UI:
 
 ```text
-http://localhost:5067/swagger
+http://localhost:5067/api/swagger
 ```
-
 ### Containerization
 
 **Docker & Docker Compose**
