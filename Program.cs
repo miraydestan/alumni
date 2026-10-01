@@ -17,7 +17,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Alumni API V1");
+    c.RoutePrefix = "api/swagger";
+});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -33,11 +37,6 @@ app.Use(async (context, next) =>
     else if (path.Equals("/about", StringComparison.OrdinalIgnoreCase))
     {
         context.Request.Path = "/Home/About";
-    }
-    else if (path.Equals("/swagger", StringComparison.OrdinalIgnoreCase))
-    {
-        context.Response.Redirect("/swagger/index.html", permanent: false);
-        return;
     }
     await next();
 });

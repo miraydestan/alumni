@@ -19,6 +19,7 @@ public class UsersController : ControllerBase
     public IActionResult GetUserById(int id)
     {
         var user = _users.FirstOrDefault(u => u.Id == id);
+
         if (user == null)
         {
             return NotFound();
@@ -35,10 +36,10 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [HttpPatch("{id}")]
     public IActionResult UpdateUser(int id, [FromBody] User updatedUser)
     {
         var existingUser = _users.FirstOrDefault(u => u.Id == id);
+
         if (existingUser == null)
         {
             return NotFound();
@@ -50,10 +51,34 @@ public class UsersController : ControllerBase
         return Ok(existingUser);
     }
 
+    [HttpPatch("{id}")]
+    public IActionResult PatchUser(int id, [FromBody] User updatedUser)
+    {
+        var existingUser = _users.FirstOrDefault(u => u.Id == id);
+
+        if (existingUser == null)
+        {
+            return NotFound();
+        }
+
+        if (!string.IsNullOrEmpty(updatedUser.Name))
+        {
+            existingUser.Name = updatedUser.Name;
+        }
+
+        if (!string.IsNullOrEmpty(updatedUser.Email))
+        {
+            existingUser.Email = updatedUser.Email;
+        }
+
+        return Ok(existingUser);
+    }
+
     [HttpDelete("{id}")]
     public IActionResult DeleteUser(int id)
     {
         var user = _users.FirstOrDefault(u => u.Id == id);
+
         if (user == null)
         {
             return NotFound();
