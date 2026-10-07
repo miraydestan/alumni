@@ -51,6 +51,14 @@ Content-Type: application/json
 }
 
 ###
+PATCH {{Alumni_HostAddress}}/api/users/1
+Content-Type: application/json
+
+{
+  "name": "Miray Destan Patched"
+}
+
+###
 GET {{Alumni_HostAddress}}/api/users/1
 Accept: application/json
 

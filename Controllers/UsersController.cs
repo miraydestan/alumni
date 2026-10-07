@@ -31,6 +31,11 @@ public class UsersController : ControllerBase
     [HttpPost]
     public IActionResult CreateUser([FromBody] User user)
     {
+        if (user.Id == 0)
+        {
+            user.Id = _users.Count > 0 ? _users.Max(u => u.Id) + 1 : 1;
+        }
+
         _users.Add(user);
         return Created($"/api/users/{user.Id}", user);
     }
