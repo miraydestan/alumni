@@ -4,22 +4,21 @@ using Alumni.Models;
 namespace Alumni.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
-public class UsersController : ControllerBase
+[Route("api/users")]
+public class ApiUserController : ControllerBase
 {
-    private static readonly List<User> _users = new();
-
+    // GET: /api/users
     [HttpGet]
     public IActionResult GetUsers()
     {
-        return Ok(_users);
+        return Ok(UserStore.Users);
     }
 
+    // GET: /api/users/{id}
     [HttpGet("{id}")]
     public IActionResult GetUserById(int id)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
-
+        var user = UserStore.Users.FirstOrDefault(u => u.Id == id);
         if (user == null)
         {
             return NotFound();
@@ -28,23 +27,29 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
+    // POST: /api/users
     [HttpPost]
     public IActionResult CreateUser([FromBody] User user)
     {
-        if (user.Id == 0)
+        if (user == null)
         {
-            user.Id = _users.Count > 0 ? _users.Max(u => u.Id) + 1 : 1;
+            return BadRequest();
         }
 
-        _users.Add(user);
+        if (user.Id == 0)
+        {
+            user.Id = UserStore.Users.Count > 0 ? UserStore.Users.Max(u => u.Id) + 1 : 1;
+        }
+
+        UserStore.Users.Add(user);
         return Created($"/api/users/{user.Id}", user);
     }
 
+    // PUT: /api/users/{id}
     [HttpPut("{id}")]
     public IActionResult UpdateUser(int id, [FromBody] User updatedUser)
     {
-        var existingUser = _users.FirstOrDefault(u => u.Id == id);
-
+        var existingUser = UserStore.Users.FirstOrDefault(u => u.Id == id);
         if (existingUser == null)
         {
             return NotFound();
@@ -56,11 +61,11 @@ public class UsersController : ControllerBase
         return Ok(existingUser);
     }
 
+    // PATCH: /api/users/{id}
     [HttpPatch("{id}")]
     public IActionResult PatchUser(int id, [FromBody] User updatedUser)
     {
-        var existingUser = _users.FirstOrDefault(u => u.Id == id);
-
+        var existingUser = UserStore.Users.FirstOrDefault(u => u.Id == id);
         if (existingUser == null)
         {
             return NotFound();
@@ -79,17 +84,17 @@ public class UsersController : ControllerBase
         return Ok(existingUser);
     }
 
+    // DELETE: /api/users/{id}
     [HttpDelete("{id}")]
     public IActionResult DeleteUser(int id)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
-
+        var user = UserStore.Users.FirstOrDefault(u => u.Id == id);
         if (user == null)
         {
             return NotFound();
         }
 
-        _users.Remove(user);
+        UserStore.Users.Remove(user);
         return NoContent();
     }
 }

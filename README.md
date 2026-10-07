@@ -15,82 +15,104 @@ The application is being developed incrementally as part of a university **Web P
 The application is built on the **Model-View-Controller (MVC)** architectural pattern using **ASP.NET Core**. The MVC pattern separates application concerns into three interconnected components:
 
 ```text
-       ┌────────────────────────┐
-       │    Client / Browser    │
-       └───────────┬────────────┘
-                   │ HTTP Request
-                   ▼
-       ┌────────────────────────┐
-       │       CONTROLLER       │
-       │ (Handles HTTP Request) │
-       └─────┬────────────▲─────┘
-             │            │
-  Reads /    │            │ Returns Model Data /
-  Updates    ▼            │ Renders View
-       ┌───────────┐ ┌────┴──────┐
-       │   MODEL   │ │   VIEW    │
-       │  (Data /  │ │ (UI /     │
-       │  State)   │ │  Razor)   │
-       └───────────┘ └───────────┘
-                   │
-                   ▼ HTTP Response
-       ┌────────────────────────┐
-       │    Client / Browser    │
-       └────────────────────────┘
+       +------------------------+
+       |    Client / Browser    |
+       +-----------+------------+
+                   | HTTP Request
+                   v
+       +------------------------+
+       |       CONTROLLER       |
+       | (Handles HTTP Request) |
+       +-----+------------^-----+
+             |            |
+  Reads /    |            | Returns Model Data /
+  Updates    v            | Renders View
+       +-----------+ +----+------+
+       |   MODEL   | |   VIEW    |
+       |  (Data /  | | (UI /     |
+       |  State)   | |  Razor)   |
+       +-----------+ +-----------+
+                   |
+                   v HTTP Response
+       +------------------------+
+       |    Client / Browser    |
+       +------------------------+
 ```
 
 ### 1. MODEL (Application Data & Business Entities)
+
 * **Responsibility:** Represents the shape of the data, business entities, and state within the application.
 * **Current Implementation:**
-  * [`Models/User.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Models/User.cs): Defines the `User` class with properties:
+  * [Models/User.cs](Models/User.cs): Defines the `User` class with properties:
     * `int Id`: Unique identifier.
     * `string Name`: User's full name.
     * `string Email`: User's email address.
+  * [Models/UserStore.cs](Models/UserStore.cs): Provides a shared in-memory data store (`public static List<User> Users { get; } = new();`) shared by both MVC and Web API controllers.
 * **Data Storage Status (In-Memory):**
-  * Data persistence is currently handled **in-memory** using a static collection (`private static readonly List<User> _users = new();`) located in [`Controllers/UsersController.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Controllers/UsersController.cs).
+  * Data persistence is currently handled **in-memory** using a static collection in `UserStore.cs`.
   * **No database is connected at this stage.** Relational database storage (**PostgreSQL**) and Object-Relational Mapping (**Entity Framework Core**) are **planned for future iterations** and are **not yet implemented**. When the application stops or restarts, the in-memory data resets.
 
 ---
 
-### 2. CONTROLLER (Request Processing & Coordination)
-* **Responsibility:** Receives incoming HTTP requests, processes input parameters, coordinates with the data/model layer, and returns the appropriate HTTP response (JSON data or rendered HTML views).
-* **Current Controllers:**
-  1. [`Controllers/UsersController.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Controllers/UsersController.cs):
-     * Inherits from `ControllerBase`, marked with `[ApiController]` and route `api/[controller]`.
-     * Implements full RESTful CRUD API endpoints for users.
-     * Interacts directly with the `User` model and the in-memory `List<User>` store.
-     * Handles data updates with separate **PUT** (full replacement) and **PATCH** (partial update) endpoints.
-  2. [`Controllers/HealthController.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Controllers/HealthController.cs):
-     * Inherits from `ControllerBase`, marked with `[ApiController]` and route `api/[controller]`.
-     * Provides API health check endpoints (`GET` and `POST` at `/api/health`) returning `{ status = "ok" }`.
-  3. [`Controllers/HomeController.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Controllers/HomeController.cs):
-     * Inherits from `Controller` (standard ASP.NET Core MVC controller).
-     * Serves user-facing Razor Views for the web presentation layer:
-       * `Index()`: Serves the landing page view (`Views/Home/Index.cshtml`).
-       * `About()`: Serves the platform information view (`Views/Home/About.cshtml`).
-  4. [`Controllers/AlumniController.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Controllers/AlumniController.cs):
-     * Inherits from `ControllerBase`, marked with `[ApiController]` and base route `/`.
-     * Implements foundational test and demonstration endpoints:
-       * `GET /hello`: Returns plain text `"Hello World!"`.
-       * `GET /hello/miray`: Returns plain text `"Hello Miray"`.
-       * `GET /sum/{number1}/{number2}`: Returns the calculated sum of two numbers.
-       * `GET /` and `GET /about`: Contains standalone HTML response helpers.
+### 2. CONTROLLERS (Request Processing & Coordination)
+
+The project demonstrates both ASP.NET Core approaches for user management: an **MVC Controller** returning Razor Views and a **Web API Controller** returning JSON.
+
+1. [Controllers/UserController.cs](Controllers/UserController.cs) - MVC Controller:
+   * Inherits from `Controller` (standard ASP.NET Core MVC controller).
+   * Represents the user-facing web interface for User management.
+   * Interacts with the shared `UserStore.Users` collection.
+   * Actions:
+     * `Index`: Displays the list of all users in a responsive table ([Views/User/Index.cshtml](Views/User/Index.cshtml)).
+     * `Details/{id}`: Displays single user information ([Views/User/Details.cshtml](Views/User/Details.cshtml)).
+     * `Create` (GET & POST): Renders create form and adds new user to the shared store ([Views/User/Create.cshtml](Views/User/Create.cshtml)).
+     * `Edit/{id}` (GET & POST): Renders edit form and updates existing user data ([Views/User/Edit.cshtml](Views/User/Edit.cshtml)).
+     * `Delete/{id}` (GET & POST): Renders delete confirmation and removes user from the shared store ([Views/User/Delete.cshtml](Views/User/Delete.cshtml)).
+
+2. [Controllers/ApiUserController.cs](Controllers/ApiUserController.cs) - Web API Controller:
+   * Inherits from `ControllerBase`, marked with `[ApiController]` and route `[Route("api/users")]`.
+   * Represents the RESTful Web API for User management.
+   * Interacts with the shared `UserStore.Users` collection and returns JSON responses with HTTP status codes.
+   * Endpoints:
+     * `GET /api/users`: Returns all users (`200 OK`).
+     * `GET /api/users/{id}`: Returns user by ID (`200 OK` or `404 Not Found`).
+     * `POST /api/users`: Creates a new user (`201 Created` with `Location` header). Auto-assigns next ID if ID is 0 or omitted.
+     * `PUT /api/users/{id}`: Full update of user (Name and Email; `200 OK` or `404 Not Found`).
+     * `PATCH /api/users/{id}`: Partial update of user (`200 OK` or `404 Not Found`).
+     * `DELETE /api/users/{id}`: Deletes user (`204 NoContent` or `404 Not Found`).
+
+3. [Controllers/HealthController.cs](Controllers/HealthController.cs):
+   * Inherits from `ControllerBase`, route `api/[controller]`.
+   * Provides API health check endpoints (`GET` and `POST` at `/api/health`) returning `{ status = "ok" }`.
+
+4. [Controllers/HomeController.cs](Controllers/HomeController.cs):
+   * Inherits from `Controller`.
+   * Serves landing and platform information Razor Views (`Index` and `About`).
+
+5. [Controllers/AlumniController.cs](Controllers/AlumniController.cs):
+   * Inherits from `ControllerBase`, route `/`.
+   * Foundational test/demo routes (`/hello`, `/hello/miray`, `/sum/{number1}/{number2}`).
 
 ---
 
 ### 3. VIEW (User Interface & Presentation)
+
 * **Responsibility:** Renders the user-facing interface presented to clients in web browsers.
 * **Current Implementation:**
-  * Razor Views (`.cshtml`) are implemented for informational and landing pages:
-    * [`Views/Home/Index.cshtml`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Views/Home/Index.cshtml): Main landing page featuring hero banner, mission statements, and feature cards (Alumni Network, Career & Experience, Easy Access).
-    * [`Views/Home/About.cshtml`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Views/Home/About.cshtml): Informational page detailing the platform purpose, tracked data categories (Alumni, Department, Graduation, Job Experience), and platform governance.
-    * [`Views/Shared/_Layout.cshtml`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Views/Shared/_Layout.cshtml): Shared master layout with Bootstrap 5.3 navigation header, responsive container structure, footer, and scripts.
-    * [`Views/_ViewStart.cshtml`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Views/_ViewStart.cshtml): Specifies the default layout (`_Layout.cshtml`) for all views.
-    * [`Views/_ViewImports.cshtml`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Views/_ViewImports.cshtml): Imports global namespaces (`Alumni`) and ASP.NET Core MVC Tag Helpers.
-    * [`wwwroot/css/site.css`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/wwwroot/css/site.css): Custom CSS styles for UI cards, badges, buttons, and navigation.
-* **Status of Data-Driven / CRUD Views:**
-  * While landing/informational Razor views currently exist, **entity-specific dynamic views** (e.g. Razor forms and tables for listing, creating, or editing Users and Alumni) are **not yet implemented**.
-  * User and Alumni management is currently exposed exclusively through JSON REST API endpoints (`/api/users`). Full Razor CRUD views bound to database models are planned for future iterations.
+  * **User Management Views ([Views/User/](Views/User/)):**
+    * [Views/User/Index.cshtml](Views/User/Index.cshtml): User list table with action buttons (Details, Edit, Delete), and empty state card when no users exist.
+    * [Views/User/Details.cshtml](Views/User/Details.cshtml): Single user details card.
+    * [Views/User/Create.cshtml](Views/User/Create.cshtml): Form for adding new users with CSRF validation.
+    * [Views/User/Edit.cshtml](Views/User/Edit.cshtml): Form for updating user name and email.
+    * [Views/User/Delete.cshtml](Views/User/Delete.cshtml): Confirmation prompt for deleting a user.
+  * **Home Views ([Views/Home/](Views/Home/)):**
+    * [Views/Home/Index.cshtml](Views/Home/Index.cshtml): Main landing page with hero banner and feature cards.
+    * [Views/Home/About.cshtml](Views/Home/About.cshtml): Platform info, tracked categories, and goals.
+  * **Shared Layout & Assets:**
+    * [Views/Shared/_Layout.cshtml](Views/Shared/_Layout.cshtml): Master layout with responsive navbar (Home, About, Users links), footer, Bootstrap 5.3, and icons.
+    * [Views/_ViewStart.cshtml](Views/_ViewStart.cshtml): Configures `_Layout.cshtml` as default layout.
+    * [Views/_ViewImports.cshtml](Views/_ViewImports.cshtml): Global namespaces and Tag Helpers.
+    * [wwwroot/css/site.css](wwwroot/css/site.css): Custom CSS styles for UI cards, badges, buttons, and navigation.
 
 ---
 
@@ -100,74 +122,77 @@ The application is built on the **Model-View-Controller (MVC)** architectural pa
 
 ```text
 Client / Browser
-      ↓
+      |
+      v
   Controller
-      ↓
+      |
+      v
  Model / Data
-      ↓
+      |
+      v
   Controller
-      ↓
+      |
+      v
 HTTP Response
 ```
 
 ### 2. Actual Code Implementation Flows
 
-Depending on whether a client requests a Web API endpoint or a web page, the request flows through ASP.NET Core as follows:
+#### A. Web API Request Flow (ApiUserController - e.g., POST /api/users)
 
-#### A. Web API Request Flow (e.g., `POST /api/users` or `GET /api/users/{id}`)
 ```text
-1. Client (Browser / Swagger UI / HTTP Client) sends HTTP Request:
-   POST /api/users  (with JSON body { "id": 1, "name": "Miray", "email": "miray@example.com" })
-      │
-      ▼
+1. Client (Swagger UI / HTTP Client) sends HTTP Request:
+   POST /api/users  { "name": "Miray", "email": "miray@example.com" }
+      |
+      v
 2. ASP.NET Core Routing Pipeline
-   Routes the request to UsersController.CreateUser(User user)
-      │
-      ▼
+   Routes the request to ApiUserController.CreateUser(User user)
+      |
+      v
 3. Controller Processes Request & Model:
    - Deserializes JSON payload into Alumni.Models.User instance
-   - Appends user to in-memory store (_users.Add(user))
-      │
-      ▼
+   - Auto-assigns ID if omitted (user.Id = UserStore.Users.Max() + 1)
+   - Appends user to shared in-memory store (UserStore.Users.Add(user))
+      |
+      v
 4. Controller Prepares HTTP Response:
-   - Generates HTTP 201 Created with Location header "/api/users/1"
-      │
-      ▼
+   - Returns HTTP 201 Created with Location header "/api/users/1" and user JSON
+      |
+      v
 5. Client receives JSON Response with status code 201 Created
 ```
 
-#### B. Web UI Request Flow (e.g., `GET /` or `GET /about`)
+#### B. MVC User Web UI Flow (UserController - e.g., GET /User)
+
 ```text
-1. User enters http://localhost:5067/ in Web Browser
-      │
-      ▼
-2. Middleware in Program.cs rewrites root request to /Home/Index
-      │
-      ▼
-3. Routing invokes HomeController.Index()
-      │
-      ▼
-4. Controller returns View():
-   - Razor View Engine executes Views/Home/Index.cshtml
+1. User navigates to http://localhost:5067/User in Web Browser
+      |
+      v
+2. Routing invokes UserController.Index()
+      |
+      v
+3. Controller reads UserStore.Users and passes collection to View():
+   - Razor View Engine executes Views/User/Index.cshtml
    - Layout is applied from Views/Shared/_Layout.cshtml
-   - Static assets (CSS) are referenced from wwwroot/css/site.css
-      │
-      ▼
-5. Client receives rendered HTML/CSS page with HTTP 200 OK
+   - Displays table of users or empty-state card
+      |
+      v
+4. Client receives rendered HTML/CSS page with HTTP 200 OK
 ```
 
-#### C. API Health Check Flow (`GET /api/health`)
+#### C. Web UI Home Request Flow (HomeController - e.g., GET /)
+
 ```text
-1. Client sends GET /api/health
-      │
-      ▼
-2. Routing invokes HealthController.Get()
-      │
-      ▼
-3. Controller returns Ok(new { status = "ok" })
-      │
-      ▼
-4. Client receives { "status": "ok" } with HTTP 200 OK
+1. User navigates to http://localhost:5067/
+      |
+      v
+2. Middleware in Program.cs rewrites root request to /Home/Index
+      |
+      v
+3. Routing invokes HomeController.Index() -> returns View()
+      |
+      v
+4. Client receives rendered HTML page with HTTP 200 OK
 ```
 
 ---
@@ -178,57 +203,68 @@ The current repository structure and the responsibility of each file and directo
 
 ```text
 alumni/
-│
-├── Controllers/                         # Request handling and API/UI controllers
-│   ├── AlumniController.cs              # Introductory test endpoints (/hello, /sum) & fallback pages
-│   ├── HealthController.cs              # API health verification endpoints (/api/health)
-│   ├── HomeController.cs                # MVC controller returning landing Razor Views (/Home/Index, /Home/About)
-│   └── UsersController.cs               # RESTful CRUD API endpoints for users with in-memory storage
-│
-├── Models/                              # Data models and entity representations
-│   └── User.cs                          # User data entity model (Id, Name, Email)
-│
-├── Views/                               # Razor Views (UI presentation layer)
-│   ├── Home/                            # Views corresponding to HomeController
-│   │   ├── About.cshtml                 # Platform purpose, tracked entities, and goals page
-│   │   └── Index.cshtml                 # Main landing page with hero banner and feature cards
-│   ├── Shared/                          # Shared templates across views
-│   │   └── _Layout.cshtml               # Master HTML layout, navigation navbar, footer, Bootstrap CDN
-│   ├── _ViewImports.cshtml              # Global Razor directives and MVC Tag Helpers
-│   └── _ViewStart.cshtml                # Configures the default layout for views
-│
-├── Properties/                          # Project launch settings
-│   └── launchSettings.json              # Development profiles, ports (http://localhost:5067), environment variables
-│
-├── wwwroot/                             # Static web assets served directly to the client
-│   └── css/
-│       └── site.css                     # Custom styles for Razor views (cards, navbar, badges, buttons)
-│
-├── Alumni.csproj                        # .NET 9 project file, SDK configuration, and NuGet dependencies
-├── Alumni.http                          # HTTP test requests file for Visual Studio and VS Code REST Client
-├── appsettings.json                     # General application configuration settings
-├── appsettings.Development.json         # Development environment-specific configuration settings
-├── Program.cs                           # Application entry point: service registration, middleware, and routing
-├── README.md                            # Comprehensive project documentation
-└── LICENSE                              # Project license (MIT)
+|
++-- Controllers/                         # Request handling controllers (MVC and Web API)
+|   +-- AlumniController.cs              # Introductory test endpoints (/hello, /sum) & fallback pages
+|   +-- ApiUserController.cs             # RESTful CRUD Web API endpoints (/api/users)
+|   +-- HealthController.cs              # API health verification endpoints (/api/health)
+|   +-- HomeController.cs                # MVC controller returning landing Razor Views (/Home/Index, /Home/About)
+|   `-- UserController.cs                # MVC controller for User CRUD web views (/User, /User/Create, etc.)
+|
++-- Models/                              # Data models and shared state
+|   +-- User.cs                          # User data entity model (Id, Name, Email)
+|   `-- UserStore.cs                     # Shared in-memory data store (List<User>)
+|
++-- Views/                               # Razor Views (UI presentation layer)
+|   +-- Home/                            # Views corresponding to HomeController
+|   |   +-- About.cshtml                 # Platform purpose, tracked entities, and goals page
+|   |   `-- Index.cshtml                 # Main landing page with hero banner and feature cards
+|   +-- Shared/                          # Shared templates across views
+|   |   `-- _Layout.cshtml               # Master HTML layout, navigation navbar, footer, Bootstrap CDN
+|   +-- User/                            # Views corresponding to UserController (MVC CRUD UI)
+|   |   +-- Create.cshtml                # Form for creating a new user
+|   |   +-- Delete.cshtml                # Confirmation page for deleting a user
+|   |   +-- Details.cshtml               # Details view showing user information
+|   |   +-- Edit.cshtml                  # Form for editing an existing user
+|   |   `-- Index.cshtml                 # User listing table with action links
+|   +-- _ViewImports.cshtml              # Global Razor directives and MVC Tag Helpers
+|   `-- _ViewStart.cshtml                # Configures the default layout for views
+|
++-- Properties/                          # Project launch settings
+|   `-- launchSettings.json              # Development profiles, ports (http://localhost:5067), environment variables
+|
++-- wwwroot/                             # Static web assets served directly to the client
+|   `-- css/
+|       `-- site.css                     # Custom styles for Razor views (cards, navbar, badges, buttons)
+|
++-- Alumni.csproj                        # .NET 9 project file, SDK configuration, and NuGet dependencies
++-- Alumni.http                          # HTTP test requests file for Visual Studio and VS Code REST Client
++-- appsettings.json                     # General application configuration settings
++-- appsettings.Development.json         # Development environment-specific configuration settings
++-- Program.cs                           # Application entry point: service registration, middleware, and routing
++-- README.md                            # Comprehensive project documentation
+`-- LICENSE                              # Project license (MIT)
 ```
 
 ### Detailed File Responsibilities
 
 | File / Folder | Type | Responsibility |
 | ------------- | ---- | -------------- |
-| [`Program.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Program.cs) | Configuration | Configures the dependency injection container (`AddControllersWithViews`, `AddSwaggerGen`), configures the HTTP request pipeline, middleware, custom URL rewrites, and sets up endpoint routing. |
-| [`Alumni.csproj`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Alumni.csproj) | Project File | Defines target framework (`net9.0`) and NuGet package references (`Swashbuckle.AspNetCore`, `Microsoft.AspNetCore.OpenApi`). |
-| [`Alumni.http`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Alumni.http) | Testing | Contains pre-configured HTTP requests for local testing of API endpoints (`/api/health`, `/api/users`, `/hello`, `/sum`). |
-| [`Models/User.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Models/User.cs) | Model | Defines the `User` class schema (`Id`, `Name`, `Email`) used by the Users API. |
-| [`Controllers/UsersController.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Controllers/UsersController.cs) | Controller | Handles CRUD operations for users using an in-memory list (`_users`). Implements `GET`, `POST`, `PUT`, `PATCH`, and `DELETE`. |
-| [`Controllers/HealthController.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Controllers/HealthController.cs) | Controller | Provides GET and POST health endpoints returning `{ status = "ok" }`. |
-| [`Controllers/HomeController.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Controllers/HomeController.cs) | Controller | MVC Controller that returns Razor views for `Index` and `About` pages. |
-| [`Controllers/AlumniController.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Controllers/AlumniController.cs) | Controller | API Controller containing test routes (`/hello`, `/sum`) and fallback responses. |
-| [`Views/Shared/_Layout.cshtml`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Views/Shared/_Layout.cshtml) | View | Master layout defining the standard page skeleton, navigation bar, and footer. |
-| [`Views/Home/Index.cshtml`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Views/Home/Index.cshtml) | View | Homepage presentation content displaying project intro and feature highlights. |
-| [`Views/Home/About.cshtml`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Views/Home/About.cshtml) | View | Informational presentation content explaining the scope of the alumni system. |
-| [`wwwroot/css/site.css`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/wwwroot/css/site.css) | Static Asset | Custom stylesheet providing modern UI styling for Razor views. |
+| [Program.cs](Program.cs) | Configuration | Configures dependency injection (`AddControllersWithViews`, `AddSwaggerGen`), middleware pipeline, URL rewrites, and endpoint routing. |
+| [Alumni.csproj](Alumni.csproj) | Project File | Defines target framework (`net9.0`) and NuGet dependencies (`Swashbuckle.AspNetCore`, `Microsoft.AspNetCore.OpenApi`). |
+| [Alumni.http](Alumni.http) | Testing | Pre-configured HTTP requests for testing API endpoints (`/api/health`, `/api/users`, `POST`, `PUT`, `PATCH`, `DELETE`). |
+| [Models/User.cs](Models/User.cs) | Model | Defines the `User` class schema (`Id`, `Name`, `Email`). |
+| [Models/UserStore.cs](Models/UserStore.cs) | Storage | Shared static in-memory collection (`List<User> Users`) shared between `UserController` and `ApiUserController`. |
+| [Controllers/UserController.cs](Controllers/UserController.cs) | Controller (MVC) | Handles web user requests, performs CRUD on `UserStore.Users`, and returns Razor views (`Index`, `Details`, `Create`, `Edit`, `Delete`). |
+| [Controllers/ApiUserController.cs](Controllers/ApiUserController.cs) | Controller (API) | RESTful API controller exposing `/api/users` endpoints (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) with JSON responses. |
+| [Controllers/HealthController.cs](Controllers/HealthController.cs) | Controller (API) | Provides GET and POST health endpoints returning `{ status = "ok" }`. |
+| [Controllers/HomeController.cs](Controllers/HomeController.cs) | Controller (MVC) | MVC Controller returning Razor views for `Index` and `About` pages. |
+| [Controllers/AlumniController.cs](Controllers/AlumniController.cs) | Controller (API) | API Controller containing test routes (`/hello`, `/sum`) and fallback responses. |
+| [Views/User/](Views/User/) | Views (MVC) | Razor views for User CRUD operations (`Index`, `Details`, `Create`, `Edit`, `Delete`). |
+| [Views/Shared/_Layout.cshtml](Views/Shared/_Layout.cshtml) | View | Master layout defining the standard page skeleton, navigation bar with Users link, and footer. |
+| [Views/Home/Index.cshtml](Views/Home/Index.cshtml) | View | Homepage presentation content displaying project intro and feature highlights. |
+| [Views/Home/About.cshtml](Views/Home/About.cshtml) | View | Informational presentation content explaining the scope of the alumni system. |
+| [wwwroot/css/site.css](wwwroot/css/site.css) | Static Asset | Custom stylesheet providing modern UI styling for Razor views. |
 
 ---
 
@@ -243,24 +279,33 @@ The following API endpoints are currently implemented and active in the applicat
 | `GET` | `/api/health` | Returns health status JSON `{ status = "ok" }` | `200 OK` |
 | `POST` | `/api/health` | Returns health status JSON `{ status = "ok" }` | `200 OK` |
 
-### 2. Users CRUD Endpoints
+### 2. Users REST API Endpoints (`ApiUserController`)
 
-> **Note on Data Storage:** The Users API currently uses an **in-memory list** (`List<User> _users`) inside `UsersController`. No database is connected at this stage. Data is reset upon server restart.
+> **Note on Data Storage:** The Users API uses an **in-memory list** (`UserStore.Users`). Data is shared with `UserController` and resets upon server restart.
 
 | Method | Endpoint | Description | Request Body | Response Status |
 | ------ | -------- | ----------- | ------------ | --------------- |
 | `GET` | `/api/users` | Returns list of all users | *None* | `200 OK` |
 | `GET` | `/api/users/{id}` | Returns a single user by ID | *None* | `200 OK` or `404 Not Found` |
-| `POST` | `/api/users` | Creates a new user in the in-memory list | JSON `User` object | `201 Created` (with `Location` header) |
-| `PUT` | `/api/users/{id}` | **Full update:** Replaces both `Name` and `Email` of the user | JSON `User` object | `200 OK` or `404 Not Found` |
-| `PATCH` | `/api/users/{id}` | **Partial update:** Updates `Name` and/or `Email` only if provided in request | JSON `User` object | `200 OK` or `404 Not Found` |
-| `DELETE` | `/api/users/{id}` | Deletes a user by ID from the in-memory list | *None* | `204 NoContent` or `404 Not Found` |
+| `POST` | `/api/users` | Creates a new user (auto-assigns ID if 0 or omitted) | JSON `User` object | `201 Created` (with `Location` header) |
+| `PUT` | `/api/users/{id}` | **Full update:** Replaces both `Name` and `Email` | JSON `User` object | `200 OK` or `404 Not Found` |
+| `PATCH` | `/api/users/{id}` | **Partial update:** Updates `Name` and/or `Email` only if provided | JSON `User` object | `200 OK` or `404 Not Found` |
+| `DELETE` | `/api/users/{id}` | Deletes user by ID | *None* | `204 NoContent` or `404 Not Found` |
 
-#### Key Difference Between PUT and PATCH in Current Code:
-* **`PUT /api/users/{id}`**: Expects a complete user object and unconditionally overwrites both `existingUser.Name` and `existingUser.Email` with the incoming values.
-* **`PATCH /api/users/{id}`**: Performs partial updates. Checks `!string.IsNullOrEmpty(updatedUser.Name)` and `!string.IsNullOrEmpty(updatedUser.Email)` individually, modifying only fields that contain non-empty values.
+### 3. Users MVC Web Routes (`UserController`)
 
-### 3. Utility & Demonstration Endpoints
+| Method | Route | Description | Result |
+| ------ | ----- | ----------- | ------ |
+| `GET` | `/User` or `/User/Index` | Displays all users in a table with action buttons | Renders [Views/User/Index.cshtml](Views/User/Index.cshtml) |
+| `GET` | `/User/Details/{id}` | Displays single user details card | Renders [Views/User/Details.cshtml](Views/User/Details.cshtml) |
+| `GET` | `/User/Create` | Displays form for creating a new user | Renders [Views/User/Create.cshtml](Views/User/Create.cshtml) |
+| `POST` | `/User/Create` | Processes create form, adds user to `UserStore` | Redirects to `/User` |
+| `GET` | `/User/Edit/{id}` | Displays form for editing user | Renders [Views/User/Edit.cshtml](Views/User/Edit.cshtml) |
+| `POST` | `/User/Edit/{id}` | Processes edit form, updates user in `UserStore` | Redirects to `/User` |
+| `GET` | `/User/Delete/{id}` | Displays confirmation prompt for deletion | Renders [Views/User/Delete.cshtml](Views/User/Delete.cshtml) |
+| `POST` | `/User/Delete/{id}` | Deletes user from `UserStore` | Redirects to `/User` |
+
+### 4. Utility & Demonstration Endpoints
 
 | Method | Endpoint | Description | Response Status |
 | ------ | -------- | ----------- | --------------- |
@@ -277,7 +322,7 @@ The following API endpoints are currently implemented and active in the applicat
 * **Backend Framework:** C# with **ASP.NET Core 9.0** (`net9.0`)
 * **Architecture:** MVC (Model-View-Controller) with integrated Web API
 * **Presentation Layer (Views):** Razor Views (`.cshtml`), HTML5, CSS3, Bootstrap 5.3.3, Bootstrap Icons
-* **Data Storage:** In-memory static collection (`List<User>`)
+* **Data Storage:** Shared in-memory static collection (`UserStore.Users`)
 * **API Documentation & Testing:** Swagger / OpenAPI via Swashbuckle (`Swashbuckle.AspNetCore` 6.6.2, `Microsoft.AspNetCore.OpenApi` 9.0.18)
 * **Version Control:** Git & GitHub
 
@@ -315,22 +360,25 @@ http://localhost:5067
 
 ### 3. Access the Web Pages (Razor Views)
 
-* **Home Page:** [http://localhost:5067/](http://localhost:5067/) or [http://localhost:5067/Home/Index](http://localhost:5067/Home/Index)
-* **About Page:** [http://localhost:5067/about](http://localhost:5067/about) or [http://localhost:5067/Home/About](http://localhost:5067/Home/About)
+* **Home Page:** [http://localhost:5067/](http://localhost:5067/)
+* **About Page:** [http://localhost:5067/about](http://localhost:5067/about)
+* **User Management (MVC):** [http://localhost:5067/User](http://localhost:5067/User)
 
 ### 4. Access Swagger UI (API Documentation)
 
-Swagger UI is configured with route prefix `api/swagger` in [`Program.cs`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Program.cs):
+Swagger UI is configured with route prefix `api/swagger` in [Program.cs](Program.cs):
 
 ```text
 http://localhost:5067/api/swagger
 ```
 
-Swagger provides an interactive web interface for inspecting and testing all API endpoints directly in your browser.
+Swagger provides an interactive web interface for inspecting and testing all API endpoints directly in your browser:
+
+* **Swagger UI:** [http://localhost:5067/api/swagger](http://localhost:5067/api/swagger)
 
 ### 5. Test with HTTP Client
 
-You can also run requests defined in [`Alumni.http`](file:///c:/Users/M%C4%B0RAY/Desktop/alumni/Alumni.http) directly from Visual Studio or the VS Code REST Client extension.
+You can also run requests defined in [Alumni.http](Alumni.http) directly from Visual Studio or the VS Code REST Client extension.
 
 ---
 
@@ -340,16 +388,16 @@ You can also run requests defined in [`Alumni.http`](file:///c:/Users/M%C4%B0RAY
 | ------------------- | ------ | ------- |
 | **ASP.NET Core 9.0 Setup** | ✅ Implemented | Configured with `AddControllersWithViews`, routing, and static file serving. |
 | **User Entity Model** | ✅ Implemented | `Models/User.cs` (`Id`, `Name`, `Email`). |
-| **User CRUD API** | ✅ Implemented | `GET`, `POST`, `PUT`, `PATCH`, `DELETE` endpoints in `UsersController`. |
-| **In-Memory Data Storage** | ✅ Implemented | In-memory `List<User>` used for rapid prototyping and testing. |
+| **Shared In-Memory Store** | ✅ Implemented | `Models/UserStore.cs` (`List<User> Users`) shared across MVC and API controllers. |
+| **User MVC Controller & Views** | ✅ Implemented | `Controllers/UserController.cs` with full Razor CRUD views in `Views/User/`. |
+| **User Web API Controller** | ✅ Implemented | `Controllers/ApiUserController.cs` exposing RESTful `/api/users` endpoints. |
 | **Health Check API** | ✅ Implemented | `GET` and `POST` at `/api/health`. |
 | **Swagger / OpenAPI** | ✅ Implemented | Interactive API documentation at `/api/swagger`. |
-| **Landing & About Razor Views** | ✅ Implemented | Responsive Bootstrap 5 views in `Views/Home/` with master layout. |
+| **Responsive Bootstrap UI** | ✅ Implemented | Layout with navigation header, hero cards, and tables. |
 | **Static Assets** | ✅ Implemented | `wwwroot/css/site.css` served via `app.UseStaticFiles()`. |
 | **PostgreSQL Database** | ⏳ Planned | Relational database setup for persistent data storage. |
 | **Entity Framework Core ORM** | ⏳ Planned | Data context, migrations, and database access layer. |
 | **Alumni & Related Models** | ⏳ Planned | Alumni, Department, Graduation, and Job Experience entities. |
-| **Dynamic Entity Views (CRUD UI)** | ⏳ Planned | Razor forms and tables for managing Alumni and Users directly via UI. |
 | **Authentication & Authorization** | ⏳ Planned | User login, registration, and role-based access control. |
 | **Docker & Docker Compose** | ⏳ Planned | Containerization for consistent multi-container app and database setup. |
 

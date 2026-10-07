@@ -1,0 +1,48 @@
+@model Alumni.Models.User
+
+@{
+    ViewData["Title"] = "User Details";
+    ViewData["ActivePage"] = "Users";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0 rounded-3 p-4">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="icon-box m-0">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-heading mb-0">User Details</h2>
+                        <span class="text-secondary small">Viewing information for ID #@Model.Id</span>
+                    </div>
+                </div>
+
+                <div class="mb-3 pb-3 border-bottom">
+                    <span class="text-muted small d-block">ID</span>
+                    <span class="fs-6 fw-semibold text-dark">#@Model.Id</span>
+                </div>
+
+                <div class="mb-3 pb-3 border-bottom">
+                    <span class="text-muted small d-block">Name</span>
+                    <span class="fs-5 fw-semibold text-dark">@Model.Name</span>
+                </div>
+
+                <div class="mb-4">
+                    <span class="text-muted small d-block">Email</span>
+                    <span class="fs-6 text-secondary">@Model.Email</span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary-custom px-4">
+                        <i class="bi bi-pencil me-1"></i> Edit User
+                    </a>
+                    <a asp-action="Index" class="btn btn-outline-custom px-3">
+                        <i class="bi bi-arrow-left me-1"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
