@@ -38,6 +38,11 @@ app.Use(async (context, next) =>
     {
         context.Request.Path = "/Home/About";
     }
+    else if (path.Equals("/swagger", StringComparison.OrdinalIgnoreCase) || path.Equals("/swagger/", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Response.Redirect("/api/swagger");
+        return;
+    }
     await next();
 });
 
