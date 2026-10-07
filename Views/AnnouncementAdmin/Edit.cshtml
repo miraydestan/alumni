@@ -1,0 +1,53 @@
+@model Alumni.Models.Announcement
+
+@{
+    ViewData["Title"] = "Edit Announcement";
+    ViewData["ActivePage"] = "AnnouncementAdmin";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card shadow-sm border-0 rounded-3 p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="icon-box m-0">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-heading mb-0">Edit Announcement</h2>
+                        <span class="text-secondary small">Editing announcement #@Model.Id</span>
+                    </div>
+                </div>
+
+                <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-semibold text-dark">Title</label>
+                        <input asp-for="Title" class="form-control form-control-lg fs-6" required />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Content" class="form-label fw-semibold text-dark">Content</label>
+                        <textarea asp-for="Content" class="form-control" rows="6" required></textarea>
+                        <span asp-validation-for="Content" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary-custom px-4">
+                            <i class="bi bi-check-circle me-1"></i> Save Changes
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-custom px-3">
+                            <i class="bi bi-arrow-left me-1"></i> Back to List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

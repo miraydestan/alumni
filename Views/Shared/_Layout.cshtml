@@ -36,6 +36,12 @@
                         <a class="nav-link nav-link-custom @(ViewData["ActivePage"]?.ToString() == "Users" ? "active" : "")" href="/User">Users</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link nav-link-custom @(ViewData["ActivePage"]?.ToString() == "Announcements" ? "active" : "")" href="/Announcement">Announcements</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom @(ViewData["ActivePage"]?.ToString() == "AnnouncementAdmin" ? "active" : "")" href="/AnnouncementAdmin">Admin</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link nav-link-custom" href="/#features">Alumni</a>
                     </li>
                 </ul>
@@ -67,6 +73,8 @@
                         <a href="/" class="text-decoration-none text-secondary">Home</a>
                         <span>&bull;</span>
                         <a href="/about" class="text-decoration-none text-secondary">About</a>
+                        <span>&bull;</span>
+                        <a href="/Announcement" class="text-decoration-none text-secondary">Announcements</a>
                         <span>&bull;</span>
                         <a href="/#features" class="text-decoration-none text-secondary">Features</a>
                     </div>
