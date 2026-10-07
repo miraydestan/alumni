@@ -3,8 +3,38 @@ using Alumni.Models;
 
 namespace Alumni.Controllers;
 
+[ApiExplorerSettings(IgnoreApi = true)]
 public class UserController : Controller
 {
+    // GET: /users
+    [HttpGet("/users")]
+    public IActionResult UsersList()
+    {
+        ViewData["ActivePage"] = "Users";
+        return View("Index", UserStore.Users);
+    }
+
+    // POST: /users
+    [HttpPost("/users")]
+    public IActionResult CreateFromUsersRoute(User user)
+    {
+        ViewData["ActivePage"] = "Users";
+
+        if (string.IsNullOrWhiteSpace(user.Name) || string.IsNullOrWhiteSpace(user.Email))
+        {
+            ModelState.AddModelError(string.Empty, "Name and Email are required.");
+            return View("Index", UserStore.Users);
+        }
+
+        if (user.Id == 0)
+        {
+            user.Id = UserStore.Users.Count > 0 ? UserStore.Users.Max(u => u.Id) + 1 : 1;
+        }
+
+        UserStore.Users.Add(user);
+        return Redirect("/users");
+    }
+
     // GET: /User or /User/Index
     [HttpGet]
     public IActionResult Index()

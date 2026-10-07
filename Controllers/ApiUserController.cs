@@ -5,6 +5,7 @@ namespace Alumni.Controllers;
 
 [ApiController]
 [Route("api/users")]
+[Tags("Users")]
 public class ApiUserController : ControllerBase
 {
     // GET: /api/users
