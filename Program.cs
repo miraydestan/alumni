@@ -123,4 +123,15 @@ app.MapControllerRoute(
 
 app.MapControllers();
 
+// Seed database on startup (idempotent — skips if data already exists)
+try
+{
+    await Alumni.Data.Seeders.DatabaseSeeder.SeedAsync(app.Services);
+}
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "Database seeding failed.");
+}
+
 app.Run();
