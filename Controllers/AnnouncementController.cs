@@ -1,30 +1,38 @@
 using Microsoft.AspNetCore.Mvc;
-using Alumni.Models;
+using Microsoft.EntityFrameworkCore;
+using Alumni.Data;
 
 namespace Alumni.Controllers;
 
 [ApiExplorerSettings(IgnoreApi = true)]
 public class AnnouncementController : Controller
 {
+    private readonly AlumniDbContext _db;
+
+    public AnnouncementController(AlumniDbContext db)
+    {
+        _db = db;
+    }
+
     // GET: /Announcement
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         ViewData["ActivePage"] = "Announcements";
-        var announcements = AnnouncementStore.Announcements.OrderByDescending(a => a.CreatedDate).ToList();
+        var announcements = await _db.Announcements
+            .OrderByDescending(a => a.CreatedDate)
+            .ToListAsync();
         return View(announcements);
     }
 
     // GET: /Announcement/Details/{id}
     [HttpGet]
-    public IActionResult Details(int id)
+    public async Task<IActionResult> Details(int id)
     {
         ViewData["ActivePage"] = "Announcements";
-        var announcement = AnnouncementStore.Announcements.FirstOrDefault(a => a.Id == id);
+        var announcement = await _db.Announcements.FindAsync(id);
         if (announcement == null)
-        {
             return NotFound();
-        }
 
         return View(announcement);
     }

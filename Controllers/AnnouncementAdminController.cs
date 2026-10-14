@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Alumni.Data;
 using Alumni.Models;
 
 namespace Alumni.Controllers;
@@ -6,12 +8,21 @@ namespace Alumni.Controllers;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class AnnouncementAdminController : Controller
 {
+    private readonly AlumniDbContext _db;
+
+    public AnnouncementAdminController(AlumniDbContext db)
+    {
+        _db = db;
+    }
+
     // GET: /AnnouncementAdmin
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         ViewData["ActivePage"] = "AnnouncementAdmin";
-        var announcements = AnnouncementStore.Announcements.OrderByDescending(a => a.CreatedDate).ToList();
+        var announcements = await _db.Announcements
+            .OrderByDescending(a => a.CreatedDate)
+            .ToListAsync();
         return View(announcements);
     }
 
@@ -26,7 +37,7 @@ public class AnnouncementAdminController : Controller
     // POST: /AnnouncementAdmin/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(Announcement announcement)
+    public async Task<IActionResult> Create(Announcement announcement)
     {
         ViewData["ActivePage"] = "AnnouncementAdmin";
 
@@ -36,29 +47,20 @@ public class AnnouncementAdminController : Controller
             return View(announcement);
         }
 
-        if (announcement.Id == 0)
-        {
-            announcement.Id = AnnouncementStore.Announcements.Count > 0
-                ? AnnouncementStore.Announcements.Max(a => a.Id) + 1
-                : 1;
-        }
-
-        announcement.CreatedDate = DateTime.Now;
-        AnnouncementStore.Announcements.Add(announcement);
-
+        announcement.CreatedDate = DateTime.UtcNow;
+        _db.Announcements.Add(announcement);
+        await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
     // GET: /AnnouncementAdmin/Edit/{id}
     [HttpGet]
-    public IActionResult Edit(int id)
+    public async Task<IActionResult> Edit(int id)
     {
         ViewData["ActivePage"] = "AnnouncementAdmin";
-        var announcement = AnnouncementStore.Announcements.FirstOrDefault(a => a.Id == id);
+        var announcement = await _db.Announcements.FindAsync(id);
         if (announcement == null)
-        {
             return NotFound();
-        }
 
         return View(announcement);
     }
@@ -66,14 +68,13 @@ public class AnnouncementAdminController : Controller
     // POST: /AnnouncementAdmin/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Edit(int id, Announcement updatedAnnouncement)
+    public async Task<IActionResult> Edit(int id, Announcement updatedAnnouncement)
     {
         ViewData["ActivePage"] = "AnnouncementAdmin";
-        var existing = AnnouncementStore.Announcements.FirstOrDefault(a => a.Id == id);
+
+        var existing = await _db.Announcements.FindAsync(id);
         if (existing == null)
-        {
             return NotFound();
-        }
 
         if (string.IsNullOrWhiteSpace(updatedAnnouncement.Title) || string.IsNullOrWhiteSpace(updatedAnnouncement.Content))
         {
@@ -81,22 +82,21 @@ public class AnnouncementAdminController : Controller
             return View(updatedAnnouncement);
         }
 
-        existing.Title = updatedAnnouncement.Title;
+        existing.Title   = updatedAnnouncement.Title;
         existing.Content = updatedAnnouncement.Content;
-
+        // CreatedDate is intentionally not updated on edit
+        await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
     // GET: /AnnouncementAdmin/Delete/{id}
     [HttpGet]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
         ViewData["ActivePage"] = "AnnouncementAdmin";
-        var announcement = AnnouncementStore.Announcements.FirstOrDefault(a => a.Id == id);
+        var announcement = await _db.Announcements.FindAsync(id);
         if (announcement == null)
-        {
             return NotFound();
-        }
 
         return View(announcement);
     }
@@ -104,12 +104,13 @@ public class AnnouncementAdminController : Controller
     // POST: /AnnouncementAdmin/Delete/{id}
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public IActionResult DeleteConfirmed(int id)
+    public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var announcement = AnnouncementStore.Announcements.FirstOrDefault(a => a.Id == id);
+        var announcement = await _db.Announcements.FindAsync(id);
         if (announcement != null)
         {
-            AnnouncementStore.Announcements.Remove(announcement);
+            _db.Announcements.Remove(announcement);
+            await _db.SaveChangesAsync();
         }
 
         return RedirectToAction(nameof(Index));

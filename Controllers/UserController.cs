@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Alumni.Data;
 using Alumni.Models;
 
 namespace Alumni.Controllers;
@@ -6,53 +8,57 @@ namespace Alumni.Controllers;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class UserController : Controller
 {
-    // GET: /users
-    [HttpGet("/users")]
-    public IActionResult UsersList()
+    private readonly AlumniDbContext _db;
+
+    public UserController(AlumniDbContext db)
     {
-        ViewData["ActivePage"] = "Users";
-        return View("Index", UserStore.Users);
+        _db = db;
     }
 
-    // POST: /users
+    // GET: /users
+    [HttpGet("/users")]
+    public async Task<IActionResult> UsersList()
+    {
+        ViewData["ActivePage"] = "Users";
+        var users = await _db.Users.ToListAsync();
+        return View("Index", users);
+    }
+
+    // POST: /users  (quick-create form on the Index page — no AntiForgeryToken in that form)
     [HttpPost("/users")]
-    public IActionResult CreateFromUsersRoute(User user)
+    public async Task<IActionResult> CreateFromUsersRoute(User user)
     {
         ViewData["ActivePage"] = "Users";
 
         if (string.IsNullOrWhiteSpace(user.Name) || string.IsNullOrWhiteSpace(user.Email))
         {
             ModelState.AddModelError(string.Empty, "Name and Email are required.");
-            return View("Index", UserStore.Users);
+            var users = await _db.Users.ToListAsync();
+            return View("Index", users);
         }
 
-        if (user.Id == 0)
-        {
-            user.Id = UserStore.Users.Count > 0 ? UserStore.Users.Max(u => u.Id) + 1 : 1;
-        }
-
-        UserStore.Users.Add(user);
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
         return Redirect("/users");
     }
 
     // GET: /User or /User/Index
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         ViewData["ActivePage"] = "Users";
-        return View(UserStore.Users);
+        var users = await _db.Users.ToListAsync();
+        return View(users);
     }
 
     // GET: /User/Details/{id}
     [HttpGet]
-    public IActionResult Details(int id)
+    public async Task<IActionResult> Details(int id)
     {
         ViewData["ActivePage"] = "Users";
-        var user = UserStore.Users.FirstOrDefault(u => u.Id == id);
+        var user = await _db.Users.FindAsync(id);
         if (user == null)
-        {
             return NotFound();
-        }
 
         return View(user);
     }
@@ -68,7 +74,7 @@ public class UserController : Controller
     // POST: /User/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(User user)
+    public async Task<IActionResult> Create(User user)
     {
         ViewData["ActivePage"] = "Users";
 
@@ -78,25 +84,19 @@ public class UserController : Controller
             return View(user);
         }
 
-        if (user.Id == 0)
-        {
-            user.Id = UserStore.Users.Count > 0 ? UserStore.Users.Max(u => u.Id) + 1 : 1;
-        }
-
-        UserStore.Users.Add(user);
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
     // GET: /User/Edit/{id}
     [HttpGet]
-    public IActionResult Edit(int id)
+    public async Task<IActionResult> Edit(int id)
     {
         ViewData["ActivePage"] = "Users";
-        var user = UserStore.Users.FirstOrDefault(u => u.Id == id);
+        var user = await _db.Users.FindAsync(id);
         if (user == null)
-        {
             return NotFound();
-        }
 
         return View(user);
     }
@@ -104,14 +104,13 @@ public class UserController : Controller
     // POST: /User/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Edit(int id, User updatedUser)
+    public async Task<IActionResult> Edit(int id, User updatedUser)
     {
         ViewData["ActivePage"] = "Users";
-        var existingUser = UserStore.Users.FirstOrDefault(u => u.Id == id);
-        if (existingUser == null)
-        {
+
+        var existing = await _db.Users.FindAsync(id);
+        if (existing == null)
             return NotFound();
-        }
 
         if (string.IsNullOrWhiteSpace(updatedUser.Name) || string.IsNullOrWhiteSpace(updatedUser.Email))
         {
@@ -119,22 +118,20 @@ public class UserController : Controller
             return View(updatedUser);
         }
 
-        existingUser.Name = updatedUser.Name;
-        existingUser.Email = updatedUser.Email;
-
+        existing.Name  = updatedUser.Name;
+        existing.Email = updatedUser.Email;
+        await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
     // GET: /User/Delete/{id}
     [HttpGet]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
         ViewData["ActivePage"] = "Users";
-        var user = UserStore.Users.FirstOrDefault(u => u.Id == id);
+        var user = await _db.Users.FindAsync(id);
         if (user == null)
-        {
             return NotFound();
-        }
 
         return View(user);
     }
@@ -142,12 +139,13 @@ public class UserController : Controller
     // POST: /User/Delete/{id}
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public IActionResult DeleteConfirmed(int id)
+    public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var user = UserStore.Users.FirstOrDefault(u => u.Id == id);
+        var user = await _db.Users.FindAsync(id);
         if (user != null)
         {
-            UserStore.Users.Remove(user);
+            _db.Users.Remove(user);
+            await _db.SaveChangesAsync();
         }
 
         return RedirectToAction(nameof(Index));

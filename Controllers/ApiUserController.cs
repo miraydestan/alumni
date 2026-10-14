@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Alumni.Data;
 using Alumni.Models;
 
 namespace Alumni.Controllers;
@@ -8,94 +10,86 @@ namespace Alumni.Controllers;
 [Tags("Users")]
 public class ApiUserController : ControllerBase
 {
+    private readonly AlumniDbContext _db;
+
+    public ApiUserController(AlumniDbContext db)
+    {
+        _db = db;
+    }
+
     // GET: /api/users
     [HttpGet]
-    public IActionResult GetUsers()
+    public async Task<IActionResult> GetUsers()
     {
-        return Ok(UserStore.Users);
+        var users = await _db.Users.ToListAsync();
+        return Ok(users);
     }
 
     // GET: /api/users/{id}
     [HttpGet("{id}")]
-    public IActionResult GetUserById(int id)
+    public async Task<IActionResult> GetUserById(int id)
     {
-        var user = UserStore.Users.FirstOrDefault(u => u.Id == id);
+        var user = await _db.Users.FindAsync(id);
         if (user == null)
-        {
             return NotFound();
-        }
 
         return Ok(user);
     }
 
     // POST: /api/users
     [HttpPost]
-    public IActionResult CreateUser([FromBody] User user)
+    public async Task<IActionResult> CreateUser([FromBody] User user)
     {
         if (user == null)
-        {
             return BadRequest();
-        }
 
-        if (user.Id == 0)
-        {
-            user.Id = UserStore.Users.Count > 0 ? UserStore.Users.Max(u => u.Id) + 1 : 1;
-        }
-
-        UserStore.Users.Add(user);
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
         return Created($"/api/users/{user.Id}", user);
     }
 
     // PUT: /api/users/{id}
     [HttpPut("{id}")]
-    public IActionResult UpdateUser(int id, [FromBody] User updatedUser)
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] User updatedUser)
     {
-        var existingUser = UserStore.Users.FirstOrDefault(u => u.Id == id);
-        if (existingUser == null)
-        {
+        var existing = await _db.Users.FindAsync(id);
+        if (existing == null)
             return NotFound();
-        }
 
-        existingUser.Name = updatedUser.Name;
-        existingUser.Email = updatedUser.Email;
-
-        return Ok(existingUser);
+        existing.Name  = updatedUser.Name;
+        existing.Email = updatedUser.Email;
+        await _db.SaveChangesAsync();
+        return Ok(existing);
     }
 
-    // PATCH: /api/users/{id}
+    // PATCH: /api/users/{id}  — only updates fields explicitly provided (non-null / non-empty)
     [HttpPatch("{id}")]
-    public IActionResult PatchUser(int id, [FromBody] User updatedUser)
+    public async Task<IActionResult> PatchUser(int id, [FromBody] User updatedUser)
     {
-        var existingUser = UserStore.Users.FirstOrDefault(u => u.Id == id);
-        if (existingUser == null)
-        {
+        var existing = await _db.Users.FindAsync(id);
+        if (existing == null)
             return NotFound();
-        }
 
         if (!string.IsNullOrEmpty(updatedUser.Name))
-        {
-            existingUser.Name = updatedUser.Name;
-        }
+            existing.Name = updatedUser.Name;
 
         if (!string.IsNullOrEmpty(updatedUser.Email))
-        {
-            existingUser.Email = updatedUser.Email;
-        }
+            existing.Email = updatedUser.Email;
 
-        return Ok(existingUser);
+        await _db.SaveChangesAsync();
+        return Ok(existing);
     }
 
     // DELETE: /api/users/{id}
     [HttpDelete("{id}")]
-    public IActionResult DeleteUser(int id)
+    public async Task<IActionResult> DeleteUser(int id)
     {
-        var user = UserStore.Users.FirstOrDefault(u => u.Id == id);
+        var user = await _db.Users.FindAsync(id);
         if (user == null)
-        {
             return NotFound();
-        }
 
-        UserStore.Users.Remove(user);
+        _db.Users.Remove(user);
+        await _db.SaveChangesAsync();
         return NoContent();
     }
 }
