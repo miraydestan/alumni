@@ -1,5 +1,7 @@
+name: alumni
 
 services:
+  # PostgreSQL database service for local development
   db:
     image: postgres:17-alpine
     container_name: alumni-postgres
@@ -14,9 +16,11 @@ services:
       - alumni_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U alumni_user -d alumni_db"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
 volumes:
+  # Named volume for persistent database storage across container lifecycles
   alumni_postgres_data:
