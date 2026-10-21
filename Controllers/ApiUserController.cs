@@ -92,4 +92,43 @@ public class ApiUserController : ControllerBase
         await _db.SaveChangesAsync();
         return NoContent();
     }
+
+    // GET: /api/users/{id}/jobs
+    [HttpGet("{id}/jobs")]
+    public async Task<IActionResult> GetJobsByUserId(int id)
+    {
+        var user = await _db.Users.FindAsync(id);
+        if (user == null)
+            return NotFound();
+
+        var jobs = await _db.JobPostings
+            .Where(j => j.UserId == id)
+            .ToListAsync();
+
+        return Ok(jobs);
+    }
+
+    // POST: /api/users/{id}/jobs
+    [HttpPost("{id}/jobs")]
+    public async Task<IActionResult> CreateJobForUser(int id, [FromBody] CreateJobPostingRequest request)
+    {
+        var user = await _db.Users.FindAsync(id);
+        if (user == null)
+            return NotFound();
+
+        if (request == null || string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Company))
+            return BadRequest();
+
+        var job = new JobPosting
+        {
+            UserId = id,
+            Title = request.Title.Trim(),
+            Company = request.Company.Trim()
+        };
+
+        _db.JobPostings.Add(job);
+        await _db.SaveChangesAsync();
+
+        return Created($"/api/users/{id}/jobs/{job.Id}", job);
+    }
 }

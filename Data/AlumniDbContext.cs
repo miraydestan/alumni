@@ -12,6 +12,7 @@ public class AlumniDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Announcement> Announcements => Set<Announcement>();
+    public DbSet<JobPosting> JobPostings => Set<JobPosting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +33,22 @@ public class AlumniDbContext : DbContext
             entity.Property(a => a.Title).IsRequired();
             entity.Property(a => a.Content).IsRequired();
             entity.Property(a => a.CreatedDate).IsRequired();
+        });
+
+        // Configure JobPosting entity
+        modelBuilder.Entity<JobPosting>(entity =>
+        {
+            entity.ToTable("job_postings");
+            entity.HasKey(j => j.Id);
+            entity.Property(j => j.Id).HasColumnName("id");
+            entity.Property(j => j.UserId).HasColumnName("user_id").IsRequired();
+            entity.Property(j => j.Title).HasColumnName("title").IsRequired();
+            entity.Property(j => j.Company).HasColumnName("company").IsRequired();
+
+            entity.HasOne(j => j.User)
+                .WithMany(u => u.JobPostings)
+                .HasForeignKey(j => j.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

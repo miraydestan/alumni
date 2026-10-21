@@ -1,4 +1,4 @@
-﻿# Data Design Documentation (DDD)
+# Data Design Documentation (DDD)
 
 ## 1. Purpose and Scope
 
@@ -110,6 +110,105 @@ Announcements
 EF Core maps these entities to database tables. The current model does not define a direct foreign-key relationship between users and announcements. Announcement authorship is not represented by a UserId or author navigation property in the current entity model.
 
 Alumni profiles, departments, graduation records, and job experiences are potential future domain entities. They should not be considered implemented until their models and database mappings are added.
+
+The database design for the `job_postings` table and its one-to-many relationship with `users` is specified in detail in the section below.
+
+## Database Design: Job Postings Table (`job_postings`)
+
+This section documents the database schema design and API specification for the `job_postings` table. As distinguishing implemented features from planned improvements is a primary objective of this document, note that this section defines the database design specification for upcoming implementation and is not yet implemented in the active C# entity models, DbContext, migrations, or controllers.
+
+### 1. Table Definition
+
+Table name: `job_postings`
+
+Columns:
+
+| Column Name | Data Type | Nullable | Key / Constraint | Description |
+|---|---|---|---|---|
+| `id` | `integer` | No (`NOT NULL`) | Primary Key | Unique identifier for each job posting |
+| `user_id` | `integer` | No (`NOT NULL`) | Foreign Key (`users.id`) | References the user who created/owns the posting; required |
+| `title` | `text` | No (`NOT NULL`) | None | Required text field specifying the job title |
+| `company` | `text` | No (`NOT NULL`) | None | Required text field specifying the company name |
+
+SQL Schema Definition:
+
+```sql
+CREATE TABLE job_postings (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INT NOT NULL,
+    title TEXT NOT NULL,
+    company TEXT NOT NULL,
+    CONSTRAINT fk_job_postings_users
+        FOREIGN KEY (user_id)
+        REFERENCES "Users" ("Id")
+        ON DELETE RESTRICT
+);
+```
+
+### 2. One-to-Many Relationship
+
+The `job_postings` table establishes a one-to-many (1:N) relationship between users and job postings:
+- **One user can create many job postings:** A single user can create and own multiple job postings.
+- **Each job posting belongs to exactly one user:** Every job posting record is strictly associated with a single user owner.
+- **Ownership identification:** The `user_id` column identifies the owner of the posting.
+
+### 3. Foreign Key and Deletion Rule
+
+- **Foreign Key:** `job_postings.user_id` references `users.id` (mapped to `"Users"("Id")` in PostgreSQL / EF Core).
+- **Deletion Rule:** `RESTRICT` (or `NO ACTION`).
+- **Explanation and Rationale:**
+  - The deletion rule is configured as `RESTRICT` / `NO ACTION` so that a user with existing job postings cannot be deleted accidentally.
+  - If a DELETE operation is executed against a record in `users` while that user still has one or more associated postings in `job_postings`, the database rejects the deletion and raises a foreign key violation error.
+  - This rule is chosen over alternatives for critical data integrity reasons:
+    - **Prevents accidental cascading data loss:** Unlike `CASCADE`, which would silently remove all job postings when a user is deleted, `RESTRICT` prevents accidental loss of job postings that may still be active or needed for historical tracking.
+    - **Prevents orphaned records:** Unlike `SET NULL`, which is prohibited because `user_id` is a required (`NOT NULL`) field, `RESTRICT` ensures that every job posting always has a valid owner.
+    - **Intentional account lifecycle:** To delete a user, an administrator or client must first explicitly reassign or delete their associated job postings, ensuring safe and deliberate data management.
+
+### 4. API Endpoint: `POST /api/users/{id}/jobs`
+
+The API provides an endpoint to create a job posting for a specified user:
+
+- **HTTP Method and Route:** `POST /api/users/{id}/jobs`
+- **Route Parameter:** `{id}` is the user ID from the URL, indicating the owner of the posting.
+- **Request Body:** JSON payload containing `title` and `company`:
+  ```json
+  {
+    "title": "Junior Developer",
+    "company": "Acme"
+  }
+  ```
+- **Ownership Determination:**
+  - The server must determine ownership from the URL (`{id}`), not from a `user_id` supplied in the request body.
+  - If a client supplies a `user_id` in the JSON request body, the server ignores or rejects it. The posting is always assigned the owner ID specified by `{id}` in the URL. This prevents clients from spoofing ownership or associating postings with unintended users.
+- **Expected HTTP Responses:**
+  - `404 Not Found`: If the user with ID `{id}` does not exist in the database. The server verifies that the user exists in `users` before creating the posting; if no matching user is found, it returns `404 Not Found`.
+  - `201 Created`: If creation succeeds. The server persists the new record in `job_postings` and returns `201 Created` with the newly created posting, including its `id` and `user_id` in the response body.
+  - `400 Bad Request`: If the request payload is malformed or missing required fields (`title`, `company`).
+
+### 5. Example Request
+
+`POST /api/users/1/jobs`
+
+```json
+{
+  "title": "Junior Developer",
+  "company": "Acme"
+}
+```
+
+**Explanation:**
+The resulting posting belongs to user `1` because the server extracts the owner ID directly from the URL route parameter (`{id} = 1`) rather than accepting a `user_id` from the request body.
+
+**Example Response (`201 Created`):**
+
+```json
+{
+  "id": 1,
+  "user_id": 1,
+  "title": "Junior Developer",
+  "company": "Acme"
+}
+```
 
 5. Data Access and CRUD Operations
 
@@ -245,6 +344,8 @@ Alumni profile management.
 Department and graduation records.
 
 Job experience tracking.
+
+Implementation of the designed `job_postings` entity, migrations, and API endpoint in C# (the database design and API specification are documented in Section 4 / Job Postings Table Design; code implementation is pending).
 
 Authentication, authorization, and role management.
 

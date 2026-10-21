@@ -77,6 +77,21 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Apply pending EF Core migrations before seeding data.
+try
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var db = scope.ServiceProvider.GetRequiredService<AlumniDbContext>();
+    await db.Database.MigrateAsync();
+}
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "Database migration failed.");
+    throw;
+}
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

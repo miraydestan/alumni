@@ -46,6 +46,36 @@ namespace Alumni.Migrations
                     b.ToTable("Announcements");
                 });
 
+            modelBuilder.Entity("Alumni.Models.JobPosting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Company")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("company");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("job_postings", (string)null);
+                });
+
             modelBuilder.Entity("Alumni.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -65,6 +95,22 @@ namespace Alumni.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Alumni.Models.JobPosting", b =>
+                {
+                    b.HasOne("Alumni.Models.User", "User")
+                        .WithMany("JobPostings")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Alumni.Models.User", b =>
+                {
+                    b.Navigation("JobPostings");
                 });
 #pragma warning restore 612, 618
         }
