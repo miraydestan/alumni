@@ -12,6 +12,7 @@ public static class DatabaseSeeder
 
         await SeedUsersAsync(db);
         await SeedAnnouncementsAsync(db);
+        await SeedJobPostingsAsync(db);
     }
 
     // ── Users ────────────────────────────────────────────────────────────────
@@ -34,5 +35,35 @@ public static class DatabaseSeeder
         var announcements = AnnouncementFactory.GetSeedAnnouncements();
         await db.Announcements.AddRangeAsync(announcements);
         await db.SaveChangesAsync();
+    }
+
+    // ── Job Postings ─────────────────────────────────────────────────────────
+    private static async Task SeedJobPostingsAsync(AlumniDbContext db)
+    {
+        var users = await db.Users.OrderBy(u => u.Id).ToListAsync();
+        if (users.Count == 0)
+            return;
+
+        var seedJobs = JobPostingFactory.GetSeedJobPostings(users);
+        var anyAdded = false;
+
+        foreach (var job in seedJobs)
+        {
+            var exists = await db.JobPostings.AnyAsync(j =>
+                j.Title == job.Title &&
+                j.Company == job.Company &&
+                j.UserId == job.UserId);
+
+            if (!exists)
+            {
+                await db.JobPostings.AddAsync(job);
+                anyAdded = true;
+            }
+        }
+
+        if (anyAdded)
+        {
+            await db.SaveChangesAsync();
+        }
     }
 }
