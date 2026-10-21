@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Alumni.Data;
@@ -43,29 +44,52 @@ public class ApiApplicationController : ControllerBase
         if (request == null)
             return BadRequest();
 
-        var userId = request.EffectiveUserId;
         var jobPostingId = request.EffectiveJobPostingId;
+        if (jobPostingId <= 0)
+            return BadRequest(new { message = "A valid job_posting_id is required." });
 
-        if (userId <= 0 || jobPostingId <= 0)
-            return BadRequest();
+        // Gerçek kullanıcı kimliği doğrulanamıyorsa başvuru oluşturulmasına izin verilmez (Fail-Closed)
+        if (User?.Identity?.IsAuthenticated != true)
+        {
+            return Unauthorized(new
+            {
+                message = "Authentication is required to create an application. Client-supplied user_id cannot be accepted as verified identity."
+            });
+        }
 
-        var user = await _db.Users.FindAsync(userId);
+        // İleride kimlik doğrulama eklendiğinde kullanıcı kimliği ClaimTypes.NameIdentifier üzerinden alınır
+        var claimValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(claimValue, out var authenticatedUserId) || authenticatedUserId <= 0)
+        {
+            return Unauthorized(new { message = "Invalid user identity claim in session." });
+        }
+
+        // İstemcinin gönderdiği user_id ile doğrulanmış kullanıcı kimliği eşleşmelidir
+        var requestedUserId = request.EffectiveUserId;
+        if (requestedUserId > 0 && requestedUserId != authenticatedUserId)
+        {
+            return Forbid();
+        }
+
+        var effectiveUserId = authenticatedUserId;
+
+        var user = await _db.Users.FindAsync(effectiveUserId);
         if (user == null)
-            return NotFound();
+            return NotFound(new { message = "Authenticated user does not exist in the database." });
 
         var job = await _db.JobPostings.FindAsync(jobPostingId);
         if (job == null)
-            return NotFound();
+            return NotFound(new { message = "Job posting does not exist." });
 
         var alreadyApplied = await _db.Applications
-            .AnyAsync(a => a.UserId == userId && a.JobPostingId == jobPostingId);
+            .AnyAsync(a => a.UserId == effectiveUserId && a.JobPostingId == jobPostingId);
 
         if (alreadyApplied)
             return Conflict(new { message = "User has already applied for this job posting." });
 
         var application = new Application
         {
-            UserId = userId,
+            UserId = effectiveUserId,
             JobPostingId = jobPostingId,
             Status = string.IsNullOrWhiteSpace(request.Status) ? "applied" : request.Status.Trim()
         };

@@ -1,0 +1,80 @@
+@model Alumni.Models.JobPosting
+
+@{
+    ViewData["Title"] = $"{Model.Title} - Details";
+    ViewData["ActivePage"] = "JobPostings";
+}
+
+<div class="container py-5" style="max-width: 800px;">
+    <!-- Breadcrumb / Back button -->
+    <div class="mb-4">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Job Postings
+        </a>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card shadow-sm border-0 rounded-3 p-4 p-md-5 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+                <i class="bi bi-briefcase me-1"></i> Job Opportunity
+            </span>
+            <span class="badge bg-light text-muted border">Job ID #@Model.Id</span>
+        </div>
+
+        <h1 class="h3 fw-bold text-dark mb-2">@Model.Title</h1>
+        <h2 class="h5 text-primary mb-4">
+            <i class="bi bi-building me-1"></i>@Model.Company
+        </h2>
+
+        <hr class="my-4 text-muted" />
+
+        <div class="row g-4 mb-4">
+            <div class="col-sm-6">
+                <div class="p-3 bg-light rounded-3 border">
+                    <span class="text-secondary small d-block mb-1">Company Name</span>
+                    <strong class="text-dark fs-6">@Model.Company</strong>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="p-3 bg-light rounded-3 border">
+                    <span class="text-secondary small d-block mb-1">Posted By (Owner)</span>
+                    <strong class="text-dark fs-6">
+                        @(Model.User?.Name ?? $"User ID: {Model.UserId}")
+                    </strong>
+                    @if (Model.User != null && !string.IsNullOrWhiteSpace(Model.User.Email))
+                    {
+                        <span class="text-muted small d-block">@Model.User.Email</span>
+                    }
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="p-3 bg-light rounded-3 border">
+                    <span class="text-secondary small d-block mb-1">Total Applications</span>
+                    <strong class="text-dark fs-6">
+                        <i class="bi bi-file-earmark-person text-info me-1"></i>
+                        @(Model.Applications?.Count ?? 0) Candidate(s)
+                    </strong>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="p-3 bg-light rounded-3 border">
+                    <span class="text-secondary small d-block mb-1">Internal Reference ID</span>
+                    <strong class="text-dark fs-6">job_postings.id = @Model.Id</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-3">
+            <a asp-action="Applications" asp-route-id="@Model.Id" class="btn btn-primary-custom px-4">
+                <i class="bi bi-people me-1"></i> View Applications (@(Model.Applications?.Count ?? 0))
+            </a>
+            <a asp-action="Index" class="btn btn-outline-custom">
+                <i class="bi bi-list me-1"></i> All Postings
+            </a>
+        </div>
+    </div>
+</div>

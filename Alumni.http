@@ -65,8 +65,36 @@ Accept: application/json
 ###
 DELETE {{Alumni_HostAddress}}/api/users/1
 
+###
+# Applications API: Get all applications (Public/Read-only)
+GET {{Alumni_HostAddress}}/api/applications
+Accept: application/json
 
+###
+# Applications API: Create application
+# GÜVENLİK NOTU: Kimlik doğrulama altyapısı henüz bulunmadığından ve istemciden gelen
+# user_id tek başına yetki sayılamayacağından bu istek 401 Unauthorized döner.
+POST {{Alumni_HostAddress}}/api/applications
+Content-Type: application/json
 
+{
+  "user_id": 1,
+  "job_posting_id": 1,
+  "status": "applied"
+}
 
+###
+# Job Applications API: Get applications for specific job
+GET {{Alumni_HostAddress}}/api/jobs/1/applications
+Accept: application/json
 
+###
+# Job Applications API: Create application for specific job
+# GÜVENLİK NOTU: Kimlik doğrulama bulunmadığı için bu istek 401 Unauthorized döner.
+POST {{Alumni_HostAddress}}/api/jobs/1/applications
+Content-Type: application/json
 
+{
+  "user_id": 1,
+  "status": "applied"
+}

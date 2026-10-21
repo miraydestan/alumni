@@ -1,0 +1,164 @@
+@model Alumni.Models.JobPosting
+
+@{
+    ViewData["Title"] = $"Applications - {Model.Title}";
+    ViewData["ActivePage"] = "JobPostings";
+}
+
+<div class="container py-5">
+    <!-- Breadcrumb / Back button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Job Postings
+        </a>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-custom btn-sm">
+            <i class="bi bi-eye me-1"></i> View Job Details
+        </a>
+    </div>
+
+    <!-- Header Card -->
+    <div class="card shadow-sm border-0 rounded-3 p-4 mb-4 bg-light">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <span class="badge bg-primary text-white mb-2">Job Applications Portal</span>
+                <h1 class="h3 fw-bold text-dark mb-1">@Model.Title</h1>
+                <p class="text-secondary mb-0">
+                    <i class="bi bi-building me-1"></i>Company: <strong>@Model.Company</strong> &bull; 
+                    <i class="bi bi-person me-1"></i>Owner: <strong>@(Model.User?.Name ?? $"User #{Model.UserId}")</strong>
+                </p>
+            </div>
+            <div class="text-end">
+                <span class="fs-4 fw-bold text-primary d-block">@(Model.Applications?.Count ?? 0)</span>
+                <span class="text-muted small">Total Applicants</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Alerts -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Application Section -->
+    @if (User?.Identity?.IsAuthenticated == true)
+    {
+        <div class="card shadow-sm border-0 rounded-3 p-4 mb-4 bg-light border-start border-primary border-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h2 class="h5 fw-bold text-dark mb-1">
+                        <i class="bi bi-person-check-fill text-primary me-2"></i>Bu İlana Başvur
+                    </h2>
+                    <p class="text-secondary mb-0 small">
+                        Oturum açmış kullanıcı: <strong>@User.Identity.Name</strong> olarak başvuracaksınız.
+                    </p>
+                </div>
+                <form asp-action="Apply" asp-route-id="@Model.Id" method="post" class="m-0">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-primary-custom">
+                        <i class="bi bi-send-fill me-1"></i> Kendi Adıma Başvur
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 rounded-3 p-4 mb-4 border-start border-warning border-4 bg-light">
+            <div class="d-flex align-items-start gap-3">
+                <i class="bi bi-shield-lock-fill text-warning fs-3 mt-1"></i>
+                <div class="flex-grow-1">
+                    <h2 class="h5 fw-bold text-dark mb-1">Başvuru Yapabilmek İçin Giriş Yapılmalıdır</h2>
+                    <p class="text-secondary mb-2 small">
+                        Güvenlik ve yetkilendirme kuralları gereğince kullanıcıların başka kullanıcılar adına başvuru oluşturması ("Select Applicant" seçimi) engellenmiştir. 
+                        Başvurular yalnızca doğrulanmış oturum kimliği üzerinden kendi adınıza yapılabilir.
+                    </p>
+                    <span class="badge bg-warning-subtle text-dark border border-warning-subtle">
+                        <i class="bi bi-info-circle me-1"></i>Sistemde aktif bir kimlik doğrulama (Authentication) oturumu gereklidir.
+                    </span>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Applications List -->
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-white border-bottom py-3">
+            <h2 class="h5 fw-bold text-dark mb-0">
+                <i class="bi bi-list-check me-2 text-primary"></i>Candidates Who Applied
+            </h2>
+        </div>
+
+        @if (Model.Applications == null || !Model.Applications.Any())
+        {
+            <div class="p-5 text-center">
+                <div class="icon-box mx-auto mb-3">
+                    <i class="bi bi-inbox"></i>
+                </div>
+                <h3 class="card-heading">No Applications Yet</h3>
+                <p class="card-description mb-0">No candidates have applied for this position yet. Use the form above to submit an application.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" style="width: 80px;">App ID</th>
+                            <th scope="col">Candidate Name</th>
+                            <th scope="col">Email Address</th>
+                            <th scope="col">User ID</th>
+                            <th scope="col" style="width: 140px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var app in Model.Applications)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-light text-muted border">#@app.Id</span>
+                                </td>
+                                <td class="fw-semibold text-dark">
+                                    <i class="bi bi-person-circle text-secondary me-2"></i>
+                                    @(app.User?.Name ?? $"User #{app.UserId}")
+                                </td>
+                                <td class="text-secondary">
+                                    @(app.User?.Email ?? "-")
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">User #@app.UserId</span>
+                                </td>
+                                <td>
+                                    @if (app.Status == "applied")
+                                    {
+                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-1">
+                                            <i class="bi bi-hourglass-split me-1"></i>Applied
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                                            @app.Status
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
