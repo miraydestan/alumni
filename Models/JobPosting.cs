@@ -11,4 +11,7 @@ public class JobPosting
 
     [JsonIgnore]
     public User? User { get; set; }
+
+    [JsonIgnore]
+    public ICollection<Application> Applications { get; set; } = new List<Application>();
 }

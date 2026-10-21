@@ -131,4 +131,19 @@ public class ApiUserController : ControllerBase
 
         return Created($"/api/users/{id}/jobs/{job.Id}", job);
     }
+
+    // GET: /api/users/{id}/applications
+    [HttpGet("{id}/applications")]
+    public async Task<IActionResult> GetApplicationsByUserId(int id)
+    {
+        var user = await _db.Users.FindAsync(id);
+        if (user == null)
+            return NotFound();
+
+        var applications = await _db.Applications
+            .Where(a => a.UserId == id)
+            .ToListAsync();
+
+        return Ok(applications);
+    }
 }

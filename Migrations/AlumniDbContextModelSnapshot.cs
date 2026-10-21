@@ -46,6 +46,38 @@ namespace Alumni.Migrations
                     b.ToTable("Announcements");
                 });
 
+            modelBuilder.Entity("Alumni.Models.Application", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("JobPostingId")
+                        .HasColumnType("integer")
+                        .HasColumnName("job_posting_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobPostingId");
+
+                    b.HasIndex("UserId", "JobPostingId")
+                        .IsUnique();
+
+                    b.ToTable("applications", (string)null);
+                });
+
             modelBuilder.Entity("Alumni.Models.JobPosting", b =>
                 {
                     b.Property<int>("Id")
@@ -97,6 +129,25 @@ namespace Alumni.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Alumni.Models.Application", b =>
+                {
+                    b.HasOne("Alumni.Models.JobPosting", "JobPosting")
+                        .WithMany("Applications")
+                        .HasForeignKey("JobPostingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Alumni.Models.User", "User")
+                        .WithMany("Applications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("JobPosting");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Alumni.Models.JobPosting", b =>
                 {
                     b.HasOne("Alumni.Models.User", "User")
@@ -108,8 +159,15 @@ namespace Alumni.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Alumni.Models.JobPosting", b =>
+                {
+                    b.Navigation("Applications");
+                });
+
             modelBuilder.Entity("Alumni.Models.User", b =>
                 {
+                    b.Navigation("Applications");
+
                     b.Navigation("JobPostings");
                 });
 #pragma warning restore 612, 618

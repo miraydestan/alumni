@@ -7,4 +7,5 @@ public class User
     public string Email { get; set; } = string.Empty;
 
     public ICollection<JobPosting> JobPostings { get; set; } = new List<JobPosting>();
+    public ICollection<Application> Applications { get; set; } = new List<Application>();
 }

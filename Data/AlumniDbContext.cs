@@ -13,6 +13,7 @@ public class AlumniDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Announcement> Announcements => Set<Announcement>();
     public DbSet<JobPosting> JobPostings => Set<JobPosting>();
+    public DbSet<Application> Applications => Set<Application>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +49,29 @@ public class AlumniDbContext : DbContext
             entity.HasOne(j => j.User)
                 .WithMany(u => u.JobPostings)
                 .HasForeignKey(j => j.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Configure Application entity
+        modelBuilder.Entity<Application>(entity =>
+        {
+            entity.ToTable("applications");
+            entity.HasKey(a => a.Id);
+            entity.Property(a => a.Id).HasColumnName("id");
+            entity.Property(a => a.UserId).HasColumnName("user_id").IsRequired();
+            entity.Property(a => a.JobPostingId).HasColumnName("job_posting_id").IsRequired();
+            entity.Property(a => a.Status).HasColumnName("status").IsRequired();
+
+            entity.HasIndex(a => new { a.UserId, a.JobPostingId }).IsUnique();
+
+            entity.HasOne(a => a.User)
+                .WithMany(u => u.Applications)
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(a => a.JobPosting)
+                .WithMany(j => j.Applications)
+                .HasForeignKey(a => a.JobPostingId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
     }

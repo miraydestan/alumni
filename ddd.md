@@ -210,6 +210,123 @@ The resulting posting belongs to user `1` because the server extracts the owner 
 }
 ```
 
+## Database Design: Applications Table (`applications`)
+
+This section documents the database schema design and API specification for the `applications` table, which serves as the join table implementing the many-to-many relationship between users (applicants) and job postings.
+
+### 1. Table Definition
+
+Table name: `applications`
+
+Columns:
+
+| Column Name | Data Type | Nullable | Key / Constraint | Description |
+|---|---|---|---|---|
+| `id` | `integer` | No (`NOT NULL`) | Primary Key | Unique identifier for each application record |
+| `user_id` | `integer` | No (`NOT NULL`) | Foreign Key (`users.id`) | References the user who submitted the application; required |
+| `job_posting_id` | `integer` | No (`NOT NULL`) | Foreign Key (`job_postings.id`) | References the job posting being applied for; required |
+| `status` | `text` | No (`NOT NULL`) | None | Application status (e.g. `'applied'`, `'interview'`); required |
+
+Unique Constraint:
+- `UNIQUE (user_id, job_posting_id)`: A user cannot apply to the same job posting more than once. The database enforces this constraint, and duplicate submission attempts return HTTP `409 Conflict`.
+
+SQL Schema Definition:
+
+```sql
+CREATE TABLE applications (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INT NOT NULL,
+    job_posting_id INT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'applied',
+    CONSTRAINT fk_applications_users
+        FOREIGN KEY (user_id)
+        REFERENCES "Users" ("Id")
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_applications_job_postings
+        FOREIGN KEY (job_posting_id)
+        REFERENCES job_postings (id)
+        ON DELETE RESTRICT,
+    CONSTRAINT uq_applications_user_job
+        UNIQUE (user_id, job_posting_id)
+);
+
+CREATE INDEX idx_applications_user_id ON applications (user_id);
+CREATE INDEX idx_applications_job_posting_id ON applications (job_posting_id);
+```
+
+### 2. Many-to-Many Relationship
+
+The `applications` table acts as a join table linking `users` and `job_postings`:
+- **Many users can apply to many job postings ($M:N$):** Multiple users can apply to the same job posting, and a single user can submit applications to multiple job postings.
+- **One row per (user, posting):** Each application row represents a single application submitted by one user to one job posting.
+- **Navigation Properties:**
+  - `User.Applications` collection navigation property.
+  - `JobPosting.Applications` collection navigation property.
+  - `Application.User` and `Application.JobPosting` reference navigation properties.
+
+### 3. Foreign Keys and Deletion Rule
+
+- **Foreign Keys:**
+  - `applications.user_id` references `users.id` (`"Users"("Id")`).
+  - `applications.job_posting_id` references `job_postings.id`.
+- **Deletion Rule:** `RESTRICT` (or `NO ACTION`).
+- **Explanation:**
+  - Both foreign keys use `RESTRICT` to prevent accidental deletion of user accounts or job postings that have active application history.
+  - Deleting a user or job posting with associated applications is rejected by the database until those applications are explicitly handled.
+
+### 4. API Endpoints
+
+#### POST `/api/jobs/{id}/applications`
+Submits an application to the specified job posting.
+- **Route Parameter:** `{id}` is the job posting ID from the URL (`job_posting_id`).
+- **Request Body:** JSON payload containing `user_id`:
+  ```json
+  {
+    "user_id": 1
+  }
+  ```
+- **Validation and Behavior:**
+  - If the job posting with ID `{id}` does not exist: returns `404 Not Found`.
+  - If the user with ID `user_id` does not exist: returns `404 Not Found`.
+  - If the user has already applied to this job posting: returns `409 Conflict`.
+  - If valid: persists the new application with `job_posting_id = {id}` and `status = 'applied'`, returning `201 Created` with the created application record.
+
+#### GET `/api/jobs/{id}/applications`
+Lists all applications submitted for a specific job posting.
+- **Route Parameter:** `{id}` is the job posting ID.
+- **Validation:** If the job posting with ID `{id}` does not exist, returns `404 Not Found`.
+- **Response:** `200 OK` with an array of applications belonging exclusively to job posting `{id}`.
+
+#### GET `/api/users/{id}/applications`
+Lists all applications submitted by a specific user.
+- **Route Parameter:** `{id}` is the user ID.
+- **Validation:** If the user with ID `{id}` does not exist, returns `404 Not Found`.
+- **Response:** `200 OK` with an array of applications belonging exclusively to user `{id}`.
+
+### 5. Example Request
+
+`POST /api/jobs/1/applications`
+
+```json
+{
+  "user_id": 2
+}
+```
+
+**Explanation:**
+User `2` submits an application for job posting `1`. The server takes `job_posting_id = 1` from the URL route and `user_id = 2` from the payload.
+
+**Example Response (`201 Created`):**
+
+```json
+{
+  "id": 1,
+  "userId": 2,
+  "jobPostingId": 1,
+  "status": "applied"
+}
+```
+
 5. Data Access and CRUD Operations
 
 The MVC and API controllers use dependency injection to access AlumniDbContext. Database changes are persisted using EF Core operations, including SaveChangesAsync().
@@ -319,18 +436,20 @@ The manually created forgetting_test table was used for this persistence test; i
 9. Project Structure
 
 alumni/
-├── Controllers/             # MVC and Web API controllers
+├── Controllers/             # MVC and Web API controllers (Users, Announcements, Jobs, Applications)
 ├── Data/
 │   ├── AlumniDbContext.cs    # EF Core database context
 │   ├── Factories/            # Initial data factories
 │   └── Seeders/              # Database seed logic
 ├── Migrations/               # EF Core migrations and snapshot
-├── Models/                   # User and Announcement entities
+├── Models/                   # User, Announcement, JobPosting, and Application entities (and request DTOs)
 ├── Views/                    # Razor Views
 ├── wwwroot/                  # Static assets
 ├── Program.cs                # Application configuration and DI
 ├── Alumni.csproj             # .NET dependencies
-├── docker-compose.yml        # PostgreSQL service and volume
+├── docker-compose.yml        # PostgreSQL service, application container, and volume
+├── Dockerfile                # Multi-stage container build for application service
+├── .dockerignore             # Docker build exclusions
 ├── .env.example              # Example environment configuration
 ├── README.md
 └── ddd.md
@@ -344,8 +463,6 @@ Alumni profile management.
 Department and graduation records.
 
 Job experience tracking.
-
-Implementation of the designed `job_postings` entity, migrations, and API endpoint in C# (the database design and API specification are documented in Section 4 / Job Postings Table Design; code implementation is pending).
 
 Authentication, authorization, and role management.
 
