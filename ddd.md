@@ -210,6 +210,29 @@ The resulting posting belongs to user `1` because the server extracts the owner 
 }
 ```
 
+### 6. JobPosting Business Rules
+
+The following domain rules define the field-level validation and optionality requirements for the `JobPosting` entity:
+
+1. **`title`**
+   - Required field.
+   - Maximum length: 120 characters.
+   - Must not be empty or `null`.
+
+2. **`company`**
+   - Required field.
+   - Must not be empty or `null`.
+
+3. **`city`**
+   - Optional field.
+   - Can be `null` or empty.
+
+4. **`description`**
+   - Optional field.
+   - Can be `null` or empty.
+
+> **Note:** In the current implementation (`Models/JobPosting.cs`, `Models/CreateJobPostingRequest.cs`, and the `job_postings` table), `title` and `company` are persisted as non-null `text` columns and validated for non-whitespace input in `POST /api/users/{id}/jobs`. The 120-character maximum length constraint for `title` and the optional `city` and `description` fields are documented here as domain rules and are not yet added to the active entity models, DTOs, or database schema.
+
 ## Database Design: Applications Table (`applications`)
 
 This section documents the database schema design and API specification for the `applications` table, which serves as the join table implementing the many-to-many relationship between users (applicants) and job postings.
