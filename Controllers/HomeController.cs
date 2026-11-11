@@ -16,4 +16,13 @@ public class HomeController : Controller
     {
         return View();
     }
+
+    [Route("/Home/NotFound")]
+    [IgnoreAntiforgeryToken]
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public IActionResult PageNotFound()
+    {
+        Response.StatusCode = StatusCodes.Status404NotFound;
+        return View("NotFound");
+    }
 }

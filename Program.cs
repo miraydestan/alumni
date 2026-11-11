@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Alumni.Data;
+using Alumni.Logging;
+using Alumni.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +72,8 @@ builder.Services.AddDbContext<AlumniDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<ILoggerProvider, FileErrorLoggerProvider>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
@@ -107,6 +111,32 @@ app.UseSwaggerUI(c =>
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<ServerErrorGuardianMiddleware>();
+app.UseMiddleware<NotFoundGuardianMiddleware>();
+
+// Render the custom MVC 404 page for non-API 404 responses while preserving JSON 404 responses for API requests
+app.UseWhen(
+    context => !context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase)
+        && !context.Request.Headers.Accept.Any(accept =>
+            accept is not null && accept.Contains("application/json", StringComparison.OrdinalIgnoreCase)),
+    branch =>
+    {
+        branch.UseStatusCodePagesWithReExecute("/Home/NotFound");
+        branch.Use(async (context, next) =>
+        {
+            await next();
+            if (context.Response.StatusCode != StatusCodes.Status404NotFound)
+            {
+                var statusCodeFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IStatusCodePagesFeature>();
+                if (statusCodeFeature is not null)
+                {
+                    statusCodeFeature.Enabled = false;
+                }
+            }
+        });
+    });
 
 // Route root and about requests to HomeController views, and ensure /swagger opens Swagger UI
 app.Use(async (context, next) =>

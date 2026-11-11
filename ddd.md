@@ -27,6 +27,12 @@ PostgreSQL Database
 
 MVC controllers return Razor Views for browser requests. API controllers expose HTTP endpoints and return API responses. Both access persistent data through the dependency-injected AlumniDbContext.
 
+Cross-cutting HTTP pipeline components in `Program.cs`:
+- `RequestLoggingMiddleware` logs completed MVC and Web API requests to the console.
+- `ServerErrorGuardianMiddleware` catches unhandled exceptions and unstarted 5xx responses, logs them via `ILogger`, and returns safe JSON 500 payloads.
+- `NotFoundGuardianMiddleware` returns structured JSON 404 responses for API / JSON requests, while non-API 404 responses re-execute `/Home/NotFound` (`Views/Shared/NotFound.cshtml`) via `UseStatusCodePagesWithReExecute`.
+- `FileErrorLoggerProvider` persists error-level logs (`LogLevel >= Error`) to `logs/error.logs` alongside Console logging.
+
 3. Implemented Entities
 
 3.1 User
@@ -416,7 +422,7 @@ The local .env file is ignored by Git because it may contain credentials. .env.e
 
 7. Migrations and Database Initialization
 
-EF Core migration files are stored in the Migrations/ directory. The project contains an initial migration named InitialCreate.
+EF Core migration files are stored in the Migrations/ directory. The project contains migrations including InitialCreate, AddJobPostings, and AddApplications.
 
 The migration history is tracked by EF Core in __EFMigrationsHistory.
 
@@ -432,9 +438,11 @@ Data/Factories/UserFactory.cs
 
 Data/Factories/AnnouncementFactory.cs
 
+Data/Factories/JobPostingFactory.cs
+
 Data/Seeders/DatabaseSeeder.cs
 
-The factories provide initial user and announcement data. The database seeder checks whether each corresponding table contains records before inserting its seed data. This prevents the initial records from being inserted again every time the application starts.
+The factories provide initial user, announcement, and job posting data. The database seeder checks whether each corresponding table contains records before inserting its seed data. This prevents the initial records from being inserted again every time the application starts.
 
 8. Persistence and Forgetting Test
 
@@ -464,9 +472,15 @@ alumni/
 │   ├── AlumniDbContext.cs    # EF Core database context
 │   ├── Factories/            # Initial data factories
 │   └── Seeders/              # Database seed logic
+├── Logging/
+│   └── FileErrorLoggerProvider.cs # File logger writing error logs to logs/error.logs
+├── Middleware/
+│   ├── NotFoundGuardianMiddleware.cs
+│   ├── RequestLoggingMiddleware.cs
+│   └── ServerErrorGuardianMiddleware.cs
 ├── Migrations/               # EF Core migrations and snapshot
 ├── Models/                   # User, Announcement, JobPosting, and Application entities (and request DTOs)
-├── Views/                    # Razor Views
+├── Views/                    # Razor Views (including Views/Shared/NotFound.cshtml)
 ├── wwwroot/                  # Static assets
 ├── Program.cs                # Application configuration and DI
 ├── Alumni.csproj             # .NET dependencies
