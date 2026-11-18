@@ -1,73 +1,432 @@
 @model IEnumerable<Alumni.Models.JobPosting>
 
 @{
-    ViewData["Title"] = "Job Postings";
+    var currentLang = Context.Request.Cookies["alumni_language"] ?? "en";
+    var isTr = currentLang == "tr";
+
+    ViewData["Title"] = isTr ? "Kariyer Fırsatları" : "Career Opportunities";
     ViewData["ActivePage"] = "JobPostings";
+
+    var list = Model?.ToList() ?? new List<Alumni.Models.JobPosting>();
+    var totalJobs = list.Count;
+    var partnerCompanies = list.Select(j => j.Company).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+    var totalApplications = list.Sum(j => j.Applications?.Count ?? 0);
 }
 
-<div class="container py-5">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <div>
-            <h1 class="h2 fw-bold text-dark mb-1">
-                <i class="bi bi-briefcase me-2 text-primary"></i>Job Postings
-            </h1>
-            <p class="text-secondary mb-0">Browse career opportunities posted by and for our alumni community.</p>
-        </div>
-        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fs-6">
-            <i class="bi bi-check2-circle me-1"></i>@(Model.Count()) Available Positions
-        </span>
-    </div>
-
-    @if (!Model.Any())
+@functions {
+    private static string LocalizeJobTitle(string title, string lang)
     {
-        <div class="info-card text-center py-5">
-            <div class="icon-box mx-auto mb-3">
-                <i class="bi bi-inbox"></i>
-            </div>
-            <h3 class="card-heading">No Job Postings Available</h3>
-            <p class="card-description mb-0">There are currently no job opportunities listed in the database.</p>
-        </div>
+        if (string.IsNullOrWhiteSpace(title)) return title;
+        if (lang == "tr")
+        {
+            if (title.Equals("Software Developer", StringComparison.OrdinalIgnoreCase))
+                return "Yazılım Geliştirici";
+            if (title.Equals("Software Developer Intern", StringComparison.OrdinalIgnoreCase))
+                return "Stajyer Yazılım Geliştirici";
+            if (title.Equals("Backend Intern", StringComparison.OrdinalIgnoreCase))
+                return "Stajyer Arka Yüz Geliştirici";
+            if (title.Equals("Data Analyst", StringComparison.OrdinalIgnoreCase))
+                return "Veri Analisti";
+            if (title.Equals("Business Analyst", StringComparison.OrdinalIgnoreCase))
+                return "İş Analisti";
+            if (title.Equals("Junior Frontend Developer", StringComparison.OrdinalIgnoreCase))
+                return "Ön Yüz Geliştirici";
+        }
+        return title;
     }
-    else
-    {
-        <div class="row g-4">
-            @foreach (var job in Model)
-            {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm border-0 rounded-3 p-4 d-flex flex-column justify-content-between">
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="badge bg-light text-primary border px-2 py-1">
-                                    <i class="bi bi-building me-1"></i>@job.Company
-                                </span>
-                                <span class="badge bg-light text-muted border">#@job.Id</span>
-                            </div>
+}
 
-                            <h2 class="h5 fw-bold text-dark mb-2">@job.Title</h2>
+<!-- Section 1: Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3 position-relative" style="z-index: 2;">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3 text-wrap" style="max-width: 100%;">
+                    <i class="bi bi-briefcase-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Collegiate Career Network • Opportunities" data-i18n-tr="Mezun Kariyer Ağı • Fırsatlar">
+                        Collegiate Career Network • Opportunities
+                    </span>
+                </div>
+                <h1 class="hero-title mb-3" data-i18n-en="Career Opportunities" data-i18n-tr="Kariyer Fırsatları">
+                    Career Opportunities
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="Discover verified professional positions, recruitment notices, and career opportunities shared across our global alumni fellowship." data-i18n-tr="Küresel mezun dayanışma ağımızda paylaşılan onaylı profesyonel pozisyonları, iş ilanlarını ve kariyer fırsatlarını keşfedin.">
+                    Discover verified professional positions, recruitment notices, and career opportunities shared across our global alumni fellowship.
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
 
-                            <p class="text-secondary small mb-3">
-                                <i class="bi bi-person me-1"></i>Posted by: 
-                                <strong>@(job.User?.Name ?? $"User #{job.UserId}")</strong>
-                            </p>
+<!-- Section 2: Main Career Portal Canvas -->
+<main class="py-5 bg-warm-offwhite" aria-label="Career Postings Directory">
+    <div class="container py-lg-3">
 
-                            <div class="mb-4">
-                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
-                                    <i class="bi bi-file-earmark-person me-1"></i>@(job.Applications?.Count ?? 0) Applications
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <a asp-action="Details" asp-route-id="@job.Id" class="btn btn-outline-custom flex-grow-1 btn-sm">
-                                <i class="bi bi-eye me-1"></i> Details
-                            </a>
-                            <a asp-action="Applications" asp-route-id="@job.Id" class="btn btn-primary-custom flex-grow-1 btn-sm">
-                                <i class="bi bi-people me-1"></i> Applications
-                            </a>
-                        </div>
+        <!-- Metrics Overview Strip -->
+        <div class="row g-3 g-md-4 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4 text-center h-100" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-gold) !important;">
+                    <div class="small fw-semibold text-uppercase text-muted mb-1" style="letter-spacing: 0.08em; font-size: 0.75rem;" data-i18n-en="Active Positions" data-i18n-tr="Aktif Pozisyonlar">
+                        Active Positions
+                    </div>
+                    <div class="h2 academic-serif fw-bold mb-0" style="color: var(--ats-navy);">
+                        @totalJobs
+                    </div>
+                    <div class="small text-muted mt-1" data-i18n-en="Verified Opportunities" data-i18n-tr="Onaylı Fırsatlar">
+                        Verified Opportunities
                     </div>
                 </div>
-            }
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4 text-center h-100" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important;">
+                    <div class="small fw-semibold text-uppercase text-muted mb-1" style="letter-spacing: 0.08em; font-size: 0.75rem;" data-i18n-en="Partner Organizations" data-i18n-tr="Kurumsal Şirketler">
+                        Partner Organizations
+                    </div>
+                    <div class="h2 academic-serif fw-bold mb-0" style="color: var(--ats-navy);">
+                        @partnerCompanies
+                    </div>
+                    <div class="small text-muted mt-1" data-i18n-en="Corporate Affiliates" data-i18n-tr="İş Birliği Ağı">
+                        Corporate Affiliates
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4 text-center h-100" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-gold) !important;">
+                    <div class="small fw-semibold text-uppercase text-muted mb-1" style="letter-spacing: 0.08em; font-size: 0.75rem;" data-i18n-en="Logged Applications" data-i18n-tr="Kayıtlı Başvurular">
+                        Logged Applications
+                    </div>
+                    <div class="h2 academic-serif fw-bold mb-0" style="color: var(--ats-navy);">
+                        @totalApplications
+                    </div>
+                    <div class="small text-muted mt-1" data-i18n-en="Candidate Submissions" data-i18n-tr="Aday Başvuruları">
+                        Candidate Submissions
+                    </div>
+                </div>
+            </div>
         </div>
-    }
-</div>
+
+        <!-- Controls Toolbar: Search & Sorting -->
+        <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4 mb-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important;">
+            <div class="row g-3 align-items-center justify-content-between">
+
+                <!-- Search Input -->
+                <div class="col-12 col-md-6 col-lg-6">
+                    <label for="jobSearchInput" class="visually-hidden" data-i18n-en="Search Career Opportunities" data-i18n-tr="Kariyer Fırsatlarında Ara">Search Career Opportunities</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0" style="border-color: var(--ats-gray-light); color: var(--ats-gold);">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="jobSearchInput" class="form-control border-start-0 ps-0"
+                               placeholder="Search by position, company, or poster..."
+                               data-i18n-en="Search by position, company, or poster..."
+                               data-i18n-tr="Pozisyon, şirket veya yayınlayan mezuna göre ara..."
+                               style="border-color: var(--ats-gray-light);" />
+                    </div>
+                </div>
+
+                <!-- Sort Dropdown -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <label for="jobSortSelect" class="visually-hidden" data-i18n-en="Sort Positions" data-i18n-tr="Pozisyonları Sırala">Sort Positions</label>
+                    <select id="jobSortSelect" class="form-select" style="border-color: var(--ats-gray-light); font-size: 0.9rem;">
+                        <option value="recent" data-i18n-en="Most Recent First" data-i18n-tr="En Yeniden Eskiye">Most Recent First</option>
+                        <option value="oldest" data-i18n-en="Oldest First" data-i18n-tr="En Eskiden Yeniye">Oldest First</option>
+                        <option value="title-asc" data-i18n-en="Title (A to Z)" data-i18n-tr="Pozisyona Göre (A-Z)">Title (A to Z)</option>
+                        <option value="title-desc" data-i18n-en="Title (Z to A)" data-i18n-tr="Pozisyona Göre (Z-A)">Title (Z to A)</option>
+                        <option value="applications-desc" data-i18n-en="Most Applications" data-i18n-tr="En Çok Başvuru">Most Applications</option>
+                    </select>
+                </div>
+
+                <!-- Info Pill Button -->
+                <div class="col-12 col-sm-6 col-md-2 col-lg-3 text-sm-end">
+                    <button type="button" class="btn btn-outline-custom w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#loginNoticeModal">
+                        <i class="bi bi-info-circle me-1" style="color: var(--ats-gold);"></i>
+                        <span data-i18n-en="Post Opportunity" data-i18n-tr="İlan Yayınla">Post Opportunity</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Counter Bar -->
+            <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 pt-3 mt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                <div class="small" id="jobCounterContainer" style="color: var(--ats-gray-muted);">
+                    <span id="jobCounterEn">
+                        Showing <strong class="text-dark visible-count-num">@totalJobs</strong> of <strong class="text-dark total-count-num">@totalJobs</strong> career opportunities
+                    </span>
+                    <span id="jobCounterTr" style="display: none;">
+                        <strong class="text-dark total-count-num">@totalJobs</strong> kariyer fırsatından <strong class="text-dark visible-count-num">@totalJobs</strong> tanesi gösteriliyor
+                    </span>
+                </div>
+                <div class="small fw-semibold text-uppercase" style="color: var(--ats-gold); letter-spacing: 0.08em; font-size: 0.75rem;" data-i18n-en="Verified Corporate Network &bull; University Registry" data-i18n-tr="Onaylı Kurumsal Ağ &bull; Üniversite Sicili">
+                    Verified Corporate Network &bull; University Registry
+                </div>
+            </div>
+        </div>
+
+        @if (!list.Any())
+        {
+            <!-- Authentic Academic Empty State -->
+            <div class="academic-empty-state my-5">
+                <div class="empty-state-icon mb-3">
+                    <i class="bi bi-briefcase" style="font-size: 2.75rem; color: var(--ats-gold);"></i>
+                </div>
+                <h3 class="academic-heading h3 mb-2" data-i18n-en="No Career Opportunities Posted" data-i18n-tr="Henüz Kariyer İlanı Bulunmuyor">
+                    No Career Opportunities Posted
+                </h3>
+                <p class="academic-lead mx-auto mb-4" style="max-width: 520px;" data-i18n-en="There are currently no active job postings or recruitment notices in the platform database." data-i18n-tr="Sistemde henüz yayımlanmış bir aktif kariyer veya staj ilanı bulunmamaktadır.">
+                    There are currently no active job postings or recruitment notices in the platform database.
+                </p>
+            </div>
+        }
+        else
+        {
+            <!-- Dynamic Search No-Results Placeholder -->
+            <div id="jobNoSearchResults" class="academic-empty-state my-5" style="display: none;">
+                <div class="empty-state-icon mb-3">
+                    <i class="bi bi-search" style="font-size: 2.5rem; color: var(--ats-gold);"></i>
+                </div>
+                <h3 class="academic-heading h4 mb-2" data-i18n-en="No Matching Career Opportunities" data-i18n-tr="Eşleşen Kariyer İlanı Bulunamadı">
+                    No Matching Career Opportunities
+                </h3>
+                <p class="small text-muted mb-3" data-i18n-en="We could not find any position matching your search criteria. Try a different keyword or reset the filters." data-i18n-tr="Arama kriterlerinize uyan bir pozisyon bulunamadı. Farklı bir anahtar kelime deneyin veya filtreyi sıfırlayın.">
+                    We could not find any position matching your search criteria. Try a different keyword or reset the filters.
+                </p>
+                <button type="button" class="btn btn-outline-custom btn-sm" onclick="clearJobSearch()">
+                    <span data-i18n-en="Clear Search Filter" data-i18n-tr="Aramayı Temizle">Clear Search Filter</span>
+                </button>
+            </div>
+
+            <!-- Career Postings Grid -->
+            <div class="row g-4" id="jobGridContainer">
+                @foreach (var job in list)
+                {
+                    var titleEn = job.Title;
+                    var titleTr = LocalizeJobTitle(job.Title, "tr");
+                    var posterName = job.User?.Name ?? $"User #{job.UserId}";
+                    var appCount = job.Applications?.Count ?? 0;
+
+                    <div class="col-md-6 col-lg-4 job-item"
+                         data-job-id="@job.Id"
+                         data-job-title-en="@titleEn.ToLowerInvariant()"
+                         data-job-title-tr="@titleTr.ToLowerInvariant()"
+                         data-job-company="@job.Company.ToLowerInvariant()"
+                         data-job-poster="@posterName.ToLowerInvariant()"
+                         data-job-applications="@appCount">
+
+                        <article class="card h-100 border-0 shadow-sm rounded-3 p-4 d-flex flex-column justify-content-between"
+                                 style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; transition: var(--ats-transition);">
+
+                            <div>
+                                <!-- Card Header: Company Badge & ID -->
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <span class="badge" style="background: rgba(197, 164, 109, 0.12); color: var(--ats-gold-hover); border: 1px solid var(--ats-gold-border); font-size: 0.775rem; font-weight: 600;">
+                                        <i class="bi bi-building me-1" style="color: var(--ats-gold);"></i>@job.Company
+                                    </span>
+                                    <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 0.75rem;">
+                                        #@job.Id
+                                    </span>
+                                </div>
+
+                                <!-- Position Title in Academic Serif -->
+                                <h3 class="h5 academic-serif mb-3" style="color: var(--ats-navy); line-height: 1.35; font-weight: 700;">
+                                    <a asp-action="Details" asp-route-id="@job.Id" class="text-decoration-none" style="color: var(--ats-navy);"
+                                       data-i18n-en="@titleEn"
+                                       data-i18n-tr="@titleTr">
+                                        @(isTr ? titleTr : titleEn)
+                                    </a>
+                                </h3>
+
+                                <!-- Poster Information -->
+                                <div class="d-flex align-items-center gap-2 mb-3 text-muted small">
+                                    <div class="d-inline-flex align-items-center justify-content-center text-white rounded-circle flex-shrink-0"
+                                         style="width: 26px; height: 26px; background: var(--ats-navy); font-size: 0.725rem; font-weight: 600;">
+                                        @posterName.Substring(0, 1).ToUpperInvariant()
+                                    </div>
+                                    <div class="text-truncate">
+                                        <span class="text-muted" data-i18n-en="Posted by:" data-i18n-tr="Yayınlayan:">Posted by:</span>
+                                        <strong class="text-dark">@posterName</strong>
+                                    </div>
+                                </div>
+
+                                <!-- Application Counter Strip -->
+                                <div class="mb-4">
+                                    <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 0.775rem;">
+                                        <i class="bi bi-file-earmark-person me-1 text-muted"></i>
+                                        <span class="fw-semibold text-dark">@appCount</span>
+                                        <span data-i18n-en="@(appCount == 1 ? "Candidate Applied" : "Candidates Applied")"
+                                              data-i18n-tr="@(appCount == 1 ? "Aday Başvurdu" : "Aday Başvurdu")">
+                                            @(appCount == 1 ? "Candidate Applied" : "Candidates Applied")
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Card Action Cluster -->
+                            <div class="pt-3 border-top d-flex align-items-center justify-content-between gap-2" style="border-color: var(--ats-gray-light) !important;">
+                                <a asp-action="Details" asp-route-id="@job.Id" class="btn btn-outline-custom btn-sm flex-grow-1">
+                                    <i class="bi bi-eye me-1" style="color: var(--ats-gold);"></i>
+                                    <span data-i18n-en="View Details" data-i18n-tr="İlan Detayı">View Details</span>
+                                </a>
+
+                                <a asp-action="Applications" asp-route-id="@job.Id" class="btn btn-academic-gold text-decoration-none py-1 px-3 small">
+                                    <i class="bi bi-people me-1"></i>
+                                    <span data-i18n-en="Applications" data-i18n-tr="Başvurular">Applications</span>
+                                </a>
+                            </div>
+                        </article>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</main>
+
+<!-- Section 3: Institutional Call-To-Action Banner -->
+<section class="py-5 bg-warm-offwhite pt-0" aria-label="Campus Fellowship and Networking Banner">
+    <div class="container pb-lg-4">
+        <div class="closing-academic-banner text-center">
+            <span class="academic-overline" style="color: var(--ats-gold);" data-i18n-en="Career Network &bull; Alumni Advancement" data-i18n-tr="Kariyer Ağı &bull; Mezun Gelişimi">
+                Career Network &bull; Alumni Advancement
+            </span>
+            <h2 class="academic-heading text-white mb-3" data-i18n-en="Connect with Alumni Talent &amp; Academic News" data-i18n-tr="Mezun Yetenekleri ve Akademik Gelişmelerle Bağ Kurun">
+                Connect with Alumni Talent &amp; Academic News
+            </h2>
+            <p class="closing-subtitle mx-auto mb-4" data-i18n-en="Browse verified alumni in our directory, read official university communiqués, or return to the platform homepage." data-i18n-tr="Mezunlar dizinindeki üniversite mezunlarını keşfedin, resmî kampüs duyurularını inceleyin veya ana sayfaya dönün.">
+                Browse verified alumni in our directory, read official university communiqués, or return to the platform homepage.
+            </p>
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
+                <a href="/User" class="btn-academic-gold" data-i18n-en="Explore Alumni Directory" data-i18n-tr="Mezunları Keşfet">
+                    Explore Alumni Directory
+                </a>
+                <a href="/Announcement" class="btn-academic-outline" data-i18n-en="View Campus Bulletins" data-i18n-tr="Kampüs Bültenlerini Oku">
+                    View Campus Bulletins
+                </a>
+                <a href="/" class="btn-academic-ghost text-white-50 text-decoration-none px-3 py-2 small" data-i18n-en="Return to Home &rarr;" data-i18n-tr="Ana Sayfaya Dön &rarr;">
+                    Return to Home &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Scoped Client-Side Search & Sorting Logic -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('jobSearchInput');
+        const sortSelect = document.getElementById('jobSortSelect');
+        const gridContainer = document.getElementById('jobGridContainer');
+        const noResultsMsg = document.getElementById('jobNoSearchResults');
+        const totalItemsCount = @totalJobs;
+
+        function normalizeStr(str) {
+            return (str || '')
+                .toLowerCase()
+                .replace(/ğ/g, 'g')
+                .replace(/ü/g, 'u')
+                .replace(/ş/g, 's')
+                .replace(/ı/g, 'i')
+                .replace(/ö/g, 'o')
+                .replace(/ç/g, 'c')
+                .trim();
+        }
+
+        function updateCounterDisplay(visibleCount) {
+            const lang = document.documentElement.getAttribute('lang') || 'en';
+            document.querySelectorAll('.visible-count-num').forEach(el => el.textContent = visibleCount);
+            document.querySelectorAll('.total-count-num').forEach(el => el.textContent = totalItemsCount);
+
+            const counterEn = document.getElementById('jobCounterEn');
+            const counterTr = document.getElementById('jobCounterTr');
+            if (counterEn && counterTr) {
+                if (lang === 'tr') {
+                    counterEn.style.display = 'none';
+                    counterTr.style.display = '';
+                } else {
+                    counterEn.style.display = '';
+                    counterTr.style.display = 'none';
+                }
+            }
+        }
+
+        function filterAndSortJobs() {
+            if (!gridContainer) return;
+            const lang = document.documentElement.getAttribute('lang') || 'en';
+            const term = normalizeStr(searchInput ? searchInput.value : '');
+            const sortMode = sortSelect ? sortSelect.value : 'recent';
+            const allItems = Array.from(gridContainer.querySelectorAll('.job-item'));
+
+            let visibleCount = 0;
+
+            // 1. Filtering against active language
+            allItems.forEach(item => {
+                const title = normalizeStr(item.getAttribute('data-job-title-' + lang) || item.getAttribute('data-job-title-tr') || '');
+                const company = normalizeStr(item.getAttribute('data-job-company') || '');
+                const poster = normalizeStr(item.getAttribute('data-job-poster') || '');
+                const id = (item.getAttribute('data-job-id') || '').trim();
+
+                const matches = title.includes(term) || company.includes(term) || poster.includes(term) || id.includes(term);
+                if (matches) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // 2. Sorting cards
+            allItems.sort((a, b) => {
+                const idA = parseInt(a.getAttribute('data-job-id') || '0', 10);
+                const idB = parseInt(b.getAttribute('data-job-id') || '0', 10);
+                const appA = parseInt(a.getAttribute('data-job-applications') || '0', 10);
+                const appB = parseInt(b.getAttribute('data-job-applications') || '0', 10);
+                const titleA = a.getAttribute('data-job-title-' + lang) || '';
+                const titleB = b.getAttribute('data-job-title-' + lang) || '';
+
+                if (sortMode === 'oldest') {
+                    return idA - idB;
+                } else if (sortMode === 'title-asc') {
+                    return titleA.localeCompare(titleB);
+                } else if (sortMode === 'title-desc') {
+                    return titleB.localeCompare(titleA);
+                } else if (sortMode === 'applications-desc') {
+                    return appB - appA;
+                } else {
+                    // recent -> ID descending
+                    return idB - idA;
+                }
+            });
+
+            allItems.forEach(item => gridContainer.appendChild(item));
+
+            // 3. Update counter and empty state
+            updateCounterDisplay(visibleCount);
+
+            if (noResultsMsg) {
+                noResultsMsg.style.display = (visibleCount === 0 && allItems.length > 0) ? 'block' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterAndSortJobs);
+        }
+        if (sortSelect) {
+            sortSelect.addEventListener('change', filterAndSortJobs);
+        }
+
+        window.clearJobSearch = function () {
+            if (searchInput) {
+                searchInput.value = '';
+                filterAndSortJobs();
+                searchInput.focus();
+            }
+        };
+
+        // Listen for language change events
+        window.addEventListener('languageChanged', function () {
+            filterAndSortJobs();
+        });
+
+        // Initialize on load
+        filterAndSortJobs();
+    });
+</script>

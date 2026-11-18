@@ -1,107 +1,761 @@
+/* ==========================================================================
+   ALUMNI TRACKING SYSTEM - PREMIUM ACADEMIC DESIGN SYSTEM
+   Visual Direction: Institutional, Elegant, Editorial, Prestigious University
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Brand Colors & Design Tokens
+   -------------------------------------------------------------------------- */
 :root {
-    --ats-navy: #0f2942;
-    --ats-navy-dark: #0a1b2b;
-    --ats-primary: #1e40af;
-    --ats-accent: #2563eb;
-    --ats-accent-hover: #1d4ed8;
-    --ats-bg: #f8fafc;
-    --ats-card-border: #e2e8f0;
-    --ats-text-main: #0f172a;
-    --ats-text-muted: #475569;
+    /* Approved Palette */
+    --ats-navy: #142B4A;
+    --ats-navy-dark: #0D1B2A;
+    --ats-warm-offwhite: #F7F5F0;
+    --ats-white: #FFFFFF;
+    --ats-gold: #C5A46D;
+    --ats-gold-hover: #B39158;
+    --ats-gold-light: #F4EEDA;
+    --ats-gray-muted: #737B86;
+    --ats-gray-light: #E8E6DF;
+
+    /* Semantic & Functional */
+    --ats-bg: var(--ats-warm-offwhite);
+    --ats-card-border: rgba(20, 43, 74, 0.08);
+    --ats-gold-border: rgba(197, 164, 109, 0.35);
+    --ats-text-main: #142B4A;
+    --ats-text-muted: #737B86;
+
+    /* Typography */
+    --ats-font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --ats-font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* Shadows & Transitions */
+    --ats-shadow-academic: 0 10px 30px -10px rgba(13, 27, 42, 0.08);
+    --ats-shadow-card: 0 4px 16px -2px rgba(13, 27, 42, 0.05);
+    --ats-transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --------------------------------------------------------------------------
+   2. Global Typography & Reset
+   -------------------------------------------------------------------------- */
+html {
+    scroll-behavior: smooth;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--ats-bg);
+    font-family: var(--ats-font-sans);
+    background-color: var(--ats-white);
     color: var(--ats-text-main);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
 }
 
-/* Navbar */
-.navbar-custom {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid var(--ats-card-border);
-}
-
-.navbar-brand-custom {
-    font-weight: 700;
+h1, h2, h3, h4, h5, h6,
+.academic-serif {
+    font-family: var(--ats-font-serif);
     color: var(--ats-navy);
-    letter-spacing: -0.02em;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+}
+
+p {
+    line-height: 1.7;
+    color: var(--ats-gray-muted);
+}
+
+a {
+    transition: var(--ats-transition);
     text-decoration: none;
 }
 
-.brand-icon-box {
-    background: var(--ats-navy);
-    color: #ffffff;
-    display: inline-flex;
+/* Academic Overline Header */
+.academic-overline {
+    font-family: var(--ats-font-sans);
+    font-size: 0.785rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ats-gold);
+    display: inline-block;
+    margin-bottom: 0.75rem;
+}
+
+/* Academic Headings */
+.academic-heading {
+    font-family: var(--ats-font-serif);
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--ats-navy);
+    margin-bottom: 1.25rem;
+}
+
+.academic-lead {
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: var(--ats-gray-muted);
+    max-width: 680px;
+}
+
+/* Section Backgrounds */
+.bg-warm-offwhite {
+    background-color: var(--ats-warm-offwhite) !important;
+}
+
+.bg-academic-white {
+    background-color: var(--ats-white) !important;
+}
+
+.bg-academic-navy {
+    background-color: var(--ats-navy) !important;
+}
+
+.bg-academic-dark {
+    background-color: var(--ats-navy-dark) !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. Transparent & Adaptive Navigation Bar
+   -------------------------------------------------------------------------- */
+.navbar-academic {
+    padding: 1.25rem 0;
+    transition: var(--ats-transition);
+    z-index: 1050;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Transparent Hero State */
+.navbar-academic.navbar-transparent {
+    background-color: transparent !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+/* Solid Sticky / Scrolled State */
+.navbar-academic.navbar-solid,
+.navbar-academic.navbar-scrolled {
+    background-color: var(--ats-navy) !important;
+    position: sticky;
+    top: 0;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--ats-gold-border);
+    box-shadow: 0 4px 20px rgba(13, 27, 42, 0.35);
+}
+
+/* Brand Logo */
+.brand-academic-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+}
+
+.brand-emblem {
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid var(--ats-gold);
+    border-radius: 4px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 8px;
+    color: var(--ats-gold);
     font-size: 1.15rem;
+    background: rgba(197, 164, 109, 0.1);
 }
 
-.nav-link-custom {
-    font-weight: 500;
-    color: var(--ats-text-muted);
-    transition: color 0.15s ease;
-    padding: 0.5rem 0.75rem;
-    text-decoration: none;
+.brand-text-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
-.nav-link-custom:hover, 
-.nav-link-custom.active {
-    color: var(--ats-accent) !important;
+.brand-text-title {
+    font-family: var(--ats-font-serif);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #FFFFFF;
+    line-height: 1.1;
+    text-transform: uppercase;
 }
 
-/* Hero Section */
-.hero-section {
-    background: radial-gradient(circle at 50% 0%, #eff6ff 0%, #f8fafc 70%);
-    border-bottom: 1px solid var(--ats-card-border);
-    padding: 5rem 0 4.5rem;
-}
-
-.hero-badge {
-    background-color: #dbeafe;
-    color: var(--ats-primary);
-    font-size: 0.85rem;
+.brand-text-subtitle {
+    font-family: var(--ats-font-sans);
+    font-size: 0.65rem;
     font-weight: 600;
-    padding: 0.45rem 1rem;
-    border-radius: 50rem;
+    letter-spacing: 0.16em;
+    color: var(--ats-gold);
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+
+/* Navigation Links */
+.nav-link-academic {
+    font-family: var(--ats-font-sans);
+    font-size: 0.925rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: rgba(255, 255, 255, 0.85) !important;
+    padding: 0.5rem 1rem !important;
+    position: relative;
+    transition: var(--ats-transition);
+}
+
+.nav-link-academic:hover {
+    color: #FFFFFF !important;
+}
+
+.nav-link-academic.active {
+    color: var(--ats-gold) !important;
+    font-weight: 600;
+}
+
+.nav-link-academic::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 1rem;
+    right: 1rem;
+    height: 2px;
+    background-color: var(--ats-gold);
+    transform: scaleX(0);
+    transition: var(--ats-transition);
+}
+
+.nav-link-academic:hover::after,
+.nav-link-academic.active::after {
+    transform: scaleX(1);
+}
+
+/* Language Switcher Group */
+.lang-switch-group {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 4px;
+    padding: 0.25rem 0.6rem;
+}
+
+.lang-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: var(--ats-font-sans);
+    font-size: 0.775rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    padding: 0.15rem 0.35rem;
+    border-radius: 2px;
+    transition: var(--ats-transition);
+}
+
+.lang-btn:hover {
+    color: #FFFFFF;
+}
+
+.lang-btn.active {
+    color: var(--ats-gold);
+    font-weight: 700;
+}
+
+.lang-separator {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.75rem;
+}
+
+/* Login Button in Nav */
+.btn-nav-login {
+    border: 1.5px solid var(--ats-gold);
+    background: transparent;
+    color: var(--ats-gold) !important;
+    font-family: var(--ats-font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 0.45rem 1.25rem;
+    border-radius: 4px;
+    transition: var(--ats-transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-nav-login:hover {
+    background: var(--ats-gold);
+    color: var(--ats-navy-dark) !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Section 1 – Hero (Cinematic, Full-Width Campus Photo)
+   -------------------------------------------------------------------------- */
+.hero-academic-cinematic {
+    position: relative;
+    min-height: 92vh;
+    display: flex;
+    align-items: center;
+    background: url('/images/campus-hero.jpg') center center / cover no-repeat;
+    padding: 9rem 0 5rem;
+    color: #FFFFFF;
+}
+
+.hero-overlay-academic {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(13, 27, 42, 0.72) 0%,
+        rgba(20, 43, 74, 0.78) 60%,
+        rgba(13, 27, 42, 0.88) 100%
+    );
+    z-index: 1;
+}
+
+.hero-content-container {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+}
+
+.hero-crest-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--ats-gold-border);
+    border-radius: 3px;
+    background: rgba(13, 27, 42, 0.45);
+    backdrop-filter: blur(8px);
+    margin-bottom: 2rem;
+}
+
+.hero-crest-badge span {
+    font-family: var(--ats-font-sans);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ats-gold);
+}
+
+.hero-headline-academic {
+    font-family: var(--ats-font-serif);
+    font-size: clamp(2.75rem, 6vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: #FFFFFF;
     margin-bottom: 1.5rem;
 }
 
-.hero-title {
-    font-weight: 800;
-    color: var(--ats-navy);
-    letter-spacing: -0.03em;
-    font-size: clamp(2rem, 4vw, 3.25rem);
-    line-height: 1.15;
+.hero-subtitle-academic {
+    font-family: var(--ats-font-sans);
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.88);
+    max-width: 720px;
+    margin-bottom: 2.75rem;
 }
 
-.hero-subtitle {
-    color: var(--ats-text-muted);
-    font-size: 1.15rem;
-    line-height: 1.6;
-    max-width: 680px;
-    margin: 1.25rem auto 2rem;
-}
-
-/* Buttons */
-.btn-primary-custom {
-    background-color: var(--ats-accent);
-    border: 1px solid var(--ats-accent);
-    color: #ffffff !important;
-    padding: 0.75rem 1.75rem;
+/* Academic Buttons */
+.btn-academic-gold {
+    background-color: var(--ats-gold);
+    border: 1.5px solid var(--ats-gold);
+    color: var(--ats-navy-dark) !important;
+    font-family: var(--ats-font-sans);
+    font-size: 0.95rem;
     font-weight: 600;
-    border-radius: 50rem;
-    transition: all 0.2s ease;
+    letter-spacing: 0.05em;
+    padding: 0.85rem 2rem;
+    border-radius: 4px;
+    transition: var(--ats-transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-academic-gold:hover {
+    background-color: var(--ats-gold-hover);
+    border-color: var(--ats-gold-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(197, 164, 109, 0.35);
+}
+
+.btn-academic-outline {
+    background-color: transparent;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    color: #FFFFFF !important;
+    font-family: var(--ats-font-sans);
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 0.85rem 2rem;
+    border-radius: 4px;
+    transition: var(--ats-transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-academic-outline:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: #FFFFFF;
+    color: #FFFFFF !important;
+    transform: translateY(-2px);
+}
+
+/* --------------------------------------------------------------------------
+   5. Section 2 – About the Platform (Editorial Presentation)
+   -------------------------------------------------------------------------- */
+.editorial-image-frame {
+    position: relative;
+    padding: 0.5rem;
+    background: #FFFFFF;
+    border: 1px solid var(--ats-card-border);
+    box-shadow: var(--ats-shadow-academic);
+    border-radius: 4px;
+}
+
+.editorial-image-frame img {
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+    border-radius: 2px;
+}
+
+.editorial-caption {
+    font-family: var(--ats-font-sans);
+    font-size: 0.8rem;
+    color: var(--ats-gray-muted);
+    font-style: italic;
+    margin-top: 0.75rem;
+    display: block;
+    text-align: center;
+}
+
+.editorial-divider {
+    width: 60px;
+    height: 2px;
+    background-color: var(--ats-gold);
+    margin: 1.5rem 0;
+}
+
+/* --------------------------------------------------------------------------
+   6. Section 3 – Alumni Connections
+   -------------------------------------------------------------------------- */
+.academic-quote-box {
+    border-left: 3px solid var(--ats-gold);
+    padding: 1.5rem 2rem;
+    background: var(--ats-warm-offwhite);
+    margin: 2rem 0;
+}
+
+.academic-quote-text {
+    font-family: var(--ats-font-serif);
+    font-size: 1.25rem;
+    font-style: italic;
+    color: var(--ats-navy);
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+}
+
+.academic-quote-author {
+    font-family: var(--ats-font-sans);
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: var(--ats-gray-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   7. Section 4 & 5 – Database Real Content Listings
+   -------------------------------------------------------------------------- */
+.editorial-record-card {
+    background: #FFFFFF;
+    border: 1px solid var(--ats-card-border);
+    border-top: 3px solid var(--ats-navy);
+    border-radius: 4px;
+    padding: 2rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: var(--ats-transition);
+    box-shadow: var(--ats-shadow-card);
+}
+
+.editorial-record-card:hover {
+    border-top-color: var(--ats-gold);
+    transform: translateY(-3px);
+    box-shadow: var(--ats-shadow-academic);
+}
+
+.editorial-date-badge {
+    font-family: var(--ats-font-sans);
+    font-size: 0.775rem;
+    font-weight: 600;
+    color: var(--ats-gold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: inline-block;
+}
+
+.editorial-title {
+    font-family: var(--ats-font-serif);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--ats-navy);
+    line-height: 1.35;
+    margin-bottom: 0.75rem;
+}
+
+.editorial-content {
+    font-family: var(--ats-font-sans);
+    font-size: 0.925rem;
+    color: var(--ats-gray-muted);
+    line-height: 1.65;
+    margin-bottom: 1.5rem;
+}
+
+.editorial-link {
+    font-family: var(--ats-font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--ats-navy);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.editorial-link:hover {
+    color: var(--ats-gold);
+    transform: translateX(3px);
+}
+
+/* Job Posting Specific Card */
+.editorial-job-card {
+    background: var(--ats-warm-offwhite);
+    border: 1px solid var(--ats-card-border);
+    border-radius: 4px;
+    padding: 1.75rem 2rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: var(--ats-transition);
+}
+
+.editorial-job-card:hover {
+    background: #FFFFFF;
+    border-color: var(--ats-gold-border);
+    box-shadow: var(--ats-shadow-card);
+    transform: translateY(-2px);
+}
+
+.editorial-job-company {
+    font-family: var(--ats-font-sans);
+    font-size: 0.825rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--ats-gold);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.editorial-job-title {
+    font-family: var(--ats-font-serif);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--ats-navy);
+    margin-bottom: 0.75rem;
+}
+
+.editorial-job-meta {
+    font-family: var(--ats-font-sans);
+    font-size: 0.85rem;
+    color: var(--ats-gray-muted);
+}
+
+/* Refined Empty State */
+.academic-empty-state {
+    text-align: center;
+    padding: 3.5rem 2rem;
+    border: 1px dashed var(--ats-card-border);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.empty-state-icon {
+    font-size: 2.25rem;
+    color: var(--ats-gold);
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.empty-state-title {
+    font-family: var(--ats-font-serif);
+    font-size: 1.25rem;
+    color: var(--ats-navy);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-text {
+    font-family: var(--ats-font-sans);
+    font-size: 0.925rem;
+    color: var(--ats-gray-muted);
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+   8. Section 6 – Closing Banner (Deep Navy & Gold)
+   -------------------------------------------------------------------------- */
+.closing-academic-banner {
+    background: var(--ats-navy-dark);
+    border: 1px solid var(--ats-gold-border);
+    border-radius: 4px;
+    padding: 4.5rem 3rem;
+    color: #FFFFFF;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(13, 27, 42, 0.4);
+}
+
+.closing-title {
+    font-family: var(--ats-font-serif);
+    font-size: clamp(2rem, 3.5vw, 2.85rem);
+    color: #FFFFFF;
+    margin-bottom: 1.25rem;
+}
+
+.closing-subtitle {
+    font-family: var(--ats-font-sans);
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 620px;
+    line-height: 1.7;
+}
+
+/* --------------------------------------------------------------------------
+   9. Section 7 – Institutional Footer
+   -------------------------------------------------------------------------- */
+.footer-academic {
+    background-color: var(--ats-navy-dark);
+    border-top: 1px solid var(--ats-gold-border);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 4.5rem 0 2rem;
+    margin-top: auto;
+}
+
+.footer-brand-title {
+    font-family: var(--ats-font-serif);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #FFFFFF;
+    text-transform: uppercase;
+}
+
+.footer-academic-lead {
+    font-family: var(--ats-font-sans);
+    font-size: 0.9rem;
+    color: var(--ats-gray-muted);
+    line-height: 1.7;
+}
+
+.footer-nav-title {
+    font-family: var(--ats-font-sans);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ats-gold);
+    margin-bottom: 1.25rem;
+}
+
+.footer-nav-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.footer-nav-list li {
+    margin-bottom: 0.65rem;
+}
+
+.footer-nav-link {
+    font-family: var(--ats-font-sans);
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.75);
+    transition: var(--ats-transition);
+}
+
+.footer-nav-link:hover {
+    color: var(--ats-gold);
+    padding-left: 4px;
+}
+
+.footer-lang-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid rgba(255, 255, 255, 0.18);
+    color: #FFFFFF !important;
+    font-family: var(--ats-font-sans);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.45rem 0.95rem;
+    border-radius: 4px;
+    text-align: left;
+    display: inline-flex;
+    align-items: center;
+    transition: var(--ats-transition);
+    cursor: pointer;
+    width: fit-content;
+    text-decoration: none;
+}
+
+.footer-lang-btn:hover {
+    background: rgba(197, 164, 109, 0.18);
+    border-color: var(--ats-gold);
+    color: var(--ats-gold) !important;
+}
+
+.footer-lang-btn.active {
+    background: rgba(197, 164, 109, 0.22);
+    border-color: var(--ats-gold);
+    color: var(--ats-gold) !important;
+    font-weight: 600;
+}
+
+.footer-bottom-bar {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 2rem;
+    margin-top: 3.5rem;
+    font-size: 0.85rem;
+    color: var(--ats-gray-muted);
+}
+
+/* --------------------------------------------------------------------------
+   10. Backwards Compatibility Classes for Inner Pages
+   -------------------------------------------------------------------------- */
+.btn-primary-custom {
+    background-color: var(--ats-navy);
+    border: 1.5px solid var(--ats-navy);
+    color: #FFFFFF !important;
+    padding: 0.65rem 1.5rem;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: var(--ats-transition);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -109,20 +763,19 @@ body {
 }
 
 .btn-primary-custom:hover {
-    background-color: var(--ats-accent-hover);
-    border-color: var(--ats-accent-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    background-color: var(--ats-gold);
+    border-color: var(--ats-gold);
+    color: var(--ats-navy-dark) !important;
 }
 
 .btn-outline-custom {
-    border: 1px solid var(--ats-card-border);
-    background-color: #ffffff;
-    color: var(--ats-text-main) !important;
-    padding: 0.75rem 1.75rem;
+    border: 1.5px solid var(--ats-card-border);
+    background-color: #FFFFFF;
+    color: var(--ats-navy) !important;
+    padding: 0.65rem 1.5rem;
     font-weight: 600;
-    border-radius: 50rem;
-    transition: all 0.2s ease;
+    border-radius: 4px;
+    transition: var(--ats-transition);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -130,104 +783,165 @@ body {
 }
 
 .btn-outline-custom:hover {
-    background-color: #f1f5f9;
-    color: var(--ats-navy) !important;
-    transform: translateY(-1px);
+    border-color: var(--ats-gold);
+    color: var(--ats-gold) !important;
 }
 
-/* Feature & Info Cards */
 .feature-card, .info-card {
-    background: #ffffff;
+    background: #FFFFFF;
     border: 1px solid var(--ats-card-border);
-    border-radius: 14px;
-    padding: 2.25rem;
+    border-top: 2px solid var(--ats-gold);
+    border-radius: 4px;
+    padding: 2rem;
     height: 100%;
-    transition: all 0.25s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: var(--ats-transition);
+    box-shadow: var(--ats-shadow-card);
 }
 
 .feature-card:hover, .info-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px -3px rgba(15, 23, 42, 0.08);
-    border-color: #cbd5e1;
+    box-shadow: var(--ats-shadow-academic);
 }
 
 .icon-box {
-    width: 50px;
-    height: 50px;
-    border-radius: 10px;
-    background: #eff6ff;
-    color: var(--ats-accent);
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    background: var(--ats-warm-offwhite);
+    color: var(--ats-gold);
+    border: 1px solid var(--ats-gold-border);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     margin-bottom: 1.25rem;
 }
 
 .card-heading {
+    font-family: var(--ats-font-serif);
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--ats-navy);
     margin-bottom: 0.75rem;
 }
 
 .card-description {
-    color: var(--ats-text-muted);
-    line-height: 1.6;
-    margin-bottom: 0;
+    color: var(--ats-gray-muted);
+    line-height: 1.65;
     font-size: 0.95rem;
 }
 
-/* Track list */
 .track-list {
     list-style: none;
     padding-left: 0;
-    margin-bottom: 0;
 }
 
 .track-list li {
     display: flex;
     align-items: center;
-    padding: 0.45rem 0;
-    color: var(--ats-text-muted);
-    font-size: 0.95rem;
-    border-bottom: 1px dashed #f1f5f9;
-}
-
-.track-list li:last-child {
-    border-bottom: none;
+    padding: 0.5rem 0;
+    color: var(--ats-gray-muted);
+    border-bottom: 1px dashed var(--ats-gray-light);
 }
 
 .track-list li i {
-    color: var(--ats-accent);
+    color: var(--ats-gold);
     margin-right: 0.6rem;
-    font-size: 1rem;
 }
 
-/* Highlight Banner */
 .management-banner {
-    background: #ffffff;
+    background: var(--ats-warm-offwhite);
     border: 1px solid var(--ats-card-border);
-    border-radius: 14px;
-    padding: 2.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border-left: 4px solid var(--ats-gold);
+    border-radius: 4px;
+    padding: 2.25rem;
 }
 
-/* Footer */
-.footer-custom {
-    margin-top: auto;
-    background-color: #ffffff;
-    border-top: 1px solid var(--ats-card-border);
-    padding: 2.5rem 0;
+/* Inner Page Header Compatibility */
+.hero-section {
+    background: var(--ats-navy);
+    color: #FFFFFF;
+    padding: 4.5rem 0 3.5rem;
+    border-bottom: 1px solid var(--ats-gold-border);
 }
 
-.footer-brand {
+.hero-section .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.95rem;
+    border: 1px solid var(--ats-gold-border);
+    border-radius: 3px;
+    background: rgba(13, 27, 42, 0.4);
+    color: var(--ats-gold);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+}
+
+.hero-section .hero-title {
+    font-family: var(--ats-font-serif);
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
     font-weight: 700;
-    color: var(--ats-navy);
+    color: #FFFFFF;
+    margin-bottom: 1rem;
 }
 
-.footer-text {
-    color: var(--ats-text-muted);
-    font-size: 0.9rem;
+.hero-section .hero-subtitle {
+    font-family: var(--ats-font-sans);
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 680px;
+    margin: 0 auto;
+    line-height: 1.65;
+}
+
+/* --------------------------------------------------------------------------
+   11. Responsive Media Queries
+   -------------------------------------------------------------------------- */
+@media (max-width: 991.98px) {
+    .navbar-academic {
+        background-color: var(--ats-navy) !important;
+        padding: 0.85rem 0;
+    }
+
+    .navbar-academic.navbar-transparent {
+        position: relative;
+    }
+
+    .hero-academic-cinematic {
+        min-height: auto;
+        padding: 5rem 0;
+        text-align: center;
+    }
+
+    .hero-subtitle-academic {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .closing-academic-banner {
+        padding: 3rem 1.5rem;
+        text-align: center;
+    }
+
+    .closing-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .editorial-image-frame img {
+        height: 300px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .hero-headline-academic {
+        font-size: 2.35rem;
+    }
+
+    .academic-heading {
+        font-size: 1.85rem;
+    }
 }

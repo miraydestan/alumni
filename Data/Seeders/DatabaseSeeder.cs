@@ -29,12 +29,34 @@ public static class DatabaseSeeder
     // ── Announcements ────────────────────────────────────────────────────────
     private static async Task SeedAnnouncementsAsync(AlumniDbContext db)
     {
-        if (await db.Announcements.AnyAsync())
-            return;
+        var seedAnnouncements = AnnouncementFactory.GetSeedAnnouncements();
 
-        var announcements = AnnouncementFactory.GetSeedAnnouncements();
-        await db.Announcements.AddRangeAsync(announcements);
-        await db.SaveChangesAsync();
+        if (!await db.Announcements.AnyAsync())
+        {
+            await db.Announcements.AddRangeAsync(seedAnnouncements);
+            await db.SaveChangesAsync();
+            return;
+        }
+
+        // If announcements already exist, ensure bilingual fields are populated
+        var existingAnnouncements = await db.Announcements.ToListAsync();
+        var modified = false;
+
+        foreach (var seed in seedAnnouncements)
+        {
+            var match = existingAnnouncements.FirstOrDefault(a => a.Title == seed.Title || a.Id == seed.Id);
+            if (match != null && (string.IsNullOrEmpty(match.TitleEn) || string.IsNullOrEmpty(match.ContentEn)))
+            {
+                match.TitleEn = seed.TitleEn;
+                match.ContentEn = seed.ContentEn;
+                modified = true;
+            }
+        }
+
+        if (modified)
+        {
+            await db.SaveChangesAsync();
+        }
     }
 
     // ── Job Postings ─────────────────────────────────────────────────────────

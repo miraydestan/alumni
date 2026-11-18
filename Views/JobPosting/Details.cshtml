@@ -1,80 +1,293 @@
 @model Alumni.Models.JobPosting
 
 @{
-    ViewData["Title"] = $"{Model.Title} - Details";
+    var currentLang = Context.Request.Cookies["alumni_language"] ?? "en";
+    var isTr = currentLang == "tr";
+
+    var titleEn = Model.Title;
+    var titleTr = LocalizeJobTitle(Model.Title, "tr");
+    var activeTitle = isTr ? titleTr : titleEn;
+
+    ViewData["Title"] = $"{activeTitle} - {Model.Company}";
     ViewData["ActivePage"] = "JobPostings";
+
+    var posterName = Model.User?.Name ?? $"User #{Model.UserId}";
+    var posterEmail = Model.User?.Email ?? string.Empty;
+    var appCount = Model.Applications?.Count ?? 0;
 }
 
-<div class="container py-5" style="max-width: 800px;">
-    <!-- Breadcrumb / Back button -->
-    <div class="mb-4">
-        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left me-1"></i> Back to Job Postings
-        </a>
-    </div>
+@functions {
+    private static string LocalizeJobTitle(string title, string lang)
+    {
+        if (string.IsNullOrWhiteSpace(title)) return title;
+        if (lang == "tr")
+        {
+            if (title.Equals("Software Developer", StringComparison.OrdinalIgnoreCase))
+                return "Yazılım Geliştirici";
+            if (title.Equals("Software Developer Intern", StringComparison.OrdinalIgnoreCase))
+                return "Stajyer Yazılım Geliştirici";
+            if (title.Equals("Backend Intern", StringComparison.OrdinalIgnoreCase))
+                return "Stajyer Arka Yüz Geliştirici";
+            if (title.Equals("Data Analyst", StringComparison.OrdinalIgnoreCase))
+                return "Veri Analisti";
+            if (title.Equals("Business Analyst", StringComparison.OrdinalIgnoreCase))
+                return "İş Analisti";
+            if (title.Equals("Junior Frontend Developer", StringComparison.OrdinalIgnoreCase))
+                return "Ön Yüz Geliştirici";
+        }
+        return title;
+    }
+}
 
-    <!-- Main Card -->
-    <div class="card shadow-sm border-0 rounded-3 p-4 p-md-5 mb-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
-                <i class="bi bi-briefcase me-1"></i> Job Opportunity
+<!-- Section 1: Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3 position-relative" style="z-index: 2;">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3 text-wrap" style="max-width: 100%;">
+                    <i class="bi bi-briefcase-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Collegiate Career Opportunity &bull; Position Details" data-i18n-tr="Mezun Kariyer Fırsatı &bull; Pozisyon Detayı">
+                        Collegiate Career Opportunity &bull; Position Details
+                    </span>
+                </div>
+                <h1 class="hero-title mb-3" style="font-size: clamp(1.85rem, 3.2vw, 2.6rem); line-height: 1.3;"
+                    data-i18n-en="@titleEn"
+                    data-i18n-tr="@titleTr">
+                    @activeTitle
+                </h1>
+
+                <!-- Editorial Metadata Strip -->
+                <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 text-white-50 small mt-2">
+                    <span class="d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-building" style="color: var(--ats-gold);"></i>
+                        <span class="text-white fw-semibold">@Model.Company</span>
+                    </span>
+                    <span>&bull;</span>
+                    <span class="d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-person-circle" style="color: var(--ats-gold);"></i>
+                        <span data-i18n-en="Posted by:" data-i18n-tr="Yayınlayan:">Posted by:</span>
+                        <span class="text-white">@posterName</span>
+                    </span>
+                    <span>&bull;</span>
+                    <span class="d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-bookmark-check" style="color: var(--ats-gold);"></i>
+                        <span data-i18n-en="Position ID #@Model.Id" data-i18n-tr="İlan No #@Model.Id">Position ID #@Model.Id</span>
+                    </span>
+                    <span>&bull;</span>
+                    <span class="d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-people" style="color: var(--ats-gold);"></i>
+                        <span>@appCount</span>
+                        <span data-i18n-en="@(appCount == 1 ? "Applicant" : "Applicants")" data-i18n-tr="Başvuru">
+                            @(appCount == 1 ? "Applicant" : "Applicants")
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Section 2: Position Details & Application Body -->
+<main class="py-5 bg-warm-offwhite" aria-label="Job Details Content">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+
+                <!-- Feedback Alerts -->
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="border-left: 4px solid #198754;">
+                        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="border-left: 4px solid #dc3545;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <!-- Master Editorial Card -->
+                <article class="card border-0 shadow-sm rounded-3 p-4 p-md-5 mb-5"
+                         style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 4px solid var(--ats-gold) !important;">
+
+                    <!-- Top Navigation Bar inside Card -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 pb-3 mb-4 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <a asp-action="Index" class="btn btn-outline-custom btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            <span data-i18n-en="All Opportunities" data-i18n-tr="Tüm Fırsatlar">All Opportunities</span>
+                        </a>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge" style="background: rgba(197, 164, 109, 0.15); color: var(--ats-gold-hover); border: 1px solid var(--ats-gold-border); font-size: 0.725rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                                <i class="bi bi-shield-check me-1"></i>
+                                <span data-i18n-en="Verified Opportunity" data-i18n-tr="Onaylı Fırsat">Verified Opportunity</span>
+                            </span>
+                            <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 0.75rem;">
+                                #@Model.Id
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Position Headline & Company Group -->
+                    <div class="mb-4">
+                        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-2" style="background: rgba(197, 164, 109, 0.12); color: var(--ats-gold-hover); font-size: 0.825rem; font-weight: 600;">
+                            <i class="bi bi-building"></i>
+                            <span>@Model.Company</span>
+                        </div>
+                        <h2 class="academic-heading h3 mb-2" style="color: var(--ats-navy); line-height: 1.3;"
+                            data-i18n-en="@titleEn"
+                            data-i18n-tr="@titleTr">
+                            @activeTitle
+                        </h2>
+                        <p class="text-muted" data-i18n-en="Official career opportunity published for the university graduate fellowship." data-i18n-tr="Üniversite mezun topluluğumuz için paylaşılan resmî kariyer fırsatı.">
+                            Official career opportunity published for the university graduate fellowship.
+                        </p>
+                    </div>
+
+                    <!-- Information Structured Grid -->
+                    <div class="row g-3 g-md-4 mb-4">
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 h-100" style="background: var(--ats-warm-offwhite); border: 1px solid var(--ats-card-border);">
+                                <span class="small text-muted d-block mb-1 text-uppercase fw-semibold" style="letter-spacing: 0.06em; font-size: 0.725rem;" data-i18n-en="Hiring Organization" data-i18n-tr="İşveren Kuruluş">
+                                    Hiring Organization
+                                </span>
+                                <strong class="fs-6" style="color: var(--ats-navy);">@Model.Company</strong>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 h-100" style="background: var(--ats-warm-offwhite); border: 1px solid var(--ats-card-border);">
+                                <span class="small text-muted d-block mb-1 text-uppercase fw-semibold" style="letter-spacing: 0.06em; font-size: 0.725rem;" data-i18n-en="Collegiate Poster" data-i18n-tr="İlan Sahibi Mezun">
+                                    Collegiate Poster
+                                </span>
+                                <strong class="fs-6 d-block" style="color: var(--ats-navy);">@posterName</strong>
+                                @if (!string.IsNullOrWhiteSpace(posterEmail))
+                                {
+                                    <span class="small text-muted">@posterEmail</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 h-100" style="background: var(--ats-warm-offwhite); border: 1px solid var(--ats-card-border);">
+                                <span class="small text-muted d-block mb-1 text-uppercase fw-semibold" style="letter-spacing: 0.06em; font-size: 0.725rem;" data-i18n-en="Total Candidate Submissions" data-i18n-tr="Toplam Aday Başvurusu">
+                                    Total Candidate Submissions
+                                </span>
+                                <strong class="fs-6" style="color: var(--ats-navy);">
+                                    <i class="bi bi-file-earmark-person text-muted me-1"></i>
+                                    <span>@appCount</span>
+                                    <span data-i18n-en="@(appCount == 1 ? "Candidate" : "Candidates")" data-i18n-tr="Aday">
+                                        @(appCount == 1 ? "Candidate" : "Candidates")
+                                    </span>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 h-100" style="background: var(--ats-warm-offwhite); border: 1px solid var(--ats-card-border);">
+                                <span class="small text-muted d-block mb-1 text-uppercase fw-semibold" style="letter-spacing: 0.06em; font-size: 0.725rem;" data-i18n-en="Internal Reference Code" data-i18n-tr="Kurumsal Referans Kodu">
+                                    Internal Reference Code
+                                </span>
+                                <strong class="fs-6" style="color: var(--ats-navy);">job_postings.id = #@Model.Id</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Application Action Block -->
+                    <div class="p-4 rounded-3 mb-5" style="background: #FAFAF7; border: 1px solid var(--ats-gold-border);">
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+                                <div>
+                                    <h4 class="h6 academic-serif fw-bold mb-1" style="color: var(--ats-navy);" data-i18n-en="Submit Application as Verified Alumnus" data-i18n-tr="Onaylı Mezun Olarak Başvur">
+                                        Submit Application as Verified Alumnus
+                                    </h4>
+                                    <p class="small text-muted mb-0">
+                                        <span data-i18n-en="You are authenticated as:" data-i18n-tr="Oturum açan kullanıcı:">You are authenticated as:</span>
+                                        <strong class="text-dark">@User.Identity.Name</strong>.
+                                    </p>
+                                </div>
+                                <form asp-action="Apply" asp-route-id="@Model.Id" method="post" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-academic-gold px-4 py-2">
+                                        <i class="bi bi-send-fill me-1"></i>
+                                        <span data-i18n-en="Submit My Application" data-i18n-tr="Kendi Adıma Başvur">Submit My Application</span>
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <i class="bi bi-shield-lock text-warning fs-5"></i>
+                                        <h4 class="h6 academic-serif fw-bold mb-0" style="color: var(--ats-navy);" data-i18n-en="Authentication Required to Apply" data-i18n-tr="Başvuru İçin Oturum Açılmalıdır">
+                                            Authentication Required to Apply
+                                        </h4>
+                                    </div>
+                                    <p class="small text-muted mb-0" data-i18n-en="In accordance with alumni governance and candidate verification standards, candidate applications must be registered under verified alumni session identities." data-i18n-tr="Mezun yönetimi ve aday doğrulama kuralları uyarınca iş başvuruları yalnızca onaylı mezun oturumları üzerinden kabul edilmektedir.">
+                                        In accordance with alumni governance and candidate verification standards, candidate applications must be registered under verified alumni session identities.
+                                    </p>
+                                </div>
+                                <button type="button" class="btn btn-outline-custom text-nowrap" data-bs-toggle="modal" data-bs-target="#loginNoticeModal">
+                                    <i class="bi bi-box-arrow-in-right me-1" style="color: var(--ats-gold);"></i>
+                                    <span data-i18n-en="Member Login Notice" data-i18n-tr="Giriş Bilgisi">Member Login Notice</span>
+                                </button>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Bottom Action Controls -->
+                    <div class="pt-4 border-top d-flex flex-wrap align-items-center justify-content-between gap-3" style="border-color: var(--ats-gray-light) !important;">
+                        <a asp-action="Index" class="btn btn-outline-custom">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            <span data-i18n-en="Back to Career Opportunities" data-i18n-tr="Tüm Fırsatlara Dön">Back to Career Opportunities</span>
+                        </a>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <a asp-action="Applications" asp-route-id="@Model.Id" class="btn btn-academic-gold text-decoration-none py-2 px-3 small">
+                                <i class="bi bi-people me-1"></i>
+                                <span data-i18n-en="View Registered Candidates" data-i18n-tr="Başvuran Adayları Görüntüle">View Registered Candidates</span>
+                                <span class="badge bg-light text-dark ms-1">@appCount</span>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Section 3: Institutional Call-To-Action Banner -->
+<section class="py-5 bg-warm-offwhite pt-0" aria-label="Campus Fellowship and Networking Banner">
+    <div class="container pb-lg-4">
+        <div class="closing-academic-banner text-center">
+            <span class="academic-overline" style="color: var(--ats-gold);" data-i18n-en="Collegiate Fellowship" data-i18n-tr="Mezun Dayanışması">
+                Collegiate Fellowship
             </span>
-            <span class="badge bg-light text-muted border">Job ID #@Model.Id</span>
-        </div>
-
-        <h1 class="h3 fw-bold text-dark mb-2">@Model.Title</h1>
-        <h2 class="h5 text-primary mb-4">
-            <i class="bi bi-building me-1"></i>@Model.Company
-        </h2>
-
-        <hr class="my-4 text-muted" />
-
-        <div class="row g-4 mb-4">
-            <div class="col-sm-6">
-                <div class="p-3 bg-light rounded-3 border">
-                    <span class="text-secondary small d-block mb-1">Company Name</span>
-                    <strong class="text-dark fs-6">@Model.Company</strong>
-                </div>
+            <h2 class="academic-heading text-white mb-3" data-i18n-en="Engage with Our Global Alumni Community" data-i18n-tr="Küresel Mezun Topluluğumuza Katılın">
+                Engage with Our Global Alumni Community
+            </h2>
+            <p class="closing-subtitle mx-auto mb-4" data-i18n-en="Connect with fellow graduates, explore institutional career postings, or submit your own professional opportunities." data-i18n-tr="Mezun arkadaşlarınızla bağlantı kurun, kurumsal kariyer ilanlarını inceleyin veya kendi iş fırsatlarınızı paylaşın.">
+                Connect with fellow graduates, explore institutional career postings, or submit your own professional opportunities.
+            </p>
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
+                <a href="/User" class="btn-academic-gold" data-i18n-en="Explore Alumni Directory" data-i18n-tr="Mezunları Keşfet">
+                    Explore Alumni Directory
+                </a>
+                <a href="/Announcement" class="btn-academic-outline" data-i18n-en="View Campus Bulletins" data-i18n-tr="Kampüs Bültenlerini Oku">
+                    View Campus Bulletins
+                </a>
+                <a href="/" class="btn-academic-ghost text-white-50 text-decoration-none px-3 py-2 small" data-i18n-en="Return to Home &rarr;" data-i18n-tr="Ana Sayfaya Dön &rarr;">
+                    Return to Home &rarr;
+                </a>
             </div>
-
-            <div class="col-sm-6">
-                <div class="p-3 bg-light rounded-3 border">
-                    <span class="text-secondary small d-block mb-1">Posted By (Owner)</span>
-                    <strong class="text-dark fs-6">
-                        @(Model.User?.Name ?? $"User ID: {Model.UserId}")
-                    </strong>
-                    @if (Model.User != null && !string.IsNullOrWhiteSpace(Model.User.Email))
-                    {
-                        <span class="text-muted small d-block">@Model.User.Email</span>
-                    }
-                </div>
-            </div>
-
-            <div class="col-sm-6">
-                <div class="p-3 bg-light rounded-3 border">
-                    <span class="text-secondary small d-block mb-1">Total Applications</span>
-                    <strong class="text-dark fs-6">
-                        <i class="bi bi-file-earmark-person text-info me-1"></i>
-                        @(Model.Applications?.Count ?? 0) Candidate(s)
-                    </strong>
-                </div>
-            </div>
-
-            <div class="col-sm-6">
-                <div class="p-3 bg-light rounded-3 border">
-                    <span class="text-secondary small d-block mb-1">Internal Reference ID</span>
-                    <strong class="text-dark fs-6">job_postings.id = @Model.Id</strong>
-                </div>
-            </div>
-        </div>
-
-        <div class="d-flex flex-wrap gap-3">
-            <a asp-action="Applications" asp-route-id="@Model.Id" class="btn btn-primary-custom px-4">
-                <i class="bi bi-people me-1"></i> View Applications (@(Model.Applications?.Count ?? 0))
-            </a>
-            <a asp-action="Index" class="btn btn-outline-custom">
-                <i class="bi bi-list me-1"></i> All Postings
-            </a>
         </div>
     </div>
-</div>
+</section>

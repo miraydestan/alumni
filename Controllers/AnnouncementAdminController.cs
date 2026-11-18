@@ -84,6 +84,8 @@ public class AnnouncementAdminController : Controller
 
         existing.Title   = updatedAnnouncement.Title;
         existing.Content = updatedAnnouncement.Content;
+        existing.TitleEn = updatedAnnouncement.TitleEn;
+        existing.ContentEn = updatedAnnouncement.ContentEn;
         // CreatedDate is intentionally not updated on edit
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
