@@ -33,6 +33,8 @@ public class AlumniDbContext : DbContext
             entity.HasKey(a => a.Id);
             entity.Property(a => a.Title).IsRequired();
             entity.Property(a => a.Content).IsRequired();
+            entity.Property(a => a.TitleEn).IsRequired(false);
+            entity.Property(a => a.ContentEn).IsRequired(false);
             entity.Property(a => a.CreatedDate).IsRequired();
         });
 

@@ -1,36 +1,171 @@
 @model Alumni.Models.Announcement
 
 @{
-    ViewData["Title"] = Model.Title;
+    var currentLang = Context.Request.Cookies["alumni_language"] ?? "en";
+    var isTr = currentLang == "tr";
+
+    var titleEn = Model.GetTitle("en");
+    var titleTr = Model.GetTitle("tr");
+    var contentEn = Model.GetContent("en");
+    var contentTr = Model.GetContent("tr");
+
+    ViewData["Title"] = isTr ? titleTr : titleEn;
     ViewData["ActivePage"] = "Announcements";
+
+    var wordCount = (isTr ? contentTr : contentEn).Split(new[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Length;
+    var readTimeMin = Math.Max(1, (int)Math.Ceiling(wordCount / 160.0));
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 rounded-3 p-4 p-md-5">
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                    <span class="badge bg-light text-primary border px-3 py-2">
-                        <i class="bi bi-calendar3 me-1"></i> Posted on @Model.CreatedDate.ToString("MMMM dd, yyyy - HH:mm")
+<!-- Section 1: Institutional Article Header -->
+<header class="hero-section text-center">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3 text-wrap" style="max-width: 100%;">
+                    <i class="bi bi-megaphone-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Official Communiqué &bull; Campus Bulletin" data-i18n-tr="Resmî Duyuru &bull; Kampüs Bülteni">
+                        Official Communiqué &bull; Campus Bulletin
                     </span>
-                    <span class="badge bg-light text-secondary border px-2 py-1">Announcement #@Model.Id</span>
                 </div>
+                <h1 class="hero-title mb-3" style="font-size: clamp(1.85rem, 3.2vw, 2.6rem); line-height: 1.3;"
+                    data-i18n-en="@titleEn"
+                    data-i18n-tr="@titleTr">
+                    @(isTr ? titleTr : titleEn)
+                </h1>
 
-                <h1 class="h2 fw-bold text-dark mb-4">@Model.Title</h1>
-
-                <div class="p-3 bg-light rounded-3 mb-4 text-secondary" style="font-size: 1.05rem; line-height: 1.8; white-space: pre-line;">
-                    @Model.Content
-                </div>
-
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top">
-                    <a asp-action="Index" class="btn btn-outline-custom">
-                        <i class="bi bi-arrow-left me-1"></i> Back to Announcements
-                    </a>
-                    <a asp-controller="AnnouncementAdmin" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary-custom">
-                        <i class="bi bi-pencil me-1"></i> Edit in Admin
-                    </a>
+                <!-- Editorial Metadata Strip -->
+                <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 text-white-50 small mt-2">
+                    <span class="d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-calendar3" style="color: var(--ats-gold);"></i>
+                        <span>@Model.CreatedDate.ToString("MMMM dd, yyyy")</span>
+                    </span>
+                    <span>&bull;</span>
+                    <span class="d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-clock" style="color: var(--ats-gold);"></i>
+                        <span>@Model.CreatedDate.ToString("HH:mm") UTC</span>
+                    </span>
+                    <span>&bull;</span>
+                    <span class="d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-bookmark-check" style="color: var(--ats-gold);"></i>
+                        <span data-i18n-en="Dispatch #@Model.Id" data-i18n-tr="Duyuru No #@Model.Id">Dispatch #@Model.Id</span>
+                    </span>
+                    <span>&bull;</span>
+                    <span class="d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-book" style="color: var(--ats-gold);"></i>
+                        <span data-i18n-en="@readTimeMin min read" data-i18n-tr="@readTimeMin dk okuma">@readTimeMin min read</span>
+                    </span>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</header>
+
+<!-- Section 2: Article Body Canvas -->
+<main class="py-5 bg-warm-offwhite" aria-label="Announcement Article Content">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+
+                <!-- Editorial Article Card -->
+                <article class="card border-0 shadow-sm rounded-3 p-4 p-md-5"
+                         style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 4px solid var(--ats-navy) !important;">
+
+                    <!-- Top Navigation Bar inside Card -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 pb-3 mb-4 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <a asp-action="Index" class="btn btn-outline-custom btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            <span data-i18n-en="All Announcements" data-i18n-tr="Tüm Duyurular">All Announcements</span>
+                        </a>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge" style="background: rgba(197, 164, 109, 0.15); color: var(--ats-gold-hover); border: 1px solid var(--ats-gold-border); font-size: 0.725rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                                <i class="bi bi-shield-check me-1"></i>
+                                <span data-i18n-en="Verified Release" data-i18n-tr="Onaylı Yayın">Verified Release</span>
+                            </span>
+                            <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 0.75rem;">
+                                #@Model.Id
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Article Headline -->
+                    <h2 class="academic-heading h3 mb-4" style="color: var(--ats-navy); line-height: 1.35;"
+                        data-i18n-en="@titleEn"
+                        data-i18n-tr="@titleTr">
+                        @(isTr ? titleTr : titleEn)
+                    </h2>
+
+                    <!-- Article Body Content -->
+                    <div class="announcement-article-body mb-5"
+                         style="font-size: 1.1rem; line-height: 1.85; color: #2D3748; white-space: pre-line; word-break: break-word;"
+                         data-i18n-en="@contentEn"
+                         data-i18n-tr="@contentTr">
+                        @(isTr ? contentTr : contentEn)
+                    </div>
+
+                    <!-- Institutional Dispatch Sign-Off Box -->
+                    <div class="p-4 rounded-3 mb-5" style="background: var(--ats-cream); border: 1px dashed var(--ats-gold-border);">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="d-inline-flex align-items-center justify-content-center text-white rounded-circle flex-shrink-0"
+                                 style="width: 44px; height: 44px; background: var(--ats-navy); border: 1.5px solid var(--ats-gold);">
+                                <i class="bi bi-mortarboard-fill" style="color: var(--ats-gold); font-size: 1.1rem;"></i>
+                            </div>
+                            <div>
+                                <h3 class="h6 academic-serif fw-bold mb-1" style="color: var(--ats-navy);" data-i18n-en="Institutional Communiqué Registry" data-i18n-tr="Kurumsal Duyuru Sicili">
+                                    Institutional Communiqué Registry
+                                </h3>
+                                <p class="small text-muted mb-0" data-i18n-en="This bulletin was formally logged in the university alumni records repository. For inquiries regarding this announcement, contact the University Alumni Relations Directorate." data-i18n-tr="Bu duyuru üniversite mezun kayıtları siciline resmî olarak işlenmiştir. Bu duyuruya ilişkin sorularınız için Üniversite Mezunlar Ofisi Direktörlüğü ile iletişime geçebilirsiniz.">
+                                    This bulletin was formally logged in the university alumni records repository. For inquiries regarding this announcement, contact the University Alumni Relations Directorate.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Article Actions & Administration Links -->
+                    <div class="pt-4 border-top d-flex flex-wrap align-items-center justify-content-between gap-3" style="border-color: var(--ats-gray-light) !important;">
+                        <a asp-action="Index" class="btn btn-outline-custom">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            <span data-i18n-en="Back to Announcements" data-i18n-tr="Tüm Duyurulara Dön">Back to Announcements</span>
+                        </a>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <a asp-controller="AnnouncementAdmin" asp-action="Edit" asp-route-id="@Model.Id" class="btn-academic-gold text-decoration-none py-2 px-3 small">
+                                <i class="bi bi-pencil me-1"></i>
+                                <span data-i18n-en="Edit in Admin" data-i18n-tr="Yönetici Panelinde Düzenle">Edit in Admin</span>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Section 3: Institutional Call-To-Action Banner -->
+<section class="py-5 bg-warm-offwhite pt-0" aria-label="Campus Fellowship and Networking Banner">
+    <div class="container pb-lg-4">
+        <div class="closing-academic-banner text-center">
+            <span class="academic-overline" style="color: var(--ats-gold);" data-i18n-en="Collegiate Fellowship" data-i18n-tr="Mezun Dayanışması">
+                Collegiate Fellowship
+            </span>
+            <h2 class="academic-heading text-white mb-3" data-i18n-en="Engage with Our Global Alumni Community" data-i18n-tr="Küresel Mezun Topluluğumuza Katılın">
+                Engage with Our Global Alumni Community
+            </h2>
+            <p class="closing-subtitle mx-auto mb-4" data-i18n-en="Connect with fellow graduates, explore institutional career postings, or submit your own professional opportunities." data-i18n-tr="Mezun arkadaşlarınızla bağlantı kurun, kurumsal kariyer ilanlarını inceleyin veya kendi iş fırsatlarınızı paylaşın.">
+                Connect with fellow graduates, explore institutional career postings, or submit your own professional opportunities.
+            </p>
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
+                <a href="/User" class="btn-academic-gold" data-i18n-en="Explore Alumni Directory" data-i18n-tr="Mezunları Keşfet">
+                    Explore Alumni Directory
+                </a>
+                <a href="/JobPosting" class="btn-academic-outline" data-i18n-en="View Career Opportunities" data-i18n-tr="Kariyer Fırsatlarını Görüntüle">
+                    View Career Opportunities
+                </a>
+                <a href="/" class="btn-academic-ghost text-white-50 text-decoration-none px-3 py-2 small" data-i18n-en="Return to Home &rarr;" data-i18n-tr="Ana Sayfaya Dön &rarr;">
+                    Return to Home &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

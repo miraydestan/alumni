@@ -25,15 +25,27 @@
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
 
                     <div class="mb-3">
-                        <label asp-for="Title" class="form-label fw-semibold text-dark">Title</label>
-                        <input asp-for="Title" class="form-control form-control-lg fs-6" placeholder="e.g. Annual Alumni Gala 2026" required />
+                        <label asp-for="Title" class="form-label fw-semibold text-dark">Title (Turkish / Default)</label>
+                        <input asp-for="Title" class="form-control form-control-lg fs-6" placeholder="e.g. 2026 Mezuniyet Töreni" required />
                         <span asp-validation-for="Title" class="text-danger small"></span>
                     </div>
 
-                    <div class="mb-4">
-                        <label asp-for="Content" class="form-label fw-semibold text-dark">Content</label>
-                        <textarea asp-for="Content" class="form-control" rows="6" placeholder="Write the announcement description and details here..." required></textarea>
+                    <div class="mb-3">
+                        <label asp-for="TitleEn" class="form-label fw-semibold text-dark">Title (English - Optional)</label>
+                        <input asp-for="TitleEn" class="form-control form-control-lg fs-6" placeholder="e.g. 2026 Graduation Ceremony" />
+                        <span asp-validation-for="TitleEn" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Content" class="form-label fw-semibold text-dark">Content (Turkish / Default)</label>
+                        <textarea asp-for="Content" class="form-control" rows="5" placeholder="Write the announcement description in Turkish..." required></textarea>
                         <span asp-validation-for="Content" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="ContentEn" class="form-label fw-semibold text-dark">Content (English - Optional)</label>
+                        <textarea asp-for="ContentEn" class="form-control" rows="5" placeholder="Write the announcement description in English..."></textarea>
+                        <span asp-validation-for="ContentEn" class="text-danger small"></span>
                     </div>
 
                     <div class="d-flex gap-2">

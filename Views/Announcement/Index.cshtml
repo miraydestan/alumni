@@ -1,63 +1,456 @@
 @model IEnumerable<Alumni.Models.Announcement>
 
 @{
-    ViewData["Title"] = "Announcements";
+    ViewData["Title"] = "Campus Announcements";
     ViewData["ActivePage"] = "Announcements";
+    var list = Model?.ToList() ?? new List<Alumni.Models.Announcement>();
+    var featured = list.FirstOrDefault();
+    var archive = list.Skip(1).ToList();
+
+    var currentLang = Context.Request.Cookies["alumni_language"] ?? "en";
+    var isTr = currentLang == "tr";
 }
 
-<div class="container py-5">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <div>
-            <h1 class="h2 fw-bold text-dark mb-1">
-                <i class="bi bi-megaphone me-2 text-primary"></i>Announcements
-            </h1>
-            <p class="text-secondary mb-0">Stay informed about campus events, reunions, and news from our alumni community.</p>
-        </div>
-        <a asp-controller="AnnouncementAdmin" asp-action="Index" class="btn btn-outline-custom">
-            <i class="bi bi-gear me-1"></i> Manage Announcements
-        </a>
-    </div>
-
-    @if (!Model.Any())
-    {
-        <div class="info-card text-center py-5">
-            <div class="icon-box mx-auto mb-3">
-                <i class="bi bi-inbox"></i>
+<!-- Section 1: Institutional Hero Header -->
+<header class="hero-section text-center">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3 text-wrap" style="max-width: 100%;">
+                    <i class="bi bi-megaphone-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Official Communiqués • Campus Bulletin" data-i18n-tr="Resmî Duyurular • Kampüs Bülteni">
+                        Official Communiqués • Campus Bulletin
+                    </span>
+                </div>
+                <h1 class="hero-title mb-3" data-i18n-en="Campus Announcements" data-i18n-tr="Kampüs Duyuruları">
+                    Campus Announcements
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="Official dispatches, commencement milestones, academic developments, and university fellowship bulletins." data-i18n-tr="Resmî tebliğler, mezuniyet takvimleri, akademik gelişmeler ve mezun dayanışma bültenleri.">
+                    Official dispatches, commencement milestones, academic developments, and university fellowship bulletins.
+                </p>
             </div>
-            <h3 class="card-heading">No Announcements Yet</h3>
-            <p class="card-description mb-3">There are currently no active announcements in the system.</p>
-            <a asp-controller="AnnouncementAdmin" asp-action="Create" class="btn btn-primary-custom">
-                <i class="bi bi-plus-circle me-1"></i> Post First Announcement
-            </a>
         </div>
-    }
-    else
-    {
-        <div class="row g-4">
-            @foreach (var item in Model)
-            {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm border-0 rounded-3 p-4 d-flex flex-column justify-content-between">
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="badge bg-light text-primary border px-2 py-1">
-                                    <i class="bi bi-calendar3 me-1"></i>@item.CreatedDate.ToString("MMM dd, yyyy")
-                                </span>
-                                <span class="badge bg-light text-muted border">#@item.Id</span>
-                            </div>
-                            <h2 class="h5 fw-bold text-dark mb-2">@item.Title</h2>
-                            <p class="text-secondary mb-4" style="line-height: 1.6;">
-                                @(item.Content.Length > 120 ? item.Content.Substring(0, 120) + "..." : item.Content)
-                            </p>
-                        </div>
-                        <div>
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-custom w-100 btn-sm">
-                                <i class="bi bi-arrow-right-circle me-1"></i> Read Details
-                            </a>
-                        </div>
+    </div>
+</header>
+
+<!-- Section 2: Bulletin Controls & Editorial Announcement Stream -->
+<main class="py-5 bg-warm-offwhite" aria-label="Campus Announcements Section">
+    <div class="container py-lg-3">
+
+        <!-- Controls Toolbar: Search, Filters & Administration Action -->
+        <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4 mb-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important;">
+            <div class="row g-3 align-items-center justify-content-between">
+                <!-- Search Input -->
+                <div class="col-12 col-md-5 col-lg-5">
+                    <label for="announcementSearchInput" class="visually-hidden" data-i18n-en="Search Announcements" data-i18n-tr="Duyurularda Ara">Search Announcements</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0" style="border-color: var(--ats-gray-light); color: var(--ats-gold);">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="announcementSearchInput" class="form-control border-start-0 ps-0"
+                               placeholder="Search Announcements..."
+                               data-i18n-en="Search Announcements..."
+                               data-i18n-tr="Duyurularda Ara..."
+                               style="border-color: var(--ats-gray-light);" />
                     </div>
                 </div>
-            }
+
+                <!-- Sort & Filter Dropdown -->
+                <div class="col-12 col-sm-6 col-md-3 col-lg-3">
+                    <label for="announcementSortSelect" class="visually-hidden" data-i18n-en="Sort Announcements" data-i18n-tr="Duyuruları Sırala">Sort Announcements</label>
+                    <select id="announcementSortSelect" class="form-select" style="border-color: var(--ats-gray-light); font-size: 0.9rem;">
+                        <option value="recent" data-i18n-en="Most Recent First" data-i18n-tr="En Yeniden Eskiye">Most Recent First</option>
+                        <option value="oldest" data-i18n-en="Oldest First" data-i18n-tr="En Eskiden Yeniye">Oldest First</option>
+                        <option value="title-asc" data-i18n-en="Title (A to Z)" data-i18n-tr="Başlığa Göre (A-Z)">Title (A to Z)</option>
+                        <option value="title-desc" data-i18n-en="Title (Z to A)" data-i18n-tr="Başlığa Göre (Z-A)">Title (Z to A)</option>
+                    </select>
+                </div>
+
+                <!-- Action Cluster: Manage in Admin & Publish Action -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-4 text-sm-end d-flex justify-content-start justify-content-sm-end gap-2 flex-wrap">
+                    <a asp-controller="AnnouncementAdmin" asp-action="Index" class="btn btn-outline-custom">
+                        <i class="bi bi-gear me-1" style="color: var(--ats-gold);"></i>
+                        <span data-i18n-en="Manage Bulletins" data-i18n-tr="Duyuruları Yönet">Manage Bulletins</span>
+                    </a>
+                    <a asp-controller="AnnouncementAdmin" asp-action="Create" class="btn-academic-gold text-decoration-none py-2 px-3 small">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        <span data-i18n-en="Publish" data-i18n-tr="Yayımla">Publish</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Active Directory Counter Strip -->
+            <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 pt-3 mt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                <div class="small" id="announcementCounterContainer" style="color: var(--ats-gray-muted);">
+                    <span id="counterEn">
+                        Showing <strong class="text-dark visible-count-num">@list.Count</strong> of <strong class="text-dark total-count-num">@list.Count</strong> official communiqués
+                    </span>
+                    <span id="counterTr" style="display: none;">
+                        <strong class="text-dark total-count-num">@list.Count</strong> resmî duyurudan <strong class="text-dark visible-count-num">@list.Count</strong> tanesi gösteriliyor
+                    </span>
+                </div>
+                <div class="small fw-semibold text-uppercase" style="color: var(--ats-gold); letter-spacing: 0.08em; font-size: 0.75rem;" data-i18n-en="University Archives &bull; Verified Dispatches" data-i18n-tr="Üniversite Arşivi &bull; Onaylı Duyurular">
+                    University Archives &bull; Verified Dispatches
+                </div>
+            </div>
         </div>
-    }
-</div>
+
+        @if (!list.Any())
+        {
+            <!-- Authentic Academic Empty State -->
+            <div class="academic-empty-state my-5">
+                <div class="empty-state-icon mb-3">
+                    <i class="bi bi-megaphone" style="font-size: 2.75rem; color: var(--ats-gold);"></i>
+                </div>
+                <h3 class="academic-heading h3 mb-2" data-i18n-en="No Announcements Yet" data-i18n-tr="Henüz Duyuru Bulunmuyor">
+                    No Announcements Yet
+                </h3>
+                <p class="academic-lead mx-auto mb-4" style="max-width: 520px;" data-i18n-en="There are currently no published campus announcements or official communiqués in the platform database." data-i18n-tr="Sistemde henüz yayımlanmış bir kampüs duyurusu veya resmî üniversite tebliği bulunmamaktadır.">
+                    There are currently no published campus announcements or official communiqués in the platform database.
+                </p>
+                <a asp-controller="AnnouncementAdmin" asp-action="Create" class="btn-academic-gold" data-i18n-en="Post First Announcement" data-i18n-tr="İlk Duyuruyu Yayımla">
+                    Post First Announcement
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Dynamic Search No-Results Placeholder -->
+            <div id="announcementNoSearchResults" class="academic-empty-state my-5" style="display: none;">
+                <div class="empty-state-icon mb-3">
+                    <i class="bi bi-search" style="font-size: 2.5rem; color: var(--ats-gold);"></i>
+                </div>
+                <h3 class="academic-heading h4 mb-2" data-i18n-en="No Matching Announcements Found" data-i18n-tr="Eşleşen Duyuru Bulunamadı">
+                    No Matching Announcements Found
+                </h3>
+                <p class="small text-muted mb-3" data-i18n-en="We could not find any announcement matching your search criteria. Try a different keyword or clear the search filter." data-i18n-tr="Arama kriterlerinize uyan duyuru bulunamadı. Farklı bir anahtar kelime deneyin veya filtreyi temizleyin.">
+                    We could not find any announcement matching your search criteria. Try a different keyword or clear the search filter.
+                </p>
+                <button type="button" class="btn btn-outline-custom btn-sm" onclick="clearAnnouncementSearch()">
+                    <span data-i18n-en="Clear Search Filter" data-i18n-tr="Aramayı Temizle">Clear Search Filter</span>
+                </button>
+            </div>
+
+            <!-- Master Announcement Stream Wrapper -->
+            <div id="announcementStreamContainer">
+
+                @if (featured != null)
+                {
+                    var featuredTitleEn = featured.GetTitle("en");
+                    var featuredTitleTr = featured.GetTitle("tr");
+                    var featuredContentEn = featured.GetContent("en");
+                    var featuredContentTr = featured.GetContent("tr");
+                    var featuredExcerptEn = featuredContentEn.Length > 260 ? featuredContentEn.Substring(0, 260) + "..." : featuredContentEn;
+                    var featuredExcerptTr = featuredContentTr.Length > 260 ? featuredContentTr.Substring(0, 260) + "..." : featuredContentTr;
+
+                    <!-- Section B: Featured Announcement Editorial Card -->
+                    <div class="announcement-item featured-announcement-card mb-5"
+                         data-announcement-id="@featured.Id"
+                         data-announcement-title-en="@featuredTitleEn.ToLowerInvariant()"
+                         data-announcement-title-tr="@featuredTitleTr.ToLowerInvariant()"
+                         data-announcement-content-en="@featuredContentEn.ToLowerInvariant()"
+                         data-announcement-content-tr="@featuredContentTr.ToLowerInvariant()"
+                         data-announcement-timestamp="@(((DateTimeOffset)featured.CreatedDate).ToUnixTimeSeconds())">
+
+                        <div class="card border-0 shadow-sm rounded-3 p-4 p-md-5"
+                             style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 4px solid var(--ats-gold) !important;">
+
+                            <div class="row g-4 align-items-center">
+                                <div class="col-lg-8">
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                                        <span class="badge" style="background: rgba(197, 164, 109, 0.15); color: var(--ats-gold-hover); border: 1px solid var(--ats-gold-border); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                                            <i class="bi bi-star-fill me-1" style="color: var(--ats-gold);"></i>
+                                            <span data-i18n-en="Featured Communiqué" data-i18n-tr="Öne Çıkan Duyuru">Featured Communiqué</span>
+                                        </span>
+                                        <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 0.75rem;">
+                                            <i class="bi bi-calendar3 me-1 text-muted"></i>@featured.CreatedDate.ToString("MMMM dd, yyyy")
+                                        </span>
+                                        <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 0.75rem;">
+                                            #@featured.Id
+                                        </span>
+                                    </div>
+
+                                    <h2 class="academic-heading h3 mb-3">
+                                        <a asp-action="Details" asp-route-id="@featured.Id" class="text-decoration-none" style="color: var(--ats-navy);"
+                                           data-i18n-en="@featuredTitleEn"
+                                           data-i18n-tr="@featuredTitleTr">
+                                            @(isTr ? featuredTitleTr : featuredTitleEn)
+                                        </a>
+                                    </h2>
+
+                                    <p class="lead mb-4" style="color: var(--ats-charcoal); font-size: 1.05rem; line-height: 1.75;"
+                                       data-i18n-en="@featuredExcerptEn"
+                                       data-i18n-tr="@featuredExcerptTr">
+                                        @(isTr ? featuredExcerptTr : featuredExcerptEn)
+                                    </p>
+
+                                    <div class="d-flex flex-wrap align-items-center gap-3">
+                                        <a asp-action="Details" asp-route-id="@featured.Id" class="btn-academic-gold text-decoration-none px-4 py-2">
+                                            <span data-i18n-en="Read Full Announcement &rarr;" data-i18n-tr="Duyurunun Tamamını Oku &rarr;">Read Full Announcement &rarr;</span>
+                                        </a>
+                                        <a asp-controller="AnnouncementAdmin" asp-action="Edit" asp-route-id="@featured.Id" class="btn btn-outline-secondary btn-sm" title="Edit in Admin">
+                                            <i class="bi bi-pencil me-1"></i> <span data-i18n-en="Edit" data-i18n-tr="Düzenle">Edit</span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4 text-center d-none d-lg-block">
+                                    <div class="p-4 rounded-3" style="background: var(--ats-cream); border: 1px dashed var(--ats-gold-border);">
+                                        <div class="mb-3">
+                                            <i class="bi bi-newspaper" style="font-size: 3rem; color: var(--ats-gold);"></i>
+                                        </div>
+                                        <div class="academic-serif fw-bold mb-1" style="color: var(--ats-navy);" data-i18n-en="Official Campus Bulletin" data-i18n-tr="Resmî Kampüs Bülteni">
+                                            Official Campus Bulletin
+                                        </div>
+                                        <div class="small text-muted" data-i18n-en="Verified institutional dispatch published by university administration" data-i18n-tr="Üniversite yönetimi tarafından yayımlanan onaylı resmî duyuru">
+                                            Verified institutional dispatch published by university administration
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (archive.Any())
+                {
+                    <!-- Section C: Announcement Archive Heading -->
+                    <div class="d-flex align-items-center justify-content-between mb-4 mt-4" id="archiveHeaderStrip">
+                        <div>
+                            <h3 class="academic-heading h4 mb-0" style="color: var(--ats-navy);" data-i18n-en="Archive &amp; Recent Dispatches" data-i18n-tr="Arşiv ve Son Duyurular">
+                                Archive &amp; Recent Dispatches
+                            </h3>
+                            <span class="small text-muted" data-i18n-en="Chronological collegiate bulletin records" data-i18n-tr="Kronolojik üniversite duyuru kayıtları">
+                                Chronological collegiate bulletin records
+                            </span>
+                        </div>
+                        <span class="badge bg-light text-secondary border px-3 py-2" style="font-size: 0.75rem;">
+                            <span id="archiveItemsCount">@archive.Count</span> <span data-i18n-en="Records" data-i18n-tr="Kayıt">Records</span>
+                        </span>
+                    </div>
+
+                    <!-- Archive Cards Grid -->
+                    <div class="row g-4" id="announcementArchiveGrid">
+                        @foreach (var item in archive)
+                        {
+                            var itemTitleEn = item.GetTitle("en");
+                            var itemTitleTr = item.GetTitle("tr");
+                            var itemContentEn = item.GetContent("en");
+                            var itemContentTr = item.GetContent("tr");
+                            var itemExcerptEn = itemContentEn.Length > 130 ? itemContentEn.Substring(0, 130) + "..." : itemContentEn;
+                            var itemExcerptTr = itemContentTr.Length > 130 ? itemContentTr.Substring(0, 130) + "..." : itemContentTr;
+
+                            <div class="col-md-6 col-lg-4 announcement-item archive-announcement-card"
+                                 data-announcement-id="@item.Id"
+                                 data-announcement-title-en="@itemTitleEn.ToLowerInvariant()"
+                                 data-announcement-title-tr="@itemTitleTr.ToLowerInvariant()"
+                                 data-announcement-content-en="@itemContentEn.ToLowerInvariant()"
+                                 data-announcement-content-tr="@itemContentTr.ToLowerInvariant()"
+                                 data-announcement-timestamp="@(((DateTimeOffset)item.CreatedDate).ToUnixTimeSeconds())">
+
+                                <div class="card h-100 border-0 shadow-sm rounded-3 p-4 d-flex flex-column justify-content-between"
+                                     style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; transition: var(--ats-transition);">
+
+                                    <div>
+                                        <!-- Card Top: Date & Issue Badge -->
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 0.75rem;">
+                                                <i class="bi bi-calendar3 me-1 text-muted"></i>@item.CreatedDate.ToString("MMM dd, yyyy")
+                                            </span>
+                                            <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 0.75rem;">
+                                                #@item.Id
+                                            </span>
+                                        </div>
+
+                                        <!-- Announcement Title in Academic Serif -->
+                                        <h4 class="h5 academic-serif mb-2" style="color: var(--ats-navy); line-height: 1.4;">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none" style="color: var(--ats-navy);"
+                                               data-i18n-en="@itemTitleEn"
+                                               data-i18n-tr="@itemTitleTr">
+                                                @(isTr ? itemTitleTr : itemTitleEn)
+                                            </a>
+                                        </h4>
+
+                                        <!-- Excerpt -->
+                                        <p class="small text-muted mb-4" style="line-height: 1.6;"
+                                           data-i18n-en="@itemExcerptEn"
+                                           data-i18n-tr="@itemExcerptTr">
+                                            @(isTr ? itemExcerptTr : itemExcerptEn)
+                                        </p>
+                                    </div>
+
+                                    <!-- Card Action Cluster -->
+                                    <div class="pt-3 border-top d-flex align-items-center justify-content-between" style="border-color: var(--ats-gray-light) !important;">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-custom btn-sm px-3">
+                                            <i class="bi bi-file-earmark-text me-1" style="color: var(--ats-gold);"></i>
+                                            <span data-i18n-en="Read Details" data-i18n-tr="Detayları Oku">Read Details</span>
+                                        </a>
+
+                                        <a asp-controller="AnnouncementAdmin" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm" title="Edit Announcement">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</main>
+
+<!-- Section 3: Institutional Call-To-Action Banner -->
+<section class="py-5 bg-warm-offwhite pt-0" aria-label="Campus Fellowship and Networking Banner">
+    <div class="container pb-lg-4">
+        <div class="closing-academic-banner text-center">
+            <span class="academic-overline" style="color: var(--ats-gold);" data-i18n-en="Campus Fellowship &amp; Networking" data-i18n-tr="Kampüs Dayanışması ve Ağı">
+                Campus Fellowship &amp; Networking
+            </span>
+            <h2 class="academic-heading text-white mb-3" data-i18n-en="Stay Connected with the University Community" data-i18n-tr="Üniversite Topluluğuyla Bağlantıda Kalın">
+                Stay Connected with the University Community
+            </h2>
+            <p class="closing-subtitle mx-auto mb-4" data-i18n-en="Explore fellow alumni in our collegiate directory, discover verified career opportunities, or return to the platform homepage." data-i18n-tr="Mezunlar dizinindeki üniversite mezunlarını keşfedin, onaylı kariyer fırsatlarını inceleyin veya ana sayfaya dönün.">
+                Explore fellow alumni in our collegiate directory, discover verified career opportunities, or return to the platform homepage.
+            </p>
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
+                <a href="/User" class="btn-academic-gold" data-i18n-en="Explore Alumni Directory" data-i18n-tr="Mezunları Keşfet">
+                    Explore Alumni Directory
+                </a>
+                <a href="/JobPosting" class="btn-academic-outline" data-i18n-en="View Career Opportunities" data-i18n-tr="Kariyer Fırsatlarını Görüntüle">
+                    View Career Opportunities
+                </a>
+                <a href="/" class="btn-academic-ghost text-white-50 text-decoration-none px-3 py-2 small" data-i18n-en="Return to Home &rarr;" data-i18n-tr="Ana Sayfaya Dön &rarr;">
+                    Return to Home &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Scoped Client-Side Search & Sorting Logic -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('announcementSearchInput');
+        const sortSelect = document.getElementById('announcementSortSelect');
+        const streamContainer = document.getElementById('announcementStreamContainer');
+        const noResultsMsg = document.getElementById('announcementNoSearchResults');
+        const archiveGrid = document.getElementById('announcementArchiveGrid');
+        const archiveHeader = document.getElementById('archiveHeaderStrip');
+        const totalItemsCount = @list.Count;
+
+        function normalizeStr(str) {
+            return (str || '')
+                .toLowerCase()
+                .replace(/ğ/g, 'g')
+                .replace(/ü/g, 'u')
+                .replace(/ş/g, 's')
+                .replace(/ı/g, 'i')
+                .replace(/ö/g, 'o')
+                .replace(/ç/g, 'c')
+                .trim();
+        }
+
+        function updateCounterDisplay(visibleCount) {
+            const lang = document.documentElement.getAttribute('lang') || 'en';
+            document.querySelectorAll('.visible-count-num').forEach(el => el.textContent = visibleCount);
+            document.querySelectorAll('.total-count-num').forEach(el => el.textContent = totalItemsCount);
+
+            const counterEn = document.getElementById('counterEn');
+            const counterTr = document.getElementById('counterTr');
+            if (counterEn && counterTr) {
+                if (lang === 'tr') {
+                    counterEn.style.display = 'none';
+                    counterTr.style.display = '';
+                } else {
+                    counterEn.style.display = '';
+                    counterTr.style.display = 'none';
+                }
+            }
+        }
+
+        function filterAndSortAnnouncements() {
+            if (!streamContainer) return;
+            const lang = document.documentElement.getAttribute('lang') || 'en';
+            const term = normalizeStr(searchInput ? searchInput.value : '');
+            const sortMode = sortSelect ? sortSelect.value : 'recent';
+            const allItems = Array.from(streamContainer.querySelectorAll('.announcement-item'));
+
+            let visibleCount = 0;
+
+            // 1. Filtering in active language
+            allItems.forEach(item => {
+                const title = normalizeStr(item.getAttribute('data-announcement-title-' + lang) || item.getAttribute('data-announcement-title-tr') || '');
+                const content = normalizeStr(item.getAttribute('data-announcement-content-' + lang) || item.getAttribute('data-announcement-content-tr') || '');
+                const id = (item.getAttribute('data-announcement-id') || '').trim();
+
+                const matches = title.includes(term) || content.includes(term) || id.includes(term);
+                if (matches) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // 2. Sorting archive cards
+            if (archiveGrid) {
+                const archiveCards = Array.from(archiveGrid.querySelectorAll('.archive-announcement-card'));
+                archiveCards.sort((a, b) => {
+                    const tsA = parseInt(a.getAttribute('data-announcement-timestamp') || '0', 10);
+                    const tsB = parseInt(b.getAttribute('data-announcement-timestamp') || '0', 10);
+                    const titleA = a.getAttribute('data-announcement-title-' + lang) || '';
+                    const titleB = b.getAttribute('data-announcement-title-' + lang) || '';
+
+                    if (sortMode === 'oldest') {
+                        return tsA - tsB;
+                    } else if (sortMode === 'title-asc') {
+                        return titleA.localeCompare(titleB);
+                    } else if (sortMode === 'title-desc') {
+                        return titleB.localeCompare(titleA);
+                    } else {
+                        // recent -> timestamp descending
+                        return tsB - tsA;
+                    }
+                });
+                archiveCards.forEach(card => archiveGrid.appendChild(card));
+            }
+
+            // 3. Update counter and empty state
+            updateCounterDisplay(visibleCount);
+
+            if (noResultsMsg) {
+                noResultsMsg.style.display = (visibleCount === 0 && allItems.length > 0) ? 'block' : 'none';
+            }
+            if (archiveHeader) {
+                const visibleArchive = archiveGrid ? archiveGrid.querySelectorAll('.archive-announcement-card:not([style*="display: none"])').length : 0;
+                archiveHeader.style.display = (visibleArchive === 0 && term.length > 0) ? 'none' : '';
+                const archiveCountEl = document.getElementById('archiveItemsCount');
+                if (archiveCountEl) archiveCountEl.textContent = visibleArchive;
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterAndSortAnnouncements);
+        }
+        if (sortSelect) {
+            sortSelect.addEventListener('change', filterAndSortAnnouncements);
+        }
+
+        window.clearAnnouncementSearch = function () {
+            if (searchInput) {
+                searchInput.value = '';
+                filterAndSortAnnouncements();
+                searchInput.focus();
+            }
+        };
+
+        // Listen for language change events
+        window.addEventListener('languageChanged', function () {
+            filterAndSortAnnouncements();
+        });
+
+        // Initialize on load
+        filterAndSortAnnouncements();
+    });
+</script>

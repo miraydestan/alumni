@@ -3,103 +3,273 @@
     ViewData["ActivePage"] = "About";
 }
 
-<!-- Header Section -->
+<!-- Embedded Scoped Styling for Footer Language Spacing & Page Polish -->
+<style>
+    /* Footer language selector separation & readability */
+    .footer-lang-btn {
+        margin-bottom: 0.65rem !important;
+        margin-right: 0.5rem !important;
+        padding: 0.5rem 1.15rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.6rem !important;
+        letter-spacing: 0.02em !important;
+        border-radius: 4px !important;
+    }
+    .footer-lang-btn:last-child {
+        margin-bottom: 0 !important;
+    }
+</style>
+
+<!-- Section 1: Institutional Hero Header -->
 <header class="hero-section text-center">
-    <div class="container">
+    <div class="container py-lg-3">
         <div class="row justify-content-center">
-            <div class="col-lg-10 col-xl-8">
-                <div class="hero-badge">
-                    <i class="bi bi-info-circle"></i>
-                    <span>About Platform</span>
+            <div class="col-lg-10 col-xl-9">
+                <!-- Overline Badge: Institutional Overview -->
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-mortarboard-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Institutional Overview" data-i18n-tr="Kurumsal Genel Bakış">Institutional Overview</span>
                 </div>
-                <h1 class="hero-title">About ALUMNI</h1>
-                <p class="hero-subtitle">
-                    Bu platform, üniversite mezunlarının kariyer yollarını, iletişim bilgilerini ve akademik geçmişlerini takip etmek ve mezunlar arasındaki ağı güçlendirmek amacıyla tasarlanmıştır.
+                <!-- Main Title: Consistent Academic Identity -->
+                <h1 class="hero-title mb-3" data-i18n-en="About ALUMNI" data-i18n-tr="ALUMNI Hakkında">
+                    About ALUMNI
+                </h1>
+                <!-- Subtitle: Purposeful, dignified platform mission -->
+                <p class="hero-subtitle mb-0" data-i18n-en="An institutional platform dedicated to preserving university heritage, tracking graduate career pathways, and strengthening lifelong alumni fellowship." data-i18n-tr="Üniversitemizin kurumsal mirasını korumak, mezunlarımızın kariyer yolculuklarını takip etmek ve yaşam boyu mezun dayanışmasını güçlendirmek amacıyla geliştirilmiş kurumsal platform.">
+                    An institutional platform dedicated to preserving university heritage, tracking graduate career pathways, and strengthening lifelong alumni fellowship.
                 </p>
             </div>
         </div>
     </div>
 </header>
 
-<!-- Main Content: 3 Structured Cards -->
-<main class="py-5">
-    <div class="container py-2">
-        <div class="row g-4 mb-5">
-            <!-- Section 1: Our Purpose -->
-            <div class="col-lg-4 col-md-6">
-                <div class="info-card">
-                    <div class="icon-box">
-                        <i class="bi bi-bullseye"></i>
-                    </div>
-                    <h2 class="card-heading">Our Purpose</h2>
-                    <p class="card-description">
-                        Üniversite mezunlarının bilgilerinin düzenli ve merkezi şekilde yönetilmesini sağlamak; akademik geçmiş ile kurumsal hafızayı koruyarak güçlü bir mezun bağı inşa etmek.
+<!-- Section 2: Two-Column Platform Purpose & Archival Imagery -->
+<section class="py-5 bg-warm-offwhite" aria-label="Platform Purpose and Academic Heritage">
+    <div class="container py-lg-4">
+        <div class="row align-items-center gy-5">
+            <div class="col-lg-6">
+                <span class="academic-overline" data-i18n-en="Our Purpose &amp; Institutional Mission" data-i18n-tr="Amacımız ve Kurumsal Misyonumuz">
+                    Our Purpose &amp; Institutional Mission
+                </span>
+                <h2 class="academic-heading mb-3" data-i18n-en="Fostering Lifelong Collegiate Fellowship &amp; Knowledge Exchange" data-i18n-tr="Yaşam Boyu Üniversite Dayanışması ve Bilgi Paylaşımı">
+                    Fostering Lifelong Collegiate Fellowship &amp; Knowledge Exchange
+                </h2>
+                <div class="editorial-divider"></div>
+                <p class="academic-lead mb-3" data-i18n-en="Founded on intellectual excellence and collegiate camaraderie, ALUMNI creates an enduring connection between our alma mater and its global graduate community." data-i18n-tr="Akademik mükemmeliyet ve üniversite dayanışması temelinde kurulan ALUMNI, üniversitemiz ile dünyanın dört bir yanındaki mezun topluluğumuz arasında kalıcı bir bağ oluşturur.">
+                    Founded on intellectual excellence and collegiate camaraderie, ALUMNI creates an enduring connection between our alma mater and its global graduate community.
+                </p>
+                <p class="mb-4" style="color: var(--ats-gray-muted); line-height: 1.75;" data-i18n-en="Commencement does not mark the conclusion of university life, but rather the beginning of an ongoing intellectual and professional partnership. ALUMNI safeguards our collective institutional memory, provides an authentic directory for graduate discovery, and connects emerging student talent with established alumni mentorship worldwide." data-i18n-tr="Mezuniyet, üniversite yaşamının sonu değil; aksine kalıcı bir entelektüel ve mesleki ortaklığın başlangıcıdır. ALUMNI, kurumsal hafızamızı muhafaza eder, mezunlar arası doğrudan iletişim için güvenilir bir dizin sunar ve yetişen genç yetenekler ile deneyimli mezunlarımız arasında rehberlik köprüsü kurar.">
+                    Commencement does not mark the conclusion of university life, but rather the beginning of an ongoing intellectual and professional partnership. ALUMNI safeguards our collective institutional memory, provides an authentic directory for graduate discovery, and connects emerging student talent with established alumni mentorship worldwide.
+                </p>
+                <!-- Academic Quote Box -->
+                <blockquote class="academic-quote-box mb-0">
+                    <p class="mb-2 fst-italic" style="font-family: var(--ats-font-serif); font-size: 1.15rem; color: var(--ats-navy); line-height: 1.6;" data-i18n-en="&ldquo;An institution's enduring renown is reflected through the intellectual achievements, societal contributions, and lifelong fellowship of its alumni.&rdquo;" data-i18n-tr="&ldquo;Bir üniversitenin kalıcı saygınlığı, mezunlarının entelektüel başarıları, toplumsal katkıları ve yaşam boyu süren dayanışmasıyla yansır.&rdquo;">
+                        &ldquo;An institution's enduring renown is reflected through the intellectual achievements, societal contributions, and lifelong fellowship of its alumni.&rdquo;
                     </p>
-                </div>
+                    <footer class="small text-uppercase fw-semibold" style="color: var(--ats-gold); letter-spacing: 0.1em;" data-i18n-en="Collegiate Alma Mater Council &bull; Academic Charter" data-i18n-tr="Üniversite Mezunlar Konseyi &bull; Kurumsal Tüzük">
+                        Collegiate Alma Mater Council &bull; Academic Charter
+                    </footer>
+                </blockquote>
             </div>
-
-            <!-- Section 2: What We Track -->
-            <div class="col-lg-4 col-md-6">
-                <div class="info-card">
-                    <div class="icon-box">
-                        <i class="bi bi-clipboard2-check"></i>
-                    </div>
-                    <h2 class="card-heading">What We Track</h2>
-                    <ul class="track-list">
-                        <li>
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Alumni information</span>
-                        </li>
-                        <li>
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Department</span>
-                        </li>
-                        <li>
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Graduation information</span>
-                        </li>
-                        <li>
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Job / Work Experience</span>
-                        </li>
-                    </ul>
-                </div>
+            <div class="col-lg-6">
+                <figure class="editorial-image-frame mb-0">
+                    <img src="~/images/campus-about.jpg" alt="University Library and Academic Quad" class="img-fluid w-100" style="height: 420px; object-fit: cover; border-radius: 2px;" />
+                    <figcaption class="editorial-caption mt-2" data-i18n-en="The University Archives &amp; Central Quad &bull; Preserving Institutional Memory" data-i18n-tr="Üniversite Arşivleri ve Merkez Kampüs &bull; Kurumsal Hafızayı Geleceğe Taşırken">
+                        The University Archives &amp; Central Quad &bull; Preserving Institutional Memory
+                    </figcaption>
+                </figure>
             </div>
+        </div>
+    </div>
+</section>
 
-            <!-- Section 3: Our Goal -->
-            <div class="col-lg-4 col-md-12">
-                <div class="info-card">
-                    <div class="icon-box">
-                        <i class="bi bi-flag"></i>
-                    </div>
-                    <h2 class="card-heading">Our Goal</h2>
-                    <p class="card-description">
-                        Üniversite ile mezunlar arasındaki bilgi akışını ve bağlantıyı güçlendiren, mezun dayanışmasını artıran düzenli ve sürdürülebilir bir sistem oluşturmak.
-                    </p>
-                </div>
+<!-- Section 3: Information Architecture & What We Track -->
+<section class="py-5 bg-academic-white" aria-label="Information Architecture and Tracked Scope">
+    <div class="container py-lg-4">
+        <div class="row justify-content-center text-center mb-5">
+            <div class="col-lg-9 col-xl-8">
+                <span class="academic-overline" data-i18n-en="Tracked Information Scope" data-i18n-tr="Takip Edilen Bilgi Alanları">
+                    Tracked Information Scope
+                </span>
+                <h2 class="academic-heading mb-3" data-i18n-en="What We Track Across the Alumni Journey" data-i18n-tr="Mezun Yolculuğunda Takip Edilen Veri Alanları">
+                    What We Track Across the Alumni Journey
+                </h2>
+                <div class="editorial-divider mx-auto"></div>
+                <p class="academic-lead mx-auto mb-0" data-i18n-en="Every record within ALUMNI is structured to maintain academic rigor, safeguard member privacy, and foster purposeful collegiate engagement." data-i18n-tr="ALUMNI içerisindeki her kayıt; akademik ciddiyeti korumak, kişisel gizliliği güvenceye almak ve amaca uygun kurumsal dayanışmayı güçlendirmek amacıyla yapılandırılmıştır.">
+                    Every record within ALUMNI is structured to maintain academic rigor, safeguard member privacy, and foster purposeful collegiate engagement.
+                </p>
             </div>
         </div>
 
-        <!-- Alumni Management Visual Highlight Section -->
-        <div class="management-banner">
-            <div class="row align-items-center gy-4">
-                <div class="col-lg-8">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-light text-primary border px-2 py-1 rounded">
-                            <i class="bi bi-shield-check me-1"></i> Governance
-                        </span>
-                        <h3 class="h4 fw-bold text-dark mb-0">ALUMNI Ecosystem</h3>
+        <div class="row g-4">
+            <!-- Pillar 1: Alumni Identity & Directory -->
+            <div class="col-md-6 col-lg-3">
+                <div class="info-card d-flex flex-column justify-content-between h-100">
+                    <div>
+                        <div class="icon-box">
+                            <i class="bi bi-person-vcard"></i>
+                        </div>
+                        <h3 class="card-heading mb-2" data-i18n-en="Alumni Identity &amp; Directory" data-i18n-tr="Mezun Kimliği ve Dizin">
+                            Alumni Identity &amp; Directory
+                        </h3>
+                        <p class="card-description" data-i18n-en="Centralized registry connecting graduates across graduating cohorts, verified membership credentials, and authenticated directory access." data-i18n-tr="Farklı mezuniyet dönemlerinden mezunlarımızı buluşturan merkezi dizin kaydı, doğrulanmış üyelik kimliği ve güvenli erişim altyapısı.">
+                            Centralized registry connecting graduates across graduating cohorts, verified membership credentials, and authenticated directory access.
+                        </p>
                     </div>
-                    <p class="text-secondary mb-0" style="line-height: 1.6;">
-                        ALUMNI altyapısı, akademik birimler ile mezunlar arasında sürekli ve güvenli bir etkileşim kanalı oluşturur. Güncel kariyer verileri sayesinde hem mezunlar kendi aralarında iş birliği yapabilir hem de üniversite kurumsal başarısını takip edebilir.
-                    </p>
+                    <div class="pt-3 mt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                        <span class="small fw-semibold" style="color: var(--ats-gold);" data-i18n-en="Verified Alumni Profiles" data-i18n-tr="Doğrulanmış Mezun Profili">
+                            Verified Alumni Profiles
+                        </span>
+                    </div>
                 </div>
-                <div class="col-lg-4 text-lg-end">
-                    <a href="/" class="btn-primary-custom px-4">
-                        <i class="bi bi-house-door-fill me-2"></i> Return to Home
-                    </a>
+            </div>
+
+            <!-- Pillar 2: Faculty & Department Associations -->
+            <div class="col-md-6 col-lg-3">
+                <div class="info-card d-flex flex-column justify-content-between h-100">
+                    <div>
+                        <div class="icon-box">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <h3 class="card-heading mb-2" data-i18n-en="Faculty &amp; Department" data-i18n-tr="Fakülte ve Bölüm Bilgisi">
+                            Faculty &amp; Department
+                        </h3>
+                        <p class="card-description" data-i18n-en="Tracking academic disciplines, departmental affiliations, and faculty milestones fostering lifelong interdisciplinary collaboration." data-i18n-tr="Akademik disiplinlerin, bölüm aidiyetlerinin ve fakülte gelişiminin takibi ile disiplinler arası sürekli iş birliği kanalları.">
+                            Tracking academic disciplines, departmental affiliations, and faculty milestones fostering lifelong interdisciplinary collaboration.
+                        </p>
+                    </div>
+                    <div class="pt-3 mt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                        <span class="small fw-semibold" style="color: var(--ats-gold);" data-i18n-en="Departmental Heritage" data-i18n-tr="Bölüm ve Fakülte Hafızası">
+                            Departmental Heritage
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pillar 3: Graduation Cohorts & Milestones -->
+            <div class="col-md-6 col-lg-3">
+                <div class="info-card d-flex flex-column justify-content-between h-100">
+                    <div>
+                        <div class="icon-box">
+                            <i class="bi bi-award"></i>
+                        </div>
+                        <h3 class="card-heading mb-2" data-i18n-en="Graduation Milestones" data-i18n-tr="Mezuniyet ve Dereceler">
+                            Graduation Milestones
+                        </h3>
+                        <p class="card-description" data-i18n-en="Historical documentation of commencement cohorts, degree classifications, and continuous institutional reunion timelines." data-i18n-tr="Mezuniyet yılları, derece sınıflandırmaları ve düzenli kurumsal buluşma takvimlerinin kayıt altına alınarak yaşatılması.">
+                            Historical documentation of commencement cohorts, degree classifications, and continuous institutional reunion timelines.
+                        </p>
+                    </div>
+                    <div class="pt-3 mt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                        <span class="small fw-semibold" style="color: var(--ats-gold);" data-i18n-en="Cohort Continuity" data-i18n-tr="Dönem Dayanışması">
+                            Cohort Continuity
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pillar 4: Professional Journey & Industry -->
+            <div class="col-md-6 col-lg-3">
+                <div class="info-card d-flex flex-column justify-content-between h-100">
+                    <div>
+                        <div class="icon-box">
+                            <i class="bi bi-briefcase"></i>
+                        </div>
+                        <h3 class="card-heading mb-2" data-i18n-en="Career &amp; Professional Journey" data-i18n-tr="Kariyer ve Mesleki Deneyim">
+                            Career &amp; Professional Journey
+                        </h3>
+                        <p class="card-description" data-i18n-en="Monitoring career paths, sector distributions, professional achievements, and alumni-sponsored opportunities for students." data-i18n-tr="Kariyer yollarının, sektör dağılımlarının, mesleki başarıların ve öğrencilerimize yönelik mezun destekli iş imkânlarının izlenmesi.">
+                            Monitoring career paths, sector distributions, professional achievements, and alumni-sponsored opportunities for students.
+                        </p>
+                    </div>
+                    <div class="pt-3 mt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                        <span class="small fw-semibold" style="color: var(--ats-gold);" data-i18n-en="Professional Mentorship" data-i18n-tr="Mesleki Rehberlik ve Ağ">
+                            Professional Mentorship
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</main>
+</section>
+
+<!-- Section 4: Institutional Governance & Integrity (Comprehensive & Unified) -->
+<section class="py-5 bg-warm-offwhite" aria-label="Institutional Governance and Ethics">
+    <div class="container py-lg-4">
+        <div class="management-banner">
+            <div class="row align-items-center gy-4">
+                <div class="col-lg-7">
+                    <!-- Governance Category Badge -->
+                    <div class="d-inline-flex align-items-center gap-2 mb-2 px-3 py-1 rounded" style="background: rgba(197, 164, 109, 0.12); border: 1px solid var(--ats-gold-border);">
+                        <i class="bi bi-shield-check" style="color: var(--ats-gold);"></i>
+                        <span class="small fw-bold text-uppercase" style="color: var(--ats-navy); letter-spacing: 0.1em; font-size: 0.75rem;" data-i18n-en="Governance &amp; Integrity" data-i18n-tr="Yönetişim ve Etik Bütünlük">
+                            Governance &amp; Integrity
+                        </span>
+                    </div>
+                    <!-- Unified Section Title -->
+                    <h3 class="h3 academic-serif mt-2 mb-3" style="color: var(--ats-navy);" data-i18n-en="Academic Integrity &amp; Responsible Governance" data-i18n-tr="Akademik Bütünlük ve Sorumlu Yönetişim">
+                        Academic Integrity &amp; Responsible Governance
+                    </h3>
+                    <!-- Complete, Self-Contained Narrative -->
+                    <p class="mb-0" style="color: var(--ats-gray-muted); line-height: 1.75;" data-i18n-en="The ALUMNI platform operates under rigorous collegiate standards. Our mission is to maintain an authentic institutional bridge between our alma mater and its graduates — safeguarding member privacy, preventing commercial exploitation, and ensuring that alumni records reflect verified academic achievements." data-i18n-tr="ALUMNI platformu, yüksek akademik standartlar ve kurumsal etik ilkeleri doğrultusunda yönetilmektedir. Amacımız, üniversitemiz ile mezunlarımız arasında güvenilir ve kalıcı bir bağ kurarken üye gizliliğini korumak, ticari amaçlı veri kullanımını engellemek ve kayıtların doğrulanmış akademik başarıları yansıtmasını sağlamaktır.">
+                        The ALUMNI platform operates under rigorous collegiate standards. Our mission is to maintain an authentic institutional bridge between our alma mater and its graduates &mdash; safeguarding member privacy, preventing commercial exploitation, and ensuring that alumni records reflect verified academic achievements.
+                    </p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="p-4 rounded" style="background: #FFFFFF; border: 1px solid var(--ats-card-border); box-shadow: var(--ats-shadow-card);">
+                        <div class="small fw-bold text-uppercase mb-3" style="color: var(--ats-gold); letter-spacing: 0.12em;" data-i18n-en="Core Operating Principles" data-i18n-tr="Temel İşletim İlkeleri">
+                            Core Operating Principles
+                        </div>
+                        <ul class="track-list mb-0">
+                            <li>
+                                <i class="bi bi-check2-circle" style="color: var(--ats-gold); font-size: 1.15rem;"></i>
+                                <span class="fw-semibold text-dark small" data-i18n-en="Authenticated Graduate Records" data-i18n-tr="Doğrulanmış Mezun Kayıtları">Authenticated Graduate Records</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check2-circle" style="color: var(--ats-gold); font-size: 1.15rem;"></i>
+                                <span class="fw-semibold text-dark small" data-i18n-en="Strict Data Privacy &amp; Ethical Stewardship" data-i18n-tr="Sıkı Veri Gizliliği ve Güvenli Yönetişim">Strict Data Privacy &amp; Ethical Stewardship</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check2-circle" style="color: var(--ats-gold); font-size: 1.15rem;"></i>
+                                <span class="fw-semibold text-dark small" data-i18n-en="Permanent Institutional Memory" data-i18n-tr="Kalıcı Kurumsal Üniversite Hafızası">Permanent Institutional Memory</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check2-circle" style="color: var(--ats-gold); font-size: 1.15rem;"></i>
+                                <span class="fw-semibold text-dark small" data-i18n-en="No Commercial Ads or External Tracking" data-i18n-tr="Ticari Reklam ve Harici Takip Bulundurmaz">No Commercial Ads or External Tracking</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 5: Institutional Call-To-Action Banner -->
+<section class="py-5 bg-warm-offwhite pt-0" aria-label="Alumni Community Call to Action">
+    <div class="container pb-lg-4">
+        <div class="closing-academic-banner text-center">
+            <span class="academic-overline" style="color: var(--ats-gold);" data-i18n-en="Join the Fellowship" data-i18n-tr="Topluluğumuza Katılın">
+                Join the Fellowship
+            </span>
+            <h2 class="academic-heading text-white mb-3" data-i18n-en="Connect with Your Fellow Alumni Today" data-i18n-tr="Üniversite Mezunlarımızla Hemen Bağlantı Kurun">
+                Connect with Your Fellow Alumni Today
+            </h2>
+            <p class="closing-subtitle mx-auto mb-4" data-i18n-en="Whether you wish to explore the graduate directory, discover curated career opportunities, or return to the platform homepage, our community welcomes you." data-i18n-tr="Mezunlar dizinini keşfetmek, kariyer fırsatlarını incelemek veya ana sayfaya dönmek için platformumuz sizleri bekliyor.">
+                Whether you wish to explore the graduate directory, discover curated career opportunities, or return to the platform homepage, our community welcomes you.
+            </p>
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
+                <a href="/User" class="btn-academic-gold" data-i18n-en="Explore Alumni Directory" data-i18n-tr="Mezunlar Dizinini Keşfet">
+                    Explore Alumni Directory
+                </a>
+                <a href="/JobPosting" class="btn-academic-outline" data-i18n-en="Career Opportunities" data-i18n-tr="Kariyer Fırsatları">
+                    Career Opportunities
+                </a>
+                <a href="/" class="btn-academic-ghost text-white-50 text-decoration-none px-3 py-2 small" data-i18n-en="Return to Home &rarr;" data-i18n-tr="Ana Sayfaya Dön &rarr;">
+                    Return to Home &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

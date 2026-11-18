@@ -129,7 +129,7 @@
 
                 <!-- Col 3: Language Options -->
                 <div class="col-lg-3 col-md-6 col-6">
-                    <div class="footer-nav-title" data-i18n-en="Language" data-i18n-tr="Dil Seçimi">Language</div>
+                    <div class="footer-nav-title" data-i18n-en="Language" data-i18n-tr="Dil">Language</div>
                     <div class="d-flex flex-column gap-2">
                         <button type="button" class="footer-lang-btn" id="footerBtnEn" onclick="setLanguage('en')">
                             <i class="bi bi-globe me-2" style="color: var(--ats-gold);"></i>
@@ -234,6 +234,8 @@
                 if (translatedText !== null) {
                     if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                         el.setAttribute('placeholder', translatedText);
+                    } else if (el.tagName === 'OPTION') {
+                        el.textContent = translatedText;
                     } else {
                         el.innerHTML = translatedText;
                     }
@@ -241,6 +243,7 @@
             });
 
             document.documentElement.setAttribute('lang', lang);
+            window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: lang } }));
         }
 
         // Initialize language on DOM ready
