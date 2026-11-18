@@ -285,9 +285,15 @@ alumni/
 
 **Planned / not yet implemented:** alumni profiles, departments, graduation details, job experience, full authentication/authorization (`AddAuthentication` / user login & claims), and additional search/filtering or dashboard features. These should be marked implemented only after their models, routes, and persistence are present in the codebase.
 
+## Brand & Design Guidelines
+
+- [Brand Guidelines](brand.md): Official brand identity, institutional naming conventions (ALUMNI), bilingual descriptions, and approved visual direction.
+- [Design System](DESIGN.md): Authoritative single source of truth for UI components, color palette tokens, typography rules, 8pt spacing grid, and accessibility standards.
+
 ## Documentation
 
 - [Brand Guidelines](brand.md)
+- [Design System](DESIGN.md)
 - [Data Design Documentation (DDD)](ddd.md): See [ddd.md](ddd.md) for the current data model, database design, `JobPosting` business rules, persistence configuration, and planned domain entities.
 
 ## License
