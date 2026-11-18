@@ -285,9 +285,10 @@ alumni/
 
 **Planned / not yet implemented:** alumni profiles, departments, graduation details, job experience, full authentication/authorization (`AddAuthentication` / user login & claims), and additional search/filtering or dashboard features. These should be marked implemented only after their models, routes, and persistence are present in the codebase.
 
-## Related Documentation
+## Documentation
 
-See [ddd.md](ddd.md) for the current data model, database design, `JobPosting` business rules, persistence configuration, and planned domain entities.
+- [Brand Guidelines](brand.md)
+- [Data Design Documentation (DDD)](ddd.md): See [ddd.md](ddd.md) for the current data model, database design, `JobPosting` business rules, persistence configuration, and planned domain entities.
 
 ## License
 
