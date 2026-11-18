@@ -1,86 +1,157 @@
+@{
+    var activePage = ViewData["ActivePage"]?.ToString() ?? "";
+    var isHome = activePage == "Home";
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewData["Title"] - Alumni Tracking System</title>
+    <meta name="title" content="ALUMNI - University Alumni Network">
+    <meta name="description" content="ALUMNI - University Alumni Network | Üniversite Mezunlar Ağı">
+    @if (isHome)
+    {
+        <title data-i18n-en="ALUMNI - University Alumni Network" data-i18n-tr="ALUMNI - Üniversite Mezunlar Ağı">ALUMNI - University Alumni Network</title>
+    }
+    else
+    {
+        <title>@ViewData["Title"] - ALUMNI</title>
+    }
+    
+    <!-- Google Fonts: Playfair Display (Serif) & Plus Jakarta Sans (Editorial Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- Custom Site Styles -->
+    <!-- Custom Academic Styles -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg sticky-top navbar-custom shadow-sm">
+    <!-- Transparent / Adaptive Navigation Bar -->
+    <nav id="academicNavbar" class="navbar navbar-expand-lg navbar-academic @(isHome ? "navbar-transparent fixed-top" : "navbar-solid sticky-top")" aria-label="Main University Navigation">
         <div class="container">
-            <a class="navbar-brand navbar-brand-custom d-flex align-items-center gap-2" href="/">
-                <span class="brand-icon-box">
-                    <i class="bi bi-mortarboard-fill"></i>
+            <!-- Left: ALUMNI Logo -->
+            <a class="brand-academic-logo" href="/">
+                <span class="brand-emblem">
+                    <i class="bi bi-mortarboard"></i>
                 </span>
-                <span>Alumni Tracking System</span>
+                <span class="brand-text-block">
+                    <span class="brand-text-title">ALUMNI</span>
+                    <span class="brand-text-subtitle" data-i18n-en="University Alumni Network" data-i18n-tr="Üniversite Mezunlar Ağı">University Alumni Network</span>
+                </span>
             </a>
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#atsNavbar" aria-controls="atsNavbar" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+            
+            <!-- Mobile Toggle Button -->
+            <button class="navbar-toggler border-0 text-white shadow-none px-2" type="button" data-bs-toggle="collapse" data-bs-target="#academicNavContent" aria-controls="academicNavContent" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list fs-2 text-white"></i>
             </button>
-            <div class="collapse navbar-collapse" id="atsNavbar">
-                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-3">
+            
+            <!-- Center & Right Navigation -->
+            <div class="collapse navbar-collapse" id="academicNavContent">
+                <!-- Center Links -->
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2 text-center text-lg-start">
                     <li class="nav-item">
-                        <a class="nav-link nav-link-custom @(ViewData["ActivePage"]?.ToString() == "Home" ? "active" : "")" href="/">Home</a>
+                        <a class="nav-link nav-link-academic @(activePage == "Home" ? "active" : "")" href="/" data-i18n-en="Home" data-i18n-tr="Ana Sayfa">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link nav-link-custom @(ViewData["ActivePage"]?.ToString() == "About" ? "active" : "")" href="/about">About</a>
+                        <a class="nav-link nav-link-academic @(activePage == "About" ? "active" : "")" href="/about" data-i18n-en="About" data-i18n-tr="Hakkında">About</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link nav-link-custom @(ViewData["ActivePage"]?.ToString() == "Users" ? "active" : "")" href="/User">Users</a>
+                        <a class="nav-link nav-link-academic @(activePage == "Users" ? "active" : "")" href="/User" data-i18n-en="Alumni" data-i18n-tr="Mezunlar">Alumni</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link nav-link-custom @(ViewData["ActivePage"]?.ToString() == "Announcements" ? "active" : "")" href="/Announcement">Announcements</a>
+                        <a class="nav-link nav-link-academic @(activePage == "Announcements" ? "active" : "")" href="/Announcement" data-i18n-en="Announcements" data-i18n-tr="Duyurular">Announcements</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link nav-link-custom @(ViewData["ActivePage"]?.ToString() == "JobPostings" ? "active" : "")" href="/JobPosting">Job Postings</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-custom @(ViewData["ActivePage"]?.ToString() == "AnnouncementAdmin" ? "active" : "")" href="/AnnouncementAdmin">Admin</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-custom" href="/#features">Alumni</a>
+                        <a class="nav-link nav-link-academic @(activePage == "JobPostings" ? "active" : "")" href="/JobPosting" data-i18n-en="Jobs" data-i18n-tr="Kariyer">Jobs</a>
                     </li>
                 </ul>
-                <!-- Future-ready login/portal area -->
-                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
-                    <a href="/about" class="btn btn-outline-custom btn-sm px-3 py-1">
-                        <i class="bi bi-info-circle me-1"></i> Platform Info
-                    </a>
+
+                <!-- Right: TR | EN & Login -->
+                <div class="d-flex align-items-center justify-content-center gap-3 mt-3 mt-lg-0 pt-2 pt-lg-0 border-top border-secondary-subtle border-lg-0">
+                    <!-- Language Switcher -->
+                    <div class="lang-switch-group" role="group" aria-label="Language Switcher">
+                        <button type="button" class="lang-btn" id="btnLangTr" onclick="setLanguage('tr')">TR</button>
+                        <span class="lang-separator">|</span>
+                        <button type="button" class="lang-btn active" id="btnLangEn" onclick="setLanguage('en')">EN</button>
+                    </div>
+
+                    <!-- Login Button (Member Portal Access) -->
+                    <button type="button" class="btn-nav-login" data-bs-toggle="modal" data-bs-target="#loginNoticeModal" data-i18n-en="Login" data-i18n-tr="Giriş">
+                        <i class="bi bi-person-fill"></i>
+                        <span>Login</span>
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Main Body -->
-    <div class="flex-grow-1">
+    <!-- Main Content -->
+    <main class="flex-grow-1">
         @RenderBody()
-    </div>
+    </main>
 
-    <!-- Footer -->
-    <footer class="footer-custom">
+    <!-- Premium Institutional Footer -->
+    <footer class="footer-academic" aria-label="Institutional Footer">
         <div class="container">
-            <div class="row align-items-center gy-3">
-                <div class="col-md-6 text-center text-md-start">
-                    <div class="footer-brand mb-1">Alumni Tracking System</div>
-                    <div class="footer-text">Built for university alumni management.</div>
-                </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <div class="d-flex justify-content-center justify-content-md-end gap-3 footer-text">
-                        <a href="/" class="text-decoration-none text-secondary">Home</a>
-                        <span>&bull;</span>
-                        <a href="/about" class="text-decoration-none text-secondary">About</a>
-                        <span>&bull;</span>
-                        <a href="/Announcement" class="text-decoration-none text-secondary">Announcements</a>
-                        <span>&bull;</span>
-                        <a href="/#features" class="text-decoration-none text-secondary">Features</a>
+            <div class="row g-5">
+                <!-- Col 1: Brand & Dignified Narrative -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="brand-emblem">
+                            <i class="bi bi-mortarboard"></i>
+                        </span>
+                        <div>
+                            <div class="footer-brand-title">ALUMNI</div>
+                            <div class="small" style="color: var(--ats-gold); letter-spacing: 0.12em; text-transform: uppercase;" data-i18n-en="University Alumni Network" data-i18n-tr="Üniversite Mezunlar Ağı">University Alumni Network</div>
+                        </div>
                     </div>
+                    <p class="footer-academic-lead mb-0" data-i18n-en="The official institutional portal for alumni engagement, academic heritage preservation, and collaborative professional opportunities." data-i18n-tr="Mezun bağlılığı, akademik mirasın korunması ve iş birliğine dayalı mesleki fırsatlar için resmi kurumsal platform.">
+                        The official institutional portal for alumni engagement, academic heritage preservation, and collaborative professional opportunities.
+                    </p>
+                </div>
+
+                <!-- Col 2: Institutional Links -->
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="footer-nav-title" data-i18n-en="Institutional Links" data-i18n-tr="Kurumsal Bağlantılar">Institutional Links</div>
+                    <ul class="footer-nav-list">
+                        <li><a href="/" class="footer-nav-link" data-i18n-en="Home" data-i18n-tr="Ana Sayfa">Home</a></li>
+                        <li><a href="/about" class="footer-nav-link" data-i18n-en="About the Platform" data-i18n-tr="Platform Hakkında">About the Platform</a></li>
+                        <li><a href="/User" class="footer-nav-link" data-i18n-en="Alumni Directory" data-i18n-tr="Mezunlar Dizini">Alumni Directory</a></li>
+                        <li><a href="/Announcement" class="footer-nav-link" data-i18n-en="Campus Bulletins" data-i18n-tr="Kampüs Bültenleri">Campus Bulletins</a></li>
+                        <li><a href="/JobPosting" class="footer-nav-link" data-i18n-en="Career Opportunities" data-i18n-tr="Kariyer Fırsatları">Career Opportunities</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Language Options -->
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="footer-nav-title" data-i18n-en="Language" data-i18n-tr="Dil Seçimi">Language</div>
+                    <div class="d-flex flex-column gap-2">
+                        <button type="button" class="footer-lang-btn" id="footerBtnEn" onclick="setLanguage('en')">
+                            <i class="bi bi-globe me-2" style="color: var(--ats-gold);"></i>
+                            <span>English (EN)</span>
+                        </button>
+                        <button type="button" class="footer-lang-btn" id="footerBtnTr" onclick="setLanguage('tr')">
+                            <i class="bi bi-globe me-2" style="color: var(--ats-gold);"></i>
+                            <span>Türkçe (TR)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Copyright Bar -->
+            <div class="footer-bottom-bar d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <div data-i18n-en="&copy; @DateTime.UtcNow.Year ALUMNI. All rights reserved." data-i18n-tr="&copy; @DateTime.UtcNow.Year ALUMNI. Tüm hakları saklıdır.">
+                    &copy; @DateTime.UtcNow.Year ALUMNI. All rights reserved.
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="/about" class="footer-nav-link small" data-i18n-en="Institutional Ethics" data-i18n-tr="Kurumsal İlkeler">Institutional Ethics</a>
+                    <span class="text-secondary small" style="opacity: 0.5;">&bull;</span>
+                    <a href="/about" class="footer-nav-link small" data-i18n-en="Privacy Policy" data-i18n-tr="Gizlilik Politikası">Privacy Policy</a>
                 </div>
             </div>
         </div>
@@ -88,6 +159,130 @@
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Academic Navigation & Bilingual Switcher Script -->
+    <script>
+        // 1. Transparent Navbar on Scroll
+        (function() {
+            var navbar = document.getElementById('academicNavbar');
+            var isHome = @(isHome ? "true" : "false");
+
+            if (isHome && navbar) {
+                function updateNavbar() {
+                    if (window.scrollY > 40) {
+                        navbar.classList.remove('navbar-transparent');
+                        navbar.classList.add('navbar-scrolled');
+                    } else {
+                        navbar.classList.add('navbar-transparent');
+                        navbar.classList.remove('navbar-scrolled');
+                    }
+                }
+                window.addEventListener('scroll', updateNavbar, { passive: true });
+                updateNavbar();
+            }
+        })();
+
+        // 2. Bilingual Translation (TR / EN) with Cookie & LocalStorage Persistence
+        function getCookie(name) {
+            var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+            return match ? decodeURIComponent(match[2]) : null;
+        }
+
+        function setLanguage(lang) {
+            if (lang !== 'tr' && lang !== 'en') lang = 'en';
+            
+            // Save to cookie and localStorage
+            document.cookie = "alumni_language=" + lang + ";path=/;max-age=31536000;SameSite=Lax";
+            try { localStorage.setItem('alumni_language', lang); } catch (e) {}
+
+            // Update language switcher buttons
+            var btnTr = document.getElementById('btnLangTr');
+            var btnEn = document.getElementById('btnLangEn');
+            if (btnTr && btnEn) {
+                if (lang === 'tr') {
+                    btnTr.classList.add('active');
+                    btnEn.classList.remove('active');
+                } else {
+                    btnEn.classList.add('active');
+                    btnTr.classList.remove('active');
+                }
+            }
+
+            // Update footer language buttons
+            var footerBtnTr = document.getElementById('footerBtnTr');
+            var footerBtnEn = document.getElementById('footerBtnEn');
+            if (footerBtnTr && footerBtnEn) {
+                if (lang === 'tr') {
+                    footerBtnTr.classList.add('active');
+                    footerBtnEn.classList.remove('active');
+                } else {
+                    footerBtnEn.classList.add('active');
+                    footerBtnTr.classList.remove('active');
+                }
+            }
+
+            // Update document title and meta description on home page
+            var isHome = @(isHome ? "true" : "false");
+            if (isHome) {
+                document.title = (lang === 'tr') ? "ALUMNI - Üniversite Mezunlar Ağı" : "ALUMNI - University Alumni Network";
+            }
+
+            // Translate all elements with data-i18n attributes
+            var elements = document.querySelectorAll('[data-i18n-' + lang + ']');
+            elements.forEach(function(el) {
+                var translatedText = el.getAttribute('data-i18n-' + lang);
+                if (translatedText !== null) {
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        el.setAttribute('placeholder', translatedText);
+                    } else {
+                        el.innerHTML = translatedText;
+                    }
+                }
+            });
+
+            document.documentElement.setAttribute('lang', lang);
+        }
+
+        // Initialize language on DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            var savedLang = getCookie('alumni_language') || localStorage.getItem('alumni_language') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+
+    <!-- Institutional Member Login Information Modal -->
+    <div class="modal fade" id="loginNoticeModal" tabindex="-1" aria-labelledby="loginNoticeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="background-color: var(--ats-navy-dark); color: #FFFFFF; border: 1px solid var(--ats-gold-border) !important;">
+                <div class="modal-header border-0 pb-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="brand-emblem" style="width: 32px; height: 32px; font-size: 1rem;">
+                            <i class="bi bi-mortarboard"></i>
+                        </span>
+                        <h5 class="modal-title academic-serif" id="loginNoticeModalLabel" style="color: #FFFFFF;" data-i18n-en="Alumni Portal Access" data-i18n-tr="Mezun Portalı Girişi">Alumni Portal Access</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="p-3 mb-3 rounded" style="background: rgba(197, 164, 109, 0.1); border: 1px solid var(--ats-gold-border);">
+                        <div class="small fw-semibold mb-1" style="color: var(--ats-gold);" data-i18n-en="Single Sign-On (SSO) Notice" data-i18n-tr="Tek Oturum Açma (SSO) Bilgilendirmesi">
+                            Single Sign-On (SSO) Notice
+                        </div>
+                        <p class="small mb-0 text-white-50" data-i18n-en="The institutional member authentication infrastructure is scheduled in the university development roadmap. Direct alumni login will be enabled once institutional identity integration is complete." data-i18n-tr="Üye kimlik doğrulama altyapısı üniversite geliştirme takviminde planlanmaktadır. Kurumsal kimlik entegrasyonu tamamlandığında mezun portalı girişi aktifleşecektir.">
+                            The institutional member authentication infrastructure is scheduled in the university development roadmap. Direct alumni login will be enabled once institutional identity integration is complete.
+                        </p>
+                    </div>
+                    <p class="small text-white-50 mb-0" data-i18n-en="Public visitors can freely browse the alumni directory, read campus announcements, and explore career postings without logging in." data-i18n-tr="Ziyaretçilerimiz oturum açmaya gerek kalmadan mezunlar dizinini inceleyebilir, duyuruları okuyabilir ve kariyer fırsatlarını görüntüleyebilir.">
+                        Public visitors can freely browse the alumni directory, read campus announcements, and explore career postings without logging in.
+                    </p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn-academic-outline py-2 px-3 small" data-bs-dismiss="modal" data-i18n-en="Close" data-i18n-tr="Kapat">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
