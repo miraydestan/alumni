@@ -1,53 +1,102 @@
 @model Alumni.Models.User
 
 @{
-    ViewData["Title"] = "Edit User";
+    ViewData["Title"] = "Edit Alumnus Profile";
     ViewData["ActivePage"] = "Users";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-sm border-0 rounded-3 p-4">
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="icon-box m-0">
-                        <i class="bi bi-pencil-square"></i>
-                    </div>
-                    <div>
-                        <h2 class="card-heading mb-0">Edit User</h2>
-                        <span class="text-secondary small">Updating user #@Model.Id</span>
-                    </div>
+<!-- Section 1: Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-pencil-square" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Alumni Directory &bull; Record Modification" data-i18n-tr="Mezunlar Dizini &bull; Kay&#305;t D&uuml;zenleme">
+                        Alumni Directory &bull; Record Modification
+                    </span>
                 </div>
-
-                <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
-                    @Html.AntiForgeryToken()
-
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
-
-                    <input type="hidden" asp-for="Id" />
-
-                    <div class="mb-3">
-                        <label asp-for="Name" class="form-label fw-semibold text-dark">Full Name</label>
-                        <input asp-for="Name" class="form-control form-control-lg fs-6" required />
-                        <span asp-validation-for="Name" class="text-danger small"></span>
-                    </div>
-
-                    <div class="mb-4">
-                        <label asp-for="Email" class="form-label fw-semibold text-dark">Email Address</label>
-                        <input asp-for="Email" class="form-control form-control-lg fs-6" type="email" required />
-                        <span asp-validation-for="Email" class="text-danger small"></span>
-                    </div>
-
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary-custom px-4">
-                            <i class="bi bi-check-circle me-1"></i> Save Changes
-                        </button>
-                        <a asp-action="Index" class="btn btn-outline-custom px-3">
-                            <i class="bi bi-arrow-left me-1"></i> Back to List
-                        </a>
-                    </div>
-                </form>
+                <h1 class="hero-title mb-3" data-i18n-en="Edit Alumnus Profile" data-i18n-tr="Mezun Profilini D&uuml;zenle">
+                    Edit Alumnus Profile
+                </h1>
+                <p class="hero-subtitle mb-0">
+                    <span data-i18n-en="Updating official record for member" data-i18n-tr="Üye kaydı güncelleniyor:">Updating official record for member</span>
+                    <strong>#@Model.Id</strong> &bull;
+                    <span style="color: var(--ats-gold);">@Model.Name</span>
+                </p>
             </div>
         </div>
     </div>
-</div>
+</header>
+
+<!-- Section 2: Edit Form Container -->
+<main class="py-5 bg-warm-offwhite" aria-label="Edit Alumnus Form Section">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-md-9 col-lg-7 col-xl-6">
+                <div class="card border-0 shadow-sm p-4 p-md-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; border-radius: 4px;">
+
+                    <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-box m-0" style="width: 48px; height: 48px; font-size: 1.35rem;">
+                                <i class="bi bi-person-gear"></i>
+                            </div>
+                            <div>
+                                <span class="academic-overline mb-1" data-i18n-en="Record Modification" data-i18n-tr="Sicil Revizyonu">Record Modification</span>
+                                <h2 class="academic-serif mb-0" style="color: var(--ats-navy); font-size: 1.5rem;">@Model.Name</h2>
+                            </div>
+                        </div>
+                        <span class="badge" style="background: var(--ats-warm-offwhite); color: var(--ats-navy); border: 1px solid var(--ats-card-border); font-size: 0.85rem; padding: 0.4rem 0.75rem;">
+                            ID: #@Model.Id
+                        </span>
+                    </div>
+
+                    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4 rounded" role="alert"></div>
+
+                        <input type="hidden" asp-for="Id" />
+
+                        <!-- Name -->
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Full Name *" data-i18n-tr="Ad Soyad *">Full Name *</span>
+                            </label>
+                            <input asp-for="Name" class="form-control form-control-lg fs-6"
+                                   style="border-color: var(--ats-gray-light); border-radius: 4px;" required />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-4">
+                            <label asp-for="Email" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Institutional Email Address *" data-i18n-tr="E-posta Adresi *">Institutional Email Address *</span>
+                            </label>
+                            <input asp-for="Email" class="form-control form-control-lg fs-6" type="email"
+                                   style="border-color: var(--ats-gray-light); border-radius: 4px;" required />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-wrap align-items-center gap-2 pt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                            <button type="submit" class="btn-academic-gold border-0 text-decoration-none py-2 px-4 small">
+                                <i class="bi bi-check-circle me-1"></i>
+                                <span data-i18n-en="Save Changes" data-i18n-tr="Değişiklikleri Kaydet">Save Changes</span>
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-custom py-2 px-3 small">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                <span data-i18n-en="Back to Directory" data-i18n-tr="Dizine Dön">Back to Directory</span>
+                            </a>
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary py-2 px-3 small ms-auto" style="border-color: var(--ats-gray-light); font-size: 0.85rem;">
+                                <i class="bi bi-person-badge me-1"></i>
+                                <span data-i18n-en="View Profile" data-i18n-tr="Profili Gör">View Profile</span>
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

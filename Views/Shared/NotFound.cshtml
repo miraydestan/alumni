@@ -1,31 +1,79 @@
 @{
     ViewData["Title"] = "404 – Page Not Found";
+    ViewData["ActivePage"] = "NotFound";
 }
 
-<section class="hero-section text-center">
-    <div class="container">
+<!-- Section 1: Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-xl-7">
-                <div class="info-card text-center py-5 px-4">
-                    <div class="hero-badge mb-3">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
-                        <span>Error 404</span>
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-compass" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Institutional Registry &bull; HTTP 404" data-i18n-tr="Kurumsal Sicil &bull; HTTP 404">
+                        Institutional Registry &bull; HTTP 404
+                    </span>
+                </div>
+                <h1 class="hero-title mb-3" data-i18n-en="404 &ndash; Page Not Found" data-i18n-tr="404 &ndash; Sayfa Bulunamad&#305;">
+                    404 &ndash; Page Not Found
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="The requested institutional communiqué, directory profile, or resource could not be located in the repository." data-i18n-tr="Talep edilen kurumsal tebliğ, mezun kaydı veya sayfa bağlantısı arşivde bulunamadı.">
+                    The requested institutional communiqué, directory profile, or resource could not be located in the repository.
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Section 2: Guidance & Navigation Container -->
+<main class="py-5 bg-warm-offwhite" aria-label="Not Found Resolution Section">
+    <div class="container py-lg-4">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="card border-0 shadow-sm p-4 p-md-5 text-center" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-gold) !important; border-radius: 4px;">
+
+                    <!-- Graphic Motif -->
+                    <div class="mx-auto mb-4" style="width: 72px; height: 72px; border-radius: 4px; background: var(--ats-warm-offwhite); color: var(--ats-gold); border: 1px solid var(--ats-gold-border); display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; box-shadow: var(--ats-shadow-card);">
+                        <i class="bi bi-mortarboard"></i>
                     </div>
-                    <h1 class="hero-title mb-3">404 – Page Not Found</h1>
-                    <p class="hero-subtitle mb-4">
-                        The page you are looking for could not be found. It may have been moved, deleted, or the URL you entered might be incorrect.
+
+                    <span class="academic-overline mb-2" data-i18n-en="Navigation Assistance" data-i18n-tr="Gezinme Yard&#305;mc&#305;s&#305;">Navigation Assistance</span>
+
+                    <h2 class="academic-serif mb-3" style="color: var(--ats-navy); font-size: 1.65rem;" data-i18n-en="Resource Relocation or Missing Record" data-i18n-tr="Taşınmış Sayfa veya Eksik Kayıt">
+                        Resource Relocation or Missing Record
+                    </h2>
+
+                    <p class="text-muted mx-auto mb-4" style="max-width: 520px; font-size: 0.95rem; line-height: 1.7;" data-i18n-en="The URL you entered may have been archived, renamed, or temporarily relocated during platform updates. Please utilize the primary directory links below to navigate back to active university resources." data-i18n-tr="Girdiğiniz bağlantı arşivlenmiş, adı değiştirilmiş veya sistem güncellemeleri sırasında taşınmış olabilir. Aktif kurumsal sayfalara dönmek için aşağıdaki ana bağlantıları kullanabilirsiniz.">
+                        The URL you entered may have been archived, renamed, or temporarily relocated during platform updates. Please utilize the primary directory links below to navigate back to active university resources.
                     </p>
-                    <div class="d-flex flex-wrap justify-content-center gap-3">
-                        <a href="/" class="btn-primary-custom">
-                            <i class="bi bi-house-door-fill me-2"></i>
-                            <span>Back to Home</span>
+
+                    <!-- Helpful Directory Links -->
+                    <div class="d-flex flex-wrap justify-content-center gap-2 mb-4 pt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                        <a href="/" class="btn-academic-gold text-decoration-none py-2 px-3 small">
+                            <i class="bi bi-house-door-fill me-1"></i>
+                            <span data-i18n-en="Return to Home" data-i18n-tr="Ana Sayfaya Dön">Return to Home</span>
                         </a>
-                        <a href="/about" class="btn-outline-custom">
-                            <span>About Platform</span>
+                        <a href="/User" class="btn btn-outline-custom py-2 px-3 small">
+                            <i class="bi bi-people me-1" style="color: var(--ats-gold);"></i>
+                            <span data-i18n-en="Alumni Directory" data-i18n-tr="Mezunlar Dizini">Alumni Directory</span>
+                        </a>
+                        <a href="/Announcement" class="btn btn-outline-custom py-2 px-3 small">
+                            <i class="bi bi-megaphone me-1" style="color: var(--ats-gold);"></i>
+                            <span data-i18n-en="Campus Bulletins" data-i18n-tr="Kampüs Duyuruları">Campus Bulletins</span>
+                        </a>
+                        <a href="/JobPosting" class="btn btn-outline-custom py-2 px-3 small">
+                            <i class="bi bi-briefcase me-1" style="color: var(--ats-gold);"></i>
+                            <span data-i18n-en="Career Network" data-i18n-tr="Kariyer Ağı">Career Network</span>
                         </a>
                     </div>
+
+                    <div class="small text-muted" style="font-size: 0.8rem;">
+                        <span data-i18n-en="Need institutional assistance?" data-i18n-tr="Kurumsal desteğe mi ihtiyacınız var?">Need institutional assistance?</span>
+                        <a href="/about" style="color: var(--ats-navy); font-weight: 600; text-decoration: underline;" data-i18n-en="Learn more about ALUMNI" data-i18n-tr="ALUMNI hakkında bilgi edinin">Learn more about ALUMNI</a>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
-</section>
+</main>

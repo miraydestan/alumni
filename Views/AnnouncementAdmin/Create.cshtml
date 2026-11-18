@@ -5,59 +5,127 @@
     ViewData["ActivePage"] = "AnnouncementAdmin";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-7">
-            <div class="card shadow-sm border-0 rounded-3 p-4 p-md-5">
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="icon-box m-0">
-                        <i class="bi bi-megaphone-fill"></i>
-                    </div>
-                    <div>
-                        <h2 class="card-heading mb-0">Create Announcement</h2>
-                        <span class="text-secondary small">Post a new announcement to the alumni platform</span>
-                    </div>
+<!-- Section 1: Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-megaphone-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Institutional Communiqu&eacute; &bull; New Publication" data-i18n-tr="Kurumsal Tebli&#287; &bull; Yeni Yay&#305;n">
+                        Institutional Communiqu&eacute; &bull; New Publication
+                    </span>
                 </div>
-
-                <form asp-action="Create" method="post">
-                    @Html.AntiForgeryToken()
-
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
-
-                    <div class="mb-3">
-                        <label asp-for="Title" class="form-label fw-semibold text-dark">Title (Turkish / Default)</label>
-                        <input asp-for="Title" class="form-control form-control-lg fs-6" placeholder="e.g. 2026 Mezuniyet Töreni" required />
-                        <span asp-validation-for="Title" class="text-danger small"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="TitleEn" class="form-label fw-semibold text-dark">Title (English - Optional)</label>
-                        <input asp-for="TitleEn" class="form-control form-control-lg fs-6" placeholder="e.g. 2026 Graduation Ceremony" />
-                        <span asp-validation-for="TitleEn" class="text-danger small"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Content" class="form-label fw-semibold text-dark">Content (Turkish / Default)</label>
-                        <textarea asp-for="Content" class="form-control" rows="5" placeholder="Write the announcement description in Turkish..." required></textarea>
-                        <span asp-validation-for="Content" class="text-danger small"></span>
-                    </div>
-
-                    <div class="mb-4">
-                        <label asp-for="ContentEn" class="form-label fw-semibold text-dark">Content (English - Optional)</label>
-                        <textarea asp-for="ContentEn" class="form-control" rows="5" placeholder="Write the announcement description in English..."></textarea>
-                        <span asp-validation-for="ContentEn" class="text-danger small"></span>
-                    </div>
-
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary-custom px-4">
-                            <i class="bi bi-check-circle me-1"></i> Publish Announcement
-                        </button>
-                        <a asp-action="Index" class="btn btn-outline-custom px-3">
-                            <i class="bi bi-arrow-left me-1"></i> Back to List
-                        </a>
-                    </div>
-                </form>
+                <h1 class="hero-title mb-3" data-i18n-en="Create Announcement" data-i18n-tr="Duyuru Olu&#351;tur">
+                    Create Announcement
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="Author and release a formal institutional communiqué to the university alumni community." data-i18n-tr="Üniversite mezunlar topluluğuna resmî bir kurumsal duyuru hazırlayın ve yayımlayın.">
+                    Author and release a formal institutional communiqué to the university alumni community.
+                </p>
             </div>
         </div>
     </div>
-</div>
+</header>
+
+<!-- Section 2: Form Container -->
+<main class="py-5 bg-warm-offwhite" aria-label="Create Announcement Form Section">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="card border-0 shadow-sm p-4 p-md-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; border-radius: 4px;">
+
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <div class="icon-box m-0" style="width: 48px; height: 48px; font-size: 1.35rem;">
+                            <i class="bi bi-pencil-square"></i>
+                        </div>
+                        <div>
+                            <span class="academic-overline mb-1" data-i18n-en="Editorial Roster" data-i18n-tr="Edit&ouml;r Paneli">Editorial Roster</span>
+                            <h2 class="academic-serif mb-0" style="color: var(--ats-navy); font-size: 1.5rem;" data-i18n-en="Draft Announcement" data-i18n-tr="Duyuru Tasla&#287;&#305;">Draft Announcement</h2>
+                        </div>
+                    </div>
+
+                    <!-- Bilingual Guidance Notice -->
+                    <div class="p-3 mb-4 rounded" style="background: var(--ats-warm-offwhite); border: 1px solid var(--ats-card-border); border-left: 3px solid var(--ats-gold);">
+                        <div class="small fw-semibold mb-1" style="color: var(--ats-navy);" data-i18n-en="Bilingual Publishing Standards" data-i18n-tr="Çift Dilli Yayın İlkeleri">
+                            Bilingual Publishing Standards
+                        </div>
+                        <p class="small text-muted mb-0" data-i18n-en="Turkish is the primary institutional record language. English translations are strongly recommended to ensure accessibility across international alumni cohorts." data-i18n-tr="Türkçe birincil kurumsal kayıt dilidir. Uluslararası mezunlarımızın erişimini kolaylaştırmak amacıyla İngilizce çevirilerin de girilmesi önerilir.">
+                            Turkish is the primary institutional record language. English translations are strongly recommended to ensure accessibility across international alumni cohorts.
+                        </p>
+                    </div>
+
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4 rounded" role="alert"></div>
+
+                        <!-- Title TR -->
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Title (Turkish / Primary) *" data-i18n-tr="Başlık (Türkçe / Birincil) *">Title (Turkish / Primary) *</span>
+                            </label>
+                            <input asp-for="Title" class="form-control form-control-lg fs-6"
+                                   placeholder="Örn: 2026 Mezuniyet Töreni Programı"
+                                   data-i18n-en="e.g. 2026 Commencement Ceremony Program"
+                                   data-i18n-tr="Örn: 2026 Mezuniyet Töreni Programı"
+                                   style="border-color: var(--ats-gray-light); border-radius: 4px;" required />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Title EN -->
+                        <div class="mb-4">
+                            <label asp-for="TitleEn" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Title (English - Optional)" data-i18n-tr="Başlık (İngilizce - İsteğe Bağlı)">Title (English - Optional)</span>
+                            </label>
+                            <input asp-for="TitleEn" class="form-control form-control-lg fs-6"
+                                   placeholder="e.g. 2026 Commencement Ceremony Schedule"
+                                   data-i18n-en="e.g. 2026 Commencement Ceremony Schedule"
+                                   data-i18n-tr="Örn: 2026 Commencement Ceremony Schedule"
+                                   style="border-color: var(--ats-gray-light); border-radius: 4px;" />
+                            <span asp-validation-for="TitleEn" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Content TR -->
+                        <div class="mb-3">
+                            <label asp-for="Content" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Content (Turkish / Primary) *" data-i18n-tr="İçerik (Türkçe / Birincil) *">Content (Turkish / Primary) *</span>
+                            </label>
+                            <textarea asp-for="Content" class="form-control" rows="5"
+                                      placeholder="Duyuru metnini Türkçe olarak yazınız..."
+                                      data-i18n-en="Write the announcement description in Turkish..."
+                                      data-i18n-tr="Duyuru metnini Türkçe olarak yazınız..."
+                                      style="border-color: var(--ats-gray-light); border-radius: 4px;" required></textarea>
+                            <span asp-validation-for="Content" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Content EN -->
+                        <div class="mb-4">
+                            <label asp-for="ContentEn" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Content (English - Optional)" data-i18n-tr="İçerik (İngilizce - İsteğe Bağlı)">Content (English - Optional)</span>
+                            </label>
+                            <textarea asp-for="ContentEn" class="form-control" rows="5"
+                                      placeholder="Write the announcement description in English..."
+                                      data-i18n-en="Write the announcement description in English..."
+                                      data-i18n-tr="Duyuru metnini İngilizce olarak yazınız (isteğe bağlı)..."
+                                      style="border-color: var(--ats-gray-light); border-radius: 4px;"></textarea>
+                            <span asp-validation-for="ContentEn" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-wrap align-items-center gap-2 pt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                            <button type="submit" class="btn-academic-gold border-0 text-decoration-none py-2 px-4 small">
+                                <i class="bi bi-check-circle me-1"></i>
+                                <span data-i18n-en="Publish Announcement" data-i18n-tr="Duyuruyu Yayımla">Publish Announcement</span>
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-custom py-2 px-3 small">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                <span data-i18n-en="Back to Registry" data-i18n-tr="Listeye Dön">Back to Registry</span>
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

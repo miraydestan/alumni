@@ -1,51 +1,105 @@
 @model Alumni.Models.User
 
 @{
-    ViewData["Title"] = "Create User";
+    ViewData["Title"] = "Register Alumnus";
     ViewData["ActivePage"] = "Users";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-sm border-0 rounded-3 p-4">
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="icon-box m-0">
-                        <i class="bi bi-person-plus"></i>
-                    </div>
-                    <div>
-                        <h2 class="card-heading mb-0">Create New User</h2>
-                        <span class="text-secondary small">Add a new user to the in-memory store</span>
-                    </div>
+<!-- Section 1: Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-mortarboard-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Alumni Directory &bull; Member Registration" data-i18n-tr="Mezunlar Dizini &bull; &Uuml;ye Kayd&#305;">
+                        Alumni Directory &bull; Member Registration
+                    </span>
                 </div>
-
-                <form asp-action="Create" method="post">
-                    @Html.AntiForgeryToken()
-
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
-
-                    <div class="mb-3">
-                        <label asp-for="Name" class="form-label fw-semibold text-dark">Full Name</label>
-                        <input asp-for="Name" class="form-control form-control-lg fs-6" placeholder="e.g. John Doe" required />
-                        <span asp-validation-for="Name" class="text-danger small"></span>
-                    </div>
-
-                    <div class="mb-4">
-                        <label asp-for="Email" class="form-label fw-semibold text-dark">Email Address</label>
-                        <input asp-for="Email" class="form-control form-control-lg fs-6" type="email" placeholder="e.g. john@example.com" required />
-                        <span asp-validation-for="Email" class="text-danger small"></span>
-                    </div>
-
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary-custom px-4">
-                            <i class="bi bi-check-circle me-1"></i> Create User
-                        </button>
-                        <a asp-action="Index" class="btn btn-outline-custom px-3">
-                            <i class="bi bi-arrow-left me-1"></i> Back to List
-                        </a>
-                    </div>
-                </form>
+                <h1 class="hero-title mb-3" data-i18n-en="Register New Alumnus" data-i18n-tr="Yeni Mezun Kayd&#305;">
+                    Register New Alumnus
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="Enroll a verified university graduate into the official institutional alumni database." data-i18n-tr="Doğrulanmış bir üniversite mezununu resmî kurumsal mezunlar veritabanına kaydedin.">
+                    Enroll a verified university graduate into the official institutional alumni database.
+                </p>
             </div>
         </div>
     </div>
-</div>
+</header>
+
+<!-- Section 2: Registration Form Container -->
+<main class="py-5 bg-warm-offwhite" aria-label="Register Alumnus Form Section">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-md-9 col-lg-7 col-xl-6">
+                <div class="card border-0 shadow-sm p-4 p-md-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; border-radius: 4px;">
+
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <div class="icon-box m-0" style="width: 48px; height: 48px; font-size: 1.35rem;">
+                            <i class="bi bi-person-plus-fill"></i>
+                        </div>
+                        <div>
+                            <span class="academic-overline mb-1" data-i18n-en="Institutional Roster" data-i18n-tr="Kurumsal Sicil">Institutional Roster</span>
+                            <h2 class="academic-serif mb-0" style="color: var(--ats-navy); font-size: 1.5rem;" data-i18n-en="Graduate Credentials" data-i18n-tr="Mezun Bilgileri">Graduate Credentials</h2>
+                        </div>
+                    </div>
+
+                    <!-- Notice Note -->
+                    <div class="p-3 mb-4 rounded" style="background: var(--ats-warm-offwhite); border: 1px solid var(--ats-card-border); border-left: 3px solid var(--ats-gold);">
+                        <div class="small fw-semibold mb-1" style="color: var(--ats-navy);" data-i18n-en="Official Registry Integrity" data-i18n-tr="Resmi Kayıt Doğruluğu">
+                            Official Registry Integrity
+                        </div>
+                        <p class="small text-muted mb-0" data-i18n-en="Please provide the full legal name and primary institutional contact email to ensure directory verification and communication integrity." data-i18n-tr="Dizin doğrulaması ve iletişim bütünlüğünü sağlamak adına lütfen mezunun adını ve güncel iletişim e-postasını eksiksiz giriniz.">
+                            Please provide the full legal name and primary institutional contact email to ensure directory verification and communication integrity.
+                        </p>
+                    </div>
+
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4 rounded" role="alert"></div>
+
+                        <!-- Name -->
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Full Name *" data-i18n-tr="Ad Soyad *">Full Name *</span>
+                            </label>
+                            <input asp-for="Name" class="form-control form-control-lg fs-6"
+                                   placeholder="Örn: Dr. Aylin Kaya"
+                                   data-i18n-en="e.g. Dr. Aylin Kaya"
+                                   data-i18n-tr="Örn: Dr. Aylin Kaya"
+                                   style="border-color: var(--ats-gray-light); border-radius: 4px;" required />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-4">
+                            <label asp-for="Email" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Institutional Email Address *" data-i18n-tr="E-posta Adresi *">Institutional Email Address *</span>
+                            </label>
+                            <input asp-for="Email" class="form-control form-control-lg fs-6" type="email"
+                                   placeholder="aylin.kaya@alumni.edu"
+                                   data-i18n-en="aylin.kaya@alumni.edu"
+                                   data-i18n-tr="aylin.kaya@alumni.edu"
+                                   style="border-color: var(--ats-gray-light); border-radius: 4px;" required />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-wrap align-items-center gap-2 pt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                            <button type="submit" class="btn-academic-gold border-0 text-decoration-none py-2 px-4 small">
+                                <i class="bi bi-check-circle me-1"></i>
+                                <span data-i18n-en="Complete Registration" data-i18n-tr="Kaydı Tamamla">Complete Registration</span>
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-custom py-2 px-3 small">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                <span data-i18n-en="Back to Directory" data-i18n-tr="Dizine Dön">Back to Directory</span>
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

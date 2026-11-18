@@ -5,56 +5,112 @@
     ViewData["ActivePage"] = "AnnouncementAdmin";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-7">
-            <div class="card shadow-sm border-0 rounded-3 p-4 p-md-5">
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="icon-box m-0 bg-danger-subtle text-danger">
-                        <i class="bi bi-exclamation-triangle"></i>
-                    </div>
-                    <div>
-                        <h2 class="card-heading mb-0 text-danger">Delete Announcement</h2>
-                        <span class="text-secondary small">Are you sure you want to permanently remove this announcement?</span>
-                    </div>
+<!-- Section 1: Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-exclamation-triangle-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Administrative Control &bull; Deletion Confirmation" data-i18n-tr="Y&ouml;netici Paneli &bull; Silme Onay&#305;">
+                        Administrative Control &bull; Deletion Confirmation
+                    </span>
                 </div>
-
-                <div class="alert alert-warning py-2 small mb-4">
-                    <i class="bi bi-info-circle me-1"></i> This action will delete the announcement from the in-memory list.
-                </div>
-
-                <div class="mb-3 pb-3 border-bottom">
-                    <span class="text-muted small d-block">ID</span>
-                    <span class="fs-6 fw-semibold text-dark">#@Model.Id</span>
-                </div>
-
-                <div class="mb-3 pb-3 border-bottom">
-                    <span class="text-muted small d-block">Title</span>
-                    <span class="fs-5 fw-semibold text-dark">@Model.Title</span>
-                </div>
-
-                <div class="mb-3 pb-3 border-bottom">
-                    <span class="text-muted small d-block">Created Date</span>
-                    <span class="fs-6 text-secondary">@Model.CreatedDate.ToString("MMMM dd, yyyy - HH:mm")</span>
-                </div>
-
-                <div class="mb-4">
-                    <span class="text-muted small d-block">Content</span>
-                    <p class="fs-6 text-secondary mb-0" style="white-space: pre-line;">@Model.Content</p>
-                </div>
-
-                <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
-                    @Html.AntiForgeryToken()
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-danger px-4">
-                            <i class="bi bi-trash me-1"></i> Delete Announcement
-                        </button>
-                        <a asp-action="Index" class="btn btn-outline-custom px-3">
-                            <i class="bi bi-x-circle me-1"></i> Cancel
-                        </a>
-                    </div>
-                </form>
+                <h1 class="hero-title mb-3" data-i18n-en="Delete Announcement" data-i18n-tr="Duyuruyu Sil">
+                    Delete Announcement
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="Confirm the permanent removal of this communiqué from the institutional alumni records." data-i18n-tr="Bu resmî duyurunun kurumsal mezunlar kayıtlarından kalıcı olarak silinmesini onaylayın.">
+                    Confirm the permanent removal of this communiqué from the institutional alumni records.
+                </p>
             </div>
         </div>
     </div>
-</div>
+</header>
+
+<!-- Section 2: Confirmation Container -->
+<main class="py-5 bg-warm-offwhite" aria-label="Delete Announcement Confirmation Section">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="card border-0 shadow-sm p-4 p-md-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid #dc3545 !important; border-radius: 4px;">
+
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <div class="icon-box m-0" style="width: 48px; height: 48px; font-size: 1.35rem; background: rgba(220, 53, 69, 0.08); border-color: rgba(220, 53, 69, 0.3); color: #dc3545;">
+                            <i class="bi bi-trash"></i>
+                        </div>
+                        <div>
+                            <span class="academic-overline mb-1" style="color: #dc3545;" data-i18n-en="Irreversible Action" data-i18n-tr="Geri Al&#305;namaz &#304;&#351;lem">Irreversible Action</span>
+                            <h2 class="academic-serif mb-0" style="color: var(--ats-navy); font-size: 1.5rem;" data-i18n-en="Confirm Deletion" data-i18n-tr="Silme &#304;&#351;lemini Onaylay&#305;n">Confirm Deletion</h2>
+                        </div>
+                    </div>
+
+                    <!-- Permanent Deletion Warning Alert -->
+                    <div class="p-3 mb-4 rounded" style="background: rgba(220, 53, 69, 0.06); border: 1px solid rgba(220, 53, 69, 0.2); border-left: 3px solid #dc3545;">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi bi-exclamation-octagon-fill text-danger"></i>
+                            <strong class="text-danger small" data-i18n-en="Permanent Database Deletion" data-i18n-tr="Kalıcı Veritabanı Silme Uyarısı">
+                                Permanent Database Deletion
+                            </strong>
+                        </div>
+                        <p class="small text-muted mb-0" data-i18n-en="This action cannot be undone. Once deleted, this announcement communiqué and its bilingual records will be permanently removed from the database." data-i18n-tr="Bu işlem geri alınamaz. Silindiğinde, bu duyuru ve çift dilli kayıtları veritabanından kalıcı olarak silinecektir.">
+                            This action cannot be undone. Once deleted, this announcement communiqué and its bilingual records will be permanently removed from the database.
+                        </p>
+                    </div>
+
+                    <!-- Record Summary Card -->
+                    <div class="p-4 mb-4 rounded" style="background: var(--ats-warm-offwhite); border: 1px solid var(--ats-card-border);">
+                        <div class="row g-3">
+                            <div class="col-sm-4">
+                                <span class="text-muted small d-block text-uppercase fw-semibold" style="letter-spacing: 0.05em; font-size: 0.75rem;" data-i18n-en="Record ID" data-i18n-tr="Kayıt ID">Record ID</span>
+                                <span class="badge mt-1" style="background: #FFFFFF; color: var(--ats-navy); border: 1px solid var(--ats-card-border); font-size: 0.85rem; padding: 0.35rem 0.65rem;">
+                                    #@Model.Id
+                                </span>
+                            </div>
+                            <div class="col-sm-8">
+                                <span class="text-muted small d-block text-uppercase fw-semibold" style="letter-spacing: 0.05em; font-size: 0.75rem;" data-i18n-en="Publication Date" data-i18n-tr="Yayın Tarihi">Publication Date</span>
+                                <span class="text-dark small d-inline-flex align-items-center gap-1 mt-1">
+                                    <i class="bi bi-calendar3" style="color: var(--ats-gold);"></i>
+                                    @Model.CreatedDate.ToString("MMMM dd, yyyy - HH:mm") UTC
+                                </span>
+                            </div>
+                            <div class="col-12 pt-2 border-top" style="border-color: var(--ats-gray-light) !important;">
+                                <span class="text-muted small d-block text-uppercase fw-semibold" style="letter-spacing: 0.05em; font-size: 0.75rem;" data-i18n-en="Title (Primary)" data-i18n-tr="Başlık (Birincil)">Title (Primary)</span>
+                                <div class="fw-semibold mt-1" style="color: var(--ats-navy); font-size: 1.05rem;">
+                                    @Model.Title
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(Model.TitleEn))
+                                {
+                                    <div class="small text-muted fst-italic mt-1">
+                                        @Model.TitleEn
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-12 pt-2 border-top" style="border-color: var(--ats-gray-light) !important;">
+                                <span class="text-muted small d-block text-uppercase fw-semibold" style="letter-spacing: 0.05em; font-size: 0.75rem;" data-i18n-en="Content Preview" data-i18n-tr="İçerik">Content Preview</span>
+                                <p class="text-secondary small mb-0 mt-1" style="white-space: pre-line; line-height: 1.6;">
+                                    @Model.Content
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top" style="border-color: var(--ats-gray-light) !important;">
+                            <button type="submit" class="btn btn-danger py-2 px-4 small" style="border-radius: 4px; font-weight: 600;">
+                                <i class="bi bi-trash me-1"></i>
+                                <span data-i18n-en="Permanently Delete" data-i18n-tr="Kalıcı Olarak Sil">Permanently Delete</span>
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-custom py-2 px-3 small">
+                                <i class="bi bi-x-circle me-1"></i>
+                                <span data-i18n-en="Cancel" data-i18n-tr="İptal">Cancel</span>
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

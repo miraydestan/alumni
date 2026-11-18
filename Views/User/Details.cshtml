@@ -1,48 +1,123 @@
 @model Alumni.Models.User
 
 @{
-    ViewData["Title"] = "User Details";
+    ViewData["Title"] = $"{Model.Name} - Alumnus Profile";
     ViewData["ActivePage"] = "Users";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-sm border-0 rounded-3 p-4">
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="icon-box m-0">
-                        <i class="bi bi-person-badge"></i>
+@functions {
+    private static string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "AL";
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpperInvariant();
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
+    }
+}
+
+<!-- Section 1: Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-person-badge-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Alumni Directory &bull; Member Profile" data-i18n-tr="Mezunlar Dizini &bull; &Uuml;ye Profili">
+                        Alumni Directory &bull; Member Profile
+                    </span>
+                </div>
+                <h1 class="hero-title mb-3">
+                    @Model.Name
+                </h1>
+                <p class="hero-subtitle mb-0">
+                    <span data-i18n-en="Verified University Alumnus &bull; Institutional Registry" data-i18n-tr="Doğrulanmış Üniversite Mezunu &bull; Kurumsal Sicil">Verified University Alumnus &bull; Institutional Registry</span>
+                    <strong>#@Model.Id</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Section 2: Profile Container -->
+<main class="py-5 bg-warm-offwhite" aria-label="Alumnus Profile Details Section">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="card border-0 shadow-sm p-4 p-md-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; border-radius: 4px;">
+
+                    <!-- Profile Header Card Strip with Initials Avatar -->
+                    <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-4 mb-4 pb-4 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <div style="width: 76px; height: 76px; border-radius: 50%; background: var(--ats-navy); color: #FFFFFF; border: 2.5px solid var(--ats-gold); display: flex; align-items: center; justify-content: center; font-family: var(--ats-font-serif); font-size: 1.75rem; font-weight: 700; flex-shrink: 0; box-shadow: var(--ats-shadow-card);">
+                            @GetInitials(Model.Name)
+                        </div>
+                        <div class="text-center text-sm-start">
+                            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-start gap-2 mb-1">
+                                <h2 class="academic-serif mb-0" style="color: var(--ats-navy); font-size: 1.65rem;">
+                                    @Model.Name
+                                </h2>
+                                <span class="badge" style="background: rgba(197, 164, 109, 0.15); color: var(--ats-navy); border: 1px solid var(--ats-gold-border); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                                    <i class="bi bi-patch-check-fill me-1" style="color: var(--ats-gold);"></i>
+                                    <span data-i18n-en="Verified Alumnus" data-i18n-tr="Doğrulanmış Mezun">Verified Alumnus</span>
+                                </span>
+                            </div>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-envelope me-1" style="color: var(--ats-gold);"></i>
+                                <a href="mailto:@Model.Email" style="color: var(--ats-navy); text-decoration: none;" class="fw-medium">@Model.Email</a>
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 class="card-heading mb-0">User Details</h2>
-                        <span class="text-secondary small">Viewing information for ID #@Model.Id</span>
+
+                    <!-- Credential Data Grid -->
+                    <div class="p-4 mb-4 rounded" style="background: var(--ats-warm-offwhite); border: 1px solid var(--ats-card-border);">
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block text-uppercase fw-semibold" style="letter-spacing: 0.06em; font-size: 0.75rem;" data-i18n-en="Institutional Record ID" data-i18n-tr="Kurumsal Sicil No">Institutional Record ID</span>
+                                <span class="badge mt-1" style="background: #FFFFFF; color: var(--ats-navy); border: 1px solid var(--ats-card-border); font-size: 0.9rem; padding: 0.35rem 0.65rem;">
+                                    #@Model.Id
+                                </span>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block text-uppercase fw-semibold" style="letter-spacing: 0.06em; font-size: 0.75rem;" data-i18n-en="Registry Status" data-i18n-tr="Kayıt Durumu">Registry Status</span>
+                                <span class="d-inline-flex align-items-center gap-1 text-success small fw-semibold mt-1">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span data-i18n-en="Active Collegiate Member" data-i18n-tr="Aktif Kurumsal Üye">Active Collegiate Member</span>
+                                </span>
+                            </div>
+                            <div class="col-12 pt-2 border-top" style="border-color: var(--ats-gray-light) !important;">
+                                <span class="text-muted small d-block text-uppercase fw-semibold" style="letter-spacing: 0.06em; font-size: 0.75rem;" data-i18n-en="Full Name" data-i18n-tr="Tam Ad">Full Name</span>
+                                <div class="fw-semibold mt-1" style="color: var(--ats-navy); font-size: 1.05rem;">
+                                    @Model.Name
+                                </div>
+                            </div>
+                            <div class="col-12 pt-2 border-top" style="border-color: var(--ats-gray-light) !important;">
+                                <span class="text-muted small d-block text-uppercase fw-semibold" style="letter-spacing: 0.06em; font-size: 0.75rem;" data-i18n-en="Contact Email" data-i18n-tr="İletişim E-postası">Contact Email</span>
+                                <div class="mt-1" style="font-size: 0.95rem;">
+                                    <a href="mailto:@Model.Email" class="text-decoration-none fw-medium" style="color: var(--ats-navy);">
+                                        @Model.Email
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="mb-3 pb-3 border-bottom">
-                    <span class="text-muted small d-block">ID</span>
-                    <span class="fs-6 fw-semibold text-dark">#@Model.Id</span>
-                </div>
+                    <!-- Action Controls -->
+                    <div class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top" style="border-color: var(--ats-gray-light) !important;">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-academic-gold text-decoration-none py-2 px-4 small">
+                            <i class="bi bi-pencil me-1"></i>
+                            <span data-i18n-en="Edit Profile" data-i18n-tr="Profili Düzenle">Edit Profile</span>
+                        </a>
+                        <a asp-action="Index" class="btn btn-outline-custom py-2 px-3 small">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            <span data-i18n-en="Back to Directory" data-i18n-tr="Dizine Dön">Back to Directory</span>
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger py-2 px-3 small ms-auto" style="border-radius: 4px; font-size: 0.85rem;">
+                            <i class="bi bi-trash me-1"></i>
+                            <span data-i18n-en="Delete Member" data-i18n-tr="Üyeyi Sil">Delete Member</span>
+                        </a>
+                    </div>
 
-                <div class="mb-3 pb-3 border-bottom">
-                    <span class="text-muted small d-block">Name</span>
-                    <span class="fs-5 fw-semibold text-dark">@Model.Name</span>
-                </div>
-
-                <div class="mb-4">
-                    <span class="text-muted small d-block">Email</span>
-                    <span class="fs-6 text-secondary">@Model.Email</span>
-                </div>
-
-                <div class="d-flex gap-2">
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary-custom px-4">
-                        <i class="bi bi-pencil me-1"></i> Edit User
-                    </a>
-                    <a asp-action="Index" class="btn btn-outline-custom px-3">
-                        <i class="bi bi-arrow-left me-1"></i> Back to List
-                    </a>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</main>
