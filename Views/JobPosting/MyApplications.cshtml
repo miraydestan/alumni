@@ -1,0 +1,110 @@
+@model IEnumerable<Alumni.Models.Application>
+
+@{
+    ViewData["Title"] = "My Applications";
+    ViewData["ActivePage"] = "MyApplications";
+    var list = Model?.ToList() ?? new List<Alumni.Models.Application>();
+}
+
+<!-- Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-file-earmark-check-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Student Career Tracker &bull; Applications" data-i18n-tr="Öğrenci Kariyer Takibi &bull; Başvurular">
+                        Student Career Tracker &bull; Applications
+                    </span>
+                </div>
+                <h1 class="hero-title mb-3" data-i18n-en="My Applications" data-i18n-tr="Başvurularım">
+                    My Applications
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="Track every career opportunity and internship application you have submitted through the university alumni network." data-i18n-tr="Üniversite mezunlar ağı üzerinden gerçekleştirdiğiniz tüm iş ve staj başvurularını takip edin.">
+                    Track every career opportunity and internship application you have submitted through the university alumni network.
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="py-5 bg-warm-offwhite" aria-label="My Applications List">
+    <div class="container py-lg-3">
+        <div class="card border-0 shadow-sm p-4 p-md-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; border-radius: 4px;">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                <div>
+                    <h2 class="academic-serif mb-1" style="color: var(--ats-navy); font-size: 1.5rem;" data-i18n-en="Submitted Applications (@list.Count)" data-i18n-tr="Yapılan Başvurular (@list.Count)">
+                        Submitted Applications (@list.Count)
+                    </h2>
+                    <span class="text-muted small" data-i18n-en="Showing your active job applications retrieved from the system database" data-i18n-tr="Sistem veritabanından alınan aktif iş başvurularınız listelenmektedir">
+                        Showing your active job applications retrieved from the system database
+                    </span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="/Account/Profile" class="btn-academic-outline py-2 px-3 small text-decoration-none">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        <span data-i18n-en="Back to Profile" data-i18n-tr="Profile Dön">Back to Profile</span>
+                    </a>
+                    <a href="/JobPosting" class="btn-academic-gold py-2 px-3 small text-decoration-none">
+                        <i class="bi bi-briefcase me-1"></i>
+                        <span data-i18n-en="Browse Job Opportunities" data-i18n-tr="İş İlanlarına Göz At">Browse Job Opportunities</span>
+                    </a>
+                </div>
+            </div>
+
+            @if (!list.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-folder2-open fs-1 text-muted d-block mb-3"></i>
+                    <h5 class="academic-serif mb-2" style="color: var(--ats-navy);" data-i18n-en="No Applications Yet" data-i18n-tr="Henüz Başvurunuz Yok">No Applications Yet</h5>
+                    <p class="text-muted small mb-4" data-i18n-en="You have not applied to any career postings yet. Explore open opportunities shared by alumni." data-i18n-tr="Henüz herhangi bir iş ilanına başvurmadınız. Mezunlar tarafından paylaşılan açık fırsatları inceleyin.">
+                        You have not applied to any career postings yet. Explore open opportunities shared by alumni.
+                    </p>
+                    <a href="/JobPosting" class="btn-academic-gold py-2 px-4 small text-decoration-none">
+                        <i class="bi bi-search me-1"></i>
+                        <span data-i18n-en="Explore Opportunities" data-i18n-tr="Fırsatları Keşfet">Explore Opportunities</span>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                            <tr>
+                                <th data-i18n-en="Ref #" data-i18n-tr="No">Ref #</th>
+                                <th data-i18n-en="Position Title" data-i18n-tr="Pozisyon">Position Title</th>
+                                <th data-i18n-en="Company" data-i18n-tr="Şirket">Company</th>
+                                <th data-i18n-en="Posted By" data-i18n-tr="İlan Sahibi">Posted By</th>
+                                <th data-i18n-en="Status" data-i18n-tr="Durum">Status</th>
+                                <th class="text-end" data-i18n-en="Action" data-i18n-tr="İşlem">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var app in list)
+                            {
+                                <tr>
+                                    <td class="text-muted small fw-semibold">#@app.Id</td>
+                                    <td class="fw-semibold" style="color: var(--ats-navy);">@(app.JobPosting?.Title ?? $"Job #{app.JobPostingId}")</td>
+                                    <td class="text-muted">@(app.JobPosting?.Company ?? "—")</td>
+                                    <td class="text-muted small">@(app.JobPosting?.User?.Name ?? "—")</td>
+                                    <td>
+                                        <span class="badge px-2 py-1 text-uppercase" style="background-color: rgba(16, 185, 129, 0.14); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.72rem;">
+                                            @app.Status
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="/JobPosting/Details/@app.JobPostingId" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-eye me-1"></i>
+                                            <span data-i18n-en="View Job" data-i18n-tr="İlanı Gör">View Job</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</main>

@@ -1,6 +1,10 @@
 @{
     var activePage = ViewData["ActivePage"]?.ToString() ?? "";
     var isHome = activePage == "Home";
+    var isAuthenticated = User?.Identity?.IsAuthenticated == true;
+    var isAdmin = isAuthenticated && User!.IsInRole("Administrator");
+    var isAlumni = isAuthenticated && User!.IsInRole("Alumni");
+    var isStudent = isAuthenticated && User!.IsInRole("Student");
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -32,7 +36,7 @@
 </head>
 <body>
     <!-- Transparent / Adaptive Navigation Bar -->
-    <nav id="academicNavbar" class="navbar navbar-expand-lg navbar-academic @(isHome ? "navbar-transparent fixed-top" : "navbar-solid sticky-top")" aria-label="Main University Navigation">
+    <nav id="academicNavbar" class="navbar navbar-expand-xl navbar-academic @(isHome ? "navbar-transparent fixed-top" : "navbar-solid sticky-top")" aria-label="Main University Navigation">
         <div class="container">
             <!-- Left: ALUMNI Logo -->
             <a class="brand-academic-logo" href="/">
@@ -50,29 +54,161 @@
                 <i class="bi bi-list fs-2 text-white"></i>
             </button>
             
-            <!-- Center & Right Navigation -->
+            <!-- Center & Right Dynamic Role-Based Navigation -->
             <div class="collapse navbar-collapse" id="academicNavContent">
-                <!-- Center Links -->
-                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2 text-center text-lg-start">
+                <!-- Center Role-Based Navigation Links -->
+                <ul class="navbar-nav mx-auto mb-2 mb-xl-0 gap-xl-1 text-center text-xl-start align-items-center">
                     <li class="nav-item">
-                        <a class="nav-link nav-link-academic @(activePage == "Home" ? "active" : "")" href="/" data-i18n-en="Home" data-i18n-tr="Ana Sayfa">Home</a>
+                        <a class="nav-link nav-link-academic @(activePage == "Home" ? "active" : "")" href="/">
+                            <i class="bi bi-house-door"></i>
+                            <span data-i18n-en="Home" data-i18n-tr="Ana Sayfa">Home</span>
+                        </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-academic @(activePage == "About" ? "active" : "")" href="/about" data-i18n-en="About" data-i18n-tr="Hakkında">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-academic @(activePage == "Users" ? "active" : "")" href="/User" data-i18n-en="Alumni" data-i18n-tr="Mezunlar">Alumni</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-academic @(activePage == "Announcements" ? "active" : "")" href="/Announcement" data-i18n-en="Announcements" data-i18n-tr="Duyurular">Announcements</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-academic @(activePage == "JobPostings" ? "active" : "")" href="/JobPosting" data-i18n-en="Jobs" data-i18n-tr="Kariyer">Jobs</a>
-                    </li>
+
+                    @if (isAdmin)
+                    {
+                        <!-- Administrator Navigation -->
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "AdminDashboard" ? "active" : "")" href="/Admin">
+                                <i class="bi bi-speedometer2"></i>
+                                <span data-i18n-en="Admin Dashboard" data-i18n-tr="Yönetici Paneli">Admin Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "AdminUsers" ? "active" : "")" href="/Admin/Users">
+                                <i class="bi bi-people"></i>
+                                <span data-i18n-en="User Management" data-i18n-tr="Kullanıcı Yönetimi">User Management</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "AnnouncementAdmin" ? "active" : "")" href="/AnnouncementAdmin">
+                                <i class="bi bi-megaphone"></i>
+                                <span data-i18n-en="Announcement Management" data-i18n-tr="Duyuru Yönetimi">Announcement Management</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "Profile" ? "active" : "")" href="/Account/Profile">
+                                <i class="bi bi-person-badge"></i>
+                                <span data-i18n-en="My Profile" data-i18n-tr="Profilim">My Profile</span>
+                            </a>
+                        </li>
+                    }
+                    else if (isAlumni)
+                    {
+                        <!-- Alumni Navigation -->
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "Announcements" ? "active" : "")" href="/Announcement">
+                                <i class="bi bi-megaphone"></i>
+                                <span data-i18n-en="Announcements" data-i18n-tr="Duyurular">Announcements</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "Users" ? "active" : "")" href="/User">
+                                <i class="bi bi-mortarboard"></i>
+                                <span data-i18n-en="Alumni" data-i18n-tr="Mezunlar">Alumni</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "JobPostings" ? "active" : "")" href="/JobPosting">
+                                <i class="bi bi-briefcase"></i>
+                                <span data-i18n-en="Job Opportunities" data-i18n-tr="İş Fırsatları">Job Opportunities</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "MyJobPostings" ? "active" : "")" href="/JobPosting/MyJobPostings">
+                                <i class="bi bi-clipboard-check"></i>
+                                <span data-i18n-en="My Job Postings" data-i18n-tr="İlanlarım">My Job Postings</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "ApplicationsReceived" ? "active" : "")" href="/JobPosting/ApplicationsReceived">
+                                <i class="bi bi-inbox"></i>
+                                <span data-i18n-en="Applications Received" data-i18n-tr="Gelen Başvurular">Applications Received</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "Profile" ? "active" : "")" href="/Account/Profile">
+                                <i class="bi bi-person-badge"></i>
+                                <span data-i18n-en="My Profile" data-i18n-tr="Profilim">My Profile</span>
+                            </a>
+                        </li>
+                    }
+                    else if (isStudent)
+                    {
+                        <!-- Student Navigation -->
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "Announcements" ? "active" : "")" href="/Announcement">
+                                <i class="bi bi-megaphone"></i>
+                                <span data-i18n-en="Announcements" data-i18n-tr="Duyurular">Announcements</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "Users" ? "active" : "")" href="/User">
+                                <i class="bi bi-mortarboard"></i>
+                                <span data-i18n-en="Alumni" data-i18n-tr="Mezunlar">Alumni</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "JobPostings" ? "active" : "")" href="/JobPosting">
+                                <i class="bi bi-briefcase"></i>
+                                <span data-i18n-en="Job Opportunities" data-i18n-tr="İş Fırsatları">Job Opportunities</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "MyApplications" ? "active" : "")" href="/JobPosting/MyApplications">
+                                <i class="bi bi-file-earmark-check"></i>
+                                <span data-i18n-en="My Applications" data-i18n-tr="Başvurularım">My Applications</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "Profile" ? "active" : "")" href="/Account/Profile">
+                                <i class="bi bi-person-badge"></i>
+                                <span data-i18n-en="My Profile" data-i18n-tr="Profilim">My Profile</span>
+                            </a>
+                        </li>
+                    }
+                    else if (isAuthenticated)
+                    {
+                        <!-- Fallback Authenticated User Navigation -->
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "Announcements" ? "active" : "")" href="/Announcement">
+                                <i class="bi bi-megaphone"></i>
+                                <span data-i18n-en="Announcements" data-i18n-tr="Duyurular">Announcements</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "Users" ? "active" : "")" href="/User">
+                                <i class="bi bi-mortarboard"></i>
+                                <span data-i18n-en="Alumni" data-i18n-tr="Mezunlar">Alumni</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "Profile" ? "active" : "")" href="/Account/Profile">
+                                <i class="bi bi-person-badge"></i>
+                                <span data-i18n-en="My Profile" data-i18n-tr="Profilim">My Profile</span>
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <!-- Guest (Not Logged In) Public Navigation -->
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "Announcements" ? "active" : "")" href="/Announcement">
+                                <i class="bi bi-megaphone"></i>
+                                <span data-i18n-en="Announcements" data-i18n-tr="Duyurular">Announcements</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-academic @(activePage == "Users" ? "active" : "")" href="/User">
+                                <i class="bi bi-mortarboard"></i>
+                                <span data-i18n-en="Alumni" data-i18n-tr="Mezunlar">Alumni</span>
+                            </a>
+                        </li>
+                    }
                 </ul>
 
-                <!-- Right: TR | EN & Login -->
-                <div class="d-flex align-items-center justify-content-center gap-3 mt-3 mt-lg-0 pt-2 pt-lg-0 border-top border-secondary-subtle border-lg-0">
+                <!-- Right: TR | EN & Auth Controls -->
+                <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 gap-xl-3 mt-3 mt-xl-0 pt-2 pt-xl-0 border-top border-secondary-subtle border-xl-0">
                     <!-- Language Switcher -->
                     <div class="lang-switch-group" role="group" aria-label="Language Switcher">
                         <button type="button" class="lang-btn" id="btnLangTr" onclick="setLanguage('tr')">TR</button>
@@ -80,11 +216,49 @@
                         <button type="button" class="lang-btn active" id="btnLangEn" onclick="setLanguage('en')">EN</button>
                     </div>
 
-                    <!-- Login Button (Member Portal Access) -->
-                    <button type="button" class="btn-nav-login" data-bs-toggle="modal" data-bs-target="#loginNoticeModal" data-i18n-en="Login" data-i18n-tr="Giriş">
-                        <i class="bi bi-person-fill"></i>
-                        <span>Login</span>
-                    </button>
+                    @if (isAuthenticated)
+                    {
+                        <!-- Authenticated: User Name, Role Badge & Logout Form -->
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="d-inline-flex align-items-center gap-2 text-white small fw-semibold" style="letter-spacing: 0.02em;">
+                                <i class="bi bi-person-circle" style="color: var(--ats-gold); font-size: 1.1rem;"></i>
+                                <span class="text-truncate" style="max-width: 130px;">@User!.Identity!.Name</span>
+                                @if (isAdmin)
+                                {
+                                    <span class="nav-role-pill nav-role-pill-admin" data-i18n-en="Admin" data-i18n-tr="Yönetici">Admin</span>
+                                }
+                                else if (isAlumni)
+                                {
+                                    <span class="nav-role-pill nav-role-pill-alumni" data-i18n-en="Alumni" data-i18n-tr="Mezun">Alumni</span>
+                                }
+                                else if (isStudent)
+                                {
+                                    <span class="nav-role-pill nav-role-pill-student" data-i18n-en="Student" data-i18n-tr="Öğrenci">Student</span>
+                                }
+                            </div>
+
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="m-0 p-0 d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-academic-outline py-1 px-3 small" style="font-size: 0.825rem; white-space: nowrap;">
+                                    <i class="bi bi-box-arrow-right me-1"></i>
+                                    <span data-i18n-en="Logout" data-i18n-tr="Çıkış">Logout</span>
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Guest: Login & Register -->
+                        <a href="/Account/Login" class="btn-nav-login text-decoration-none @(activePage == "Login" ? "active" : "")">
+                            <i class="bi bi-person-fill me-1"></i>
+                            <span data-i18n-en="Login" data-i18n-tr="Giriş">Login</span>
+                        </a>
+
+                        <a href="/Account/Register" class="btn-academic-gold text-decoration-none py-1 px-3 small @(activePage == "Register" ? "active" : "")" style="font-size: 0.85rem;">
+                            <i class="bi bi-person-plus-fill me-1"></i>
+                            <span data-i18n-en="Register" data-i18n-tr="Kayıt Ol">Register</span>
+                        </a>
+                    }
                 </div>
             </div>
         </div>
@@ -121,9 +295,26 @@
                     <ul class="footer-nav-list">
                         <li><a href="/" class="footer-nav-link" data-i18n-en="Home" data-i18n-tr="Ana Sayfa">Home</a></li>
                         <li><a href="/about" class="footer-nav-link" data-i18n-en="About the Platform" data-i18n-tr="Platform Hakkında">About the Platform</a></li>
-                        <li><a href="/User" class="footer-nav-link" data-i18n-en="Alumni Directory" data-i18n-tr="Mezunlar Dizini">Alumni Directory</a></li>
                         <li><a href="/Announcement" class="footer-nav-link" data-i18n-en="Campus Bulletins" data-i18n-tr="Kampüs Bültenleri">Campus Bulletins</a></li>
                         <li><a href="/JobPosting" class="footer-nav-link" data-i18n-en="Career Opportunities" data-i18n-tr="Kariyer Fırsatları">Career Opportunities</a></li>
+                        @if (!isAuthenticated)
+                        {
+                            <li><a href="/Account/Login" class="footer-nav-link" data-i18n-en="Member Login" data-i18n-tr="Üye Girişi">Member Login</a></li>
+                            <li><a href="/Account/Register" class="footer-nav-link" data-i18n-en="Member Registration" data-i18n-tr="Üye Kaydı">Member Registration</a></li>
+                        }
+                        else
+                        {
+                            <li><a href="/Account/Profile" class="footer-nav-link" data-i18n-en="My Profile" data-i18n-tr="Profilim">My Profile</a></li>
+                            @if (isAdmin)
+                            {
+                                <li>
+                                    <a href="/Admin" class="footer-nav-link text-warning">
+                                        <i class="bi bi-speedometer2 me-1"></i>
+                                        <span data-i18n-en="Admin Dashboard" data-i18n-tr="Yönetici Paneli">Admin Dashboard</span>
+                                    </a>
+                                </li>
+                            }
+                        }
                     </ul>
                 </div>
 
@@ -279,7 +470,11 @@
                         Public visitors can freely browse the alumni directory, read campus announcements, and explore career postings without logging in.
                     </p>
                 </div>
-                <div class="modal-footer border-0 pt-0">
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-between">
+                    <a href="/Account/Register" class="btn-academic-gold py-2 px-3 small text-decoration-none" data-i18n-en="Register as Member" data-i18n-tr="Üye Olarak Kaydol">
+                        <i class="bi bi-person-plus-fill me-1"></i>
+                        <span data-i18n-en="Register as Member" data-i18n-tr="Üye Olarak Kaydol">Register as Member</span>
+                    </a>
                     <button type="button" class="btn-academic-outline py-2 px-3 small" data-bs-dismiss="modal" data-i18n-en="Close" data-i18n-tr="Kapat">Close</button>
                 </div>
             </div>

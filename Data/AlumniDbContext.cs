@@ -25,6 +25,10 @@ public class AlumniDbContext : DbContext
             entity.HasKey(u => u.Id);
             entity.Property(u => u.Name).IsRequired();
             entity.Property(u => u.Email).IsRequired();
+            entity.Property(u => u.PasswordHash).IsRequired().HasDefaultValue("");
+            entity.Property(u => u.Role).IsRequired().HasDefaultValue("Alumni");
+
+            entity.HasIndex(u => u.Email).IsUnique();
         });
 
         // Configure Announcement entity

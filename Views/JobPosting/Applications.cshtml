@@ -13,7 +13,8 @@
 
     var posterName = Model.User?.Name ?? $"User #{Model.UserId}";
     var appList = Model.Applications?.ToList() ?? new List<Alumni.Models.Application>();
-    var appCount = appList.Count;
+    var appCount = ViewBag.TotalApplicantCount is int totalCount ? totalCount : appList.Count;
+    var canViewAllApplicants = ViewBag.CanViewAllApplicants is bool canView && canView;
 }
 
 @functions {
@@ -184,14 +185,26 @@
                     {
                         <div class="p-5 text-center">
                             <div class="icon-box mx-auto mb-3" style="width: 64px; height: 64px; border-radius: 50%; background: var(--ats-cream); display: flex; align-items: center; justify-content: center;">
-                                <i class="bi bi-inbox" style="font-size: 2rem; color: var(--ats-gold);"></i>
+                                <i class="bi @(canViewAllApplicants ? "bi-inbox" : "bi-shield-lock")" style="font-size: 2rem; color: var(--ats-gold);"></i>
                             </div>
-                            <h3 class="academic-heading h4 mb-2" data-i18n-en="No Applications Registered Yet" data-i18n-tr="Henüz Başvuru Bulunmuyor">
-                                No Applications Registered Yet
-                            </h3>
-                            <p class="small text-muted mb-0" data-i18n-en="No candidates have applied for this position yet. Once authenticated alumni submit applications, records will be logged in this registry." data-i18n-tr="Bu pozisyon için henüz aday başvurusu yapılmamıştır. Onaylı mezunlar başvurduğunda kayıtlar bu sicilde listelenecektir.">
-                                No candidates have applied for this position yet. Once authenticated alumni submit applications, records will be logged in this registry.
-                            </p>
+                            @if (!canViewAllApplicants && appCount > 0)
+                            {
+                                <h3 class="academic-heading h4 mb-2" data-i18n-en="Candidate Details Protected" data-i18n-tr="Aday Bilgileri Korunmaktadır">
+                                    Candidate Details Protected
+                                </h3>
+                                <p class="small text-muted mb-0" data-i18n-en="Applicant details are private and visible only to the posting owner and system administrators. If you apply to this position, your own application status will appear here." data-i18n-tr="Aday bilgileri gizlidir ve yalnızca ilan sahibi ile sistem yöneticileri tarafından görüntülenebilir. Bu pozisyona başvurduğunuzda kendi başvuru durumunuz burada görünecektir.">
+                                    Applicant details are private and visible only to the posting owner and system administrators. If you apply to this position, your own application status will appear here.
+                                </p>
+                            }
+                            else
+                            {
+                                <h3 class="academic-heading h4 mb-2" data-i18n-en="No Applications Registered Yet" data-i18n-tr="Henüz Başvuru Bulunmuyor">
+                                    No Applications Registered Yet
+                                </h3>
+                                <p class="small text-muted mb-0" data-i18n-en="No candidates have applied for this position yet. Once authenticated members submit applications, records will be logged in this registry." data-i18n-tr="Bu pozisyon için henüz aday başvurusu yapılmamıştır. Onaylı üyeler başvurduğunda kayıtlar bu sicilde listelenecektir.">
+                                    No candidates have applied for this position yet. Once authenticated members submit applications, records will be logged in this registry.
+                                </p>
+                            }
                         </div>
                     }
                     else

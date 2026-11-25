@@ -1,0 +1,339 @@
+@model Alumni.Models.User
+
+@{
+    ViewData["Title"] = "My Profile";
+    ViewData["ActivePage"] = "Profile";
+
+    var isAdmin = User.IsInRole("Administrator");
+    var isAlumni = User.IsInRole("Alumni");
+    var isStudent = User.IsInRole("Student");
+
+    var myApplications = Model.Applications?.OrderByDescending(a => a.Id).ToList() ?? new List<Alumni.Models.Application>();
+    var myJobPostings = Model.JobPostings?.OrderByDescending(j => j.Id).ToList() ?? new List<Alumni.Models.JobPosting>();
+    var receivedApplications = myJobPostings
+        .SelectMany(j => j.Applications ?? new List<Alumni.Models.Application>())
+        .OrderByDescending(a => a.Id)
+        .ToList();
+}
+
+<!-- Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-person-badge-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Member Portal &bull; Personal Dashboard" data-i18n-tr="Üye Portalı &bull; Kişisel Pano">
+                        Member Portal &bull; Personal Dashboard
+                    </span>
+                </div>
+                <h1 class="hero-title mb-3" data-i18n-en="My Profile" data-i18n-tr="Profilim">
+                    My Profile
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="Manage your institutional identity, review your assigned role, and track your personalized activities across the alumni network." data-i18n-tr="Kurumsal kimlik bilgilerinizi yönetin, atanmış rolünüzü inceleyin ve mezunlar ağındaki kişisel aktivitelerinizi takip edin.">
+                    Manage your institutional identity, review your assigned role, and track your personalized activities across the alumni network.
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="py-5 bg-warm-offwhite" aria-label="User Profile Section">
+    <div class="container py-lg-3">
+
+        <!-- Feedback Notifications -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="border-left: 4px solid #198754;">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                    <div>@TempData["SuccessMessage"]</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="border-left: 4px solid #dc3545;">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                    <div>@TempData["ErrorMessage"]</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-4 justify-content-center">
+            <!-- Left Column: Profile Identity Card -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm p-4 h-100" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; border-radius: 4px;">
+                    <div class="text-center mb-4 pb-3 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <div class="icon-box mx-auto mb-3" style="width: 72px; height: 72px; font-size: 2rem; border-radius: 50%;">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <h2 class="academic-serif mb-1" style="color: var(--ats-navy); font-size: 1.45rem;">@Model.Name</h2>
+                        <div class="text-muted small mb-3">@Model.Email</div>
+
+                        @if (isAdmin)
+                        {
+                            <span class="badge px-3 py-2" style="background-color: var(--ats-navy); color: var(--ats-gold); border: 1px solid var(--ats-gold);">
+                                <i class="bi bi-shield-lock-fill me-1"></i>
+                                <span data-i18n-en="Administrator" data-i18n-tr="Yönetici">Administrator</span>
+                            </span>
+                        }
+                        else if (isStudent)
+                        {
+                            <span class="badge px-3 py-2" style="background-color: rgba(16, 185, 129, 0.14); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3);">
+                                <i class="bi bi-backpack-fill me-1"></i>
+                                <span data-i18n-en="Student" data-i18n-tr="Öğrenci">Student</span>
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge px-3 py-2" style="background-color: rgba(197, 164, 109, 0.18); color: #8A6D3B; border: 1px solid rgba(197, 164, 109, 0.4);">
+                                <i class="bi bi-mortarboard-fill me-1"></i>
+                                <span data-i18n-en="Alumni" data-i18n-tr="Mezun">Alumni</span>
+                            </span>
+                        }
+                    </div>
+
+                    <div class="d-flex flex-column gap-2 small mb-4">
+                        <div class="d-flex justify-content-between py-2 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                            <span class="text-muted" data-i18n-en="Member ID" data-i18n-tr="Üye Numarası">Member ID</span>
+                            <span class="fw-semibold" style="color: var(--ats-navy);">#@Model.Id</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                            <span class="text-muted" data-i18n-en="Full Name" data-i18n-tr="Ad Soyad">Full Name</span>
+                            <span class="fw-semibold text-end" style="color: var(--ats-navy);">@Model.Name</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                            <span class="text-muted" data-i18n-en="Email Address" data-i18n-tr="E-posta Adresi">Email Address</span>
+                            <span class="fw-semibold text-end text-break" style="color: var(--ats-navy);">@Model.Email</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                            <span class="text-muted" data-i18n-en="Account Role" data-i18n-tr="Hesap Rolü">Account Role</span>
+                            <span class="fw-semibold" style="color: var(--ats-navy);">@Model.Role</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2">
+                            <span class="text-muted" data-i18n-en="Authentication" data-i18n-tr="Doğrulama">Authentication</span>
+                            <span class="fw-semibold text-success">
+                                <i class="bi bi-shield-check me-1"></i>
+                                <span data-i18n-en="Verified" data-i18n-tr="Doğrulandı">Verified</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Edit Profile Action -->
+                    <div class="mt-auto pt-2">
+                        <a href="/Account/EditProfile" class="btn-academic-gold w-100 py-2 text-center d-block text-decoration-none fw-semibold">
+                            <i class="bi bi-pencil-square me-1"></i>
+                            <span data-i18n-en="Edit Profile" data-i18n-tr="Profili Düzenle">Edit Profile</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Personalized Role Dashboard -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm p-4 p-md-5 h-100" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-gold) !important; border-radius: 4px;">
+                    <div class="mb-4 pb-3 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <span class="academic-overline mb-1" data-i18n-en="Personal Dashboard" data-i18n-tr="Kişisel Pano">Personal Dashboard</span>
+                        <h3 class="academic-serif mb-0" style="color: var(--ats-navy); font-size: 1.45rem;" data-i18n-en="Activity Overview &amp; Quick Access" data-i18n-tr="Aktivite Özeti ve Hızlı Erişim">Activity Overview &amp; Quick Access</h3>
+                    </div>
+
+                    @if (isStudent)
+                    {
+                        var appliedCount = myApplications.Count(a => string.Equals(a.Status, "applied", StringComparison.OrdinalIgnoreCase));
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-6">
+                                <div class="p-3 rounded border text-center" style="background: var(--ats-warm-offwhite); border-color: var(--ats-gray-light) !important;">
+                                    <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.72rem;" data-i18n-en="Total Applications" data-i18n-tr="Toplam Başvuru">Total Applications</div>
+                                    <div class="h2 academic-serif fw-bold mb-0 mt-1" style="color: var(--ats-navy);">@myApplications.Count</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 rounded border text-center" style="background: var(--ats-warm-offwhite); border-color: var(--ats-gray-light) !important;">
+                                    <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.72rem;" data-i18n-en="Active Applications" data-i18n-tr="Aktif Başvurular">Active Applications</div>
+                                    <div class="h2 academic-serif fw-bold mb-0 mt-1 text-success">@appliedCount</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Applications Table -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="academic-serif mb-0" style="color: var(--ats-navy); font-size: 1.1rem;" data-i18n-en="Recent Application History" data-i18n-tr="Son Başvuru Geçmişi">Recent Application History</h5>
+                                <a href="/JobPosting/MyApplications" class="small fw-semibold" style="color: var(--ats-navy);" data-i18n-en="View All &rarr;" data-i18n-tr="Tümünü Gör &rarr;">View All &rarr;</a>
+                            </div>
+
+                            @if (!myApplications.Any())
+                            {
+                                <div class="p-3 rounded border text-center text-muted small" style="background: var(--ats-warm-offwhite); border-color: var(--ats-gray-light) !important;">
+                                    <span data-i18n-en="You have not submitted any job applications yet." data-i18n-tr="Henüz bir iş başvurusu yapmadınız.">You have not submitted any job applications yet.</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle mb-0">
+                                        <thead class="table-light small text-uppercase" style="font-size: 0.7rem;">
+                                            <tr>
+                                                <th data-i18n-en="Position" data-i18n-tr="Pozisyon">Position</th>
+                                                <th data-i18n-en="Company" data-i18n-tr="Şirket">Company</th>
+                                                <th data-i18n-en="Status" data-i18n-tr="Durum">Status</th>
+                                                <th class="text-end" data-i18n-en="Details" data-i18n-tr="Detay">Details</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var app in myApplications.Take(5))
+                                            {
+                                                <tr>
+                                                    <td class="fw-semibold small" style="color: var(--ats-navy);">@(app.JobPosting?.Title ?? $"Job #{app.JobPostingId}")</td>
+                                                    <td class="text-muted small">@(app.JobPosting?.Company ?? "—")</td>
+                                                    <td>
+                                                        <span class="badge text-uppercase" style="background-color: rgba(16, 185, 129, 0.14); color: #047857; font-size: 0.68rem;">@app.Status</span>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <a href="/JobPosting/Details/@app.JobPostingId" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 pt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                            <a href="/JobPosting/MyApplications" class="btn-academic-gold py-2 px-3 small text-decoration-none">
+                                <i class="bi bi-file-earmark-check me-1"></i>
+                                <span data-i18n-en="My Applications" data-i18n-tr="Başvurularım">My Applications</span>
+                            </a>
+                            <a href="/JobPosting" class="btn-academic-outline py-2 px-3 small text-decoration-none">
+                                <i class="bi bi-briefcase me-1"></i>
+                                <span data-i18n-en="Job Opportunities" data-i18n-tr="İş Fırsatları">Job Opportunities</span>
+                            </a>
+                            <a href="/Announcement" class="btn-academic-outline py-2 px-3 small text-decoration-none">
+                                <i class="bi bi-megaphone me-1"></i>
+                                <span data-i18n-en="Announcements" data-i18n-tr="Duyurular">Announcements</span>
+                            </a>
+                        </div>
+                    }
+                    else if (isAlumni)
+                    {
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-6">
+                                <div class="p-3 rounded border text-center" style="background: var(--ats-warm-offwhite); border-color: var(--ats-gray-light) !important;">
+                                    <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.72rem;" data-i18n-en="My Job Postings" data-i18n-tr="İş İlanlarım">My Job Postings</div>
+                                    <div class="h2 academic-serif fw-bold mb-0 mt-1" style="color: var(--ats-navy);">@myJobPostings.Count</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 rounded border text-center" style="background: var(--ats-warm-offwhite); border-color: var(--ats-gray-light) !important;">
+                                    <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.72rem;" data-i18n-en="Applications Received" data-i18n-tr="Gelen Başvurular">Applications Received</div>
+                                    <div class="h2 academic-serif fw-bold mb-0 mt-1" style="color: var(--ats-navy);">@receivedApplications.Count</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Job Postings Preview -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="academic-serif mb-0" style="color: var(--ats-navy); font-size: 1.1rem;" data-i18n-en="My Published Opportunities" data-i18n-tr="Yayınladığım Fırsatlar">My Published Opportunities</h5>
+                                <a href="/JobPosting/MyJobPostings" class="small fw-semibold" style="color: var(--ats-navy);" data-i18n-en="Manage All &rarr;" data-i18n-tr="Tümünü Yönet &rarr;">Manage All &rarr;</a>
+                            </div>
+
+                            @if (!myJobPostings.Any())
+                            {
+                                <div class="p-3 rounded border text-center text-muted small" style="background: var(--ats-warm-offwhite); border-color: var(--ats-gray-light) !important;">
+                                    <span data-i18n-en="You have not published any job postings yet." data-i18n-tr="Henüz bir iş ilanı yayınlamadınız.">You have not published any job postings yet.</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle mb-0">
+                                        <thead class="table-light small text-uppercase" style="font-size: 0.7rem;">
+                                            <tr>
+                                                <th data-i18n-en="Position" data-i18n-tr="Pozisyon">Position</th>
+                                                <th data-i18n-en="Company" data-i18n-tr="Şirket">Company</th>
+                                                <th data-i18n-en="Applicants" data-i18n-tr="Başvurular">Applicants</th>
+                                                <th class="text-end" data-i18n-en="Inspect" data-i18n-tr="İncele">Inspect</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var job in myJobPostings.Take(5))
+                                            {
+                                                <tr>
+                                                    <td class="fw-semibold small" style="color: var(--ats-navy);">@job.Title</td>
+                                                    <td class="text-muted small">@job.Company</td>
+                                                    <td>
+                                                        <span class="badge" style="background-color: rgba(20, 43, 74, 0.1); color: var(--ats-navy); font-size: 0.72rem;">@(job.Applications?.Count ?? 0)</span>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <a href="/JobPosting/Applications/@job.Id" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;">
+                                                            <i class="bi bi-people"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 pt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                            <a href="/JobPosting/MyJobPostings" class="btn-academic-gold py-2 px-3 small text-decoration-none">
+                                <i class="bi bi-clipboard-check me-1"></i>
+                                <span data-i18n-en="My Job Postings" data-i18n-tr="İş İlanlarım">My Job Postings</span>
+                            </a>
+                            <a href="/JobPosting/ApplicationsReceived" class="btn-academic-outline py-2 px-3 small text-decoration-none">
+                                <i class="bi bi-inbox me-1"></i>
+                                <span data-i18n-en="Applications Received" data-i18n-tr="Gelen Başvurular">Applications Received</span>
+                            </a>
+                            <a href="/Announcement" class="btn-academic-outline py-2 px-3 small text-decoration-none">
+                                <i class="bi bi-megaphone me-1"></i>
+                                <span data-i18n-en="Announcements" data-i18n-tr="Duyurular">Announcements</span>
+                            </a>
+                        </div>
+                    }
+                    else if (isAdmin)
+                    {
+                        <div class="p-4 rounded border mb-4" style="background: var(--ats-warm-offwhite); border-color: var(--ats-gray-light) !important;">
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                <i class="bi bi-shield-lock-fill fs-3" style="color: var(--ats-gold);"></i>
+                                <div>
+                                    <h5 class="academic-serif mb-0" style="color: var(--ats-navy);" data-i18n-en="Institutional Governance Clearance" data-i18n-tr="Kurumsal Yönetim Yetkisi">Institutional Governance Clearance</h5>
+                                    <span class="small text-muted" data-i18n-en="Active Administrator Session" data-i18n-tr="Aktif Yönetici Oturumu">Active Administrator Session</span>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-0 mt-2" data-i18n-en="You have full administrative access to platform statistics, member account CRUD operations, role governance, and official university announcement publishing." data-i18n-tr="Platform istatistiklerine, üye hesabı yönetimine, rol yetkilendirmelerine ve resmî üniversite duyuru yayınlama araçlarına tam yönetici erişimine sahipsiniz.">
+                                You have full administrative access to platform statistics, member account CRUD operations, role governance, and official university announcement publishing.
+                            </p>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="/Admin" class="btn-academic-gold py-2 px-3 small text-decoration-none">
+                                <i class="bi bi-speedometer2 me-1"></i>
+                                <span data-i18n-en="Admin Dashboard" data-i18n-tr="Yönetici Paneli">Admin Dashboard</span>
+                            </a>
+                            <a href="/Admin/Users" class="btn-academic-outline py-2 px-3 small text-decoration-none">
+                                <i class="bi bi-people me-1"></i>
+                                <span data-i18n-en="User Management" data-i18n-tr="Kullanıcı Yönetimi">User Management</span>
+                            </a>
+                            <a href="/AnnouncementAdmin" class="btn-academic-outline py-2 px-3 small text-decoration-none">
+                                <i class="bi bi-megaphone me-1"></i>
+                                <span data-i18n-en="Announcement Management" data-i18n-tr="Duyuru Yönetimi">Announcement Management</span>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

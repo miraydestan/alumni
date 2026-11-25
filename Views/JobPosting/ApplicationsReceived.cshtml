@@ -1,0 +1,109 @@
+@model IEnumerable<Alumni.Models.Application>
+
+@{
+    ViewData["Title"] = "Applications Received";
+    ViewData["ActivePage"] = "ApplicationsReceived";
+    var list = Model?.ToList() ?? new List<Alumni.Models.Application>();
+}
+
+<!-- Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-inbox-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Alumni Recruitment Portal &bull; Candidates" data-i18n-tr="Mezun İşe Alım Portalı &bull; Adaylar">
+                        Alumni Recruitment Portal &bull; Candidates
+                    </span>
+                </div>
+                <h1 class="hero-title mb-3" data-i18n-en="Applications Received" data-i18n-tr="Gelen Başvurular">
+                    Applications Received
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="Review candidates who have applied to the career opportunities you published on the alumni platform." data-i18n-tr="Mezun platformunda yayınladığınız kariyer fırsatlarına başvuran adayları inceleyin.">
+                    Review candidates who have applied to the career opportunities you published on the alumni platform.
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="py-5 bg-warm-offwhite" aria-label="Applications Received List">
+    <div class="container py-lg-3">
+        <div class="card border-0 shadow-sm p-4 p-md-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; border-radius: 4px;">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                <div>
+                    <h2 class="academic-serif mb-1" style="color: var(--ats-navy); font-size: 1.5rem;" data-i18n-en="Candidate Applications (@list.Count)" data-i18n-tr="Aday Başvuruları (@list.Count)">
+                        Candidate Applications (@list.Count)
+                    </h2>
+                    <span class="text-muted small" data-i18n-en="Applications submitted across all of your active job postings" data-i18n-tr="Tüm aktif iş ilanlarınıza gelen başvurular">
+                        Applications submitted across all of your active job postings
+                    </span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="/Account/Profile" class="btn-academic-outline py-2 px-3 small text-decoration-none">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        <span data-i18n-en="Back to Profile" data-i18n-tr="Profile Dön">Back to Profile</span>
+                    </a>
+                    <a href="/JobPosting/MyJobPostings" class="btn-academic-gold py-2 px-3 small text-decoration-none">
+                        <i class="bi bi-clipboard-check me-1"></i>
+                        <span data-i18n-en="My Job Postings" data-i18n-tr="İş İlanlarım">My Job Postings</span>
+                    </a>
+                </div>
+            </div>
+
+            @if (!list.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                    <h5 class="academic-serif mb-2" style="color: var(--ats-navy);" data-i18n-en="No Applications Received Yet" data-i18n-tr="Henüz Gelen Başvuru Yok">No Applications Received Yet</h5>
+                    <p class="text-muted small mb-0" data-i18n-en="When candidates apply to your job postings, their details will appear here." data-i18n-tr="Adaylar iş ilanlarınıza başvurduğunda bilgileri burada görüntülenecektir.">
+                        When candidates apply to your job postings, their details will appear here.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                            <tr>
+                                <th data-i18n-en="Ref #" data-i18n-tr="No">Ref #</th>
+                                <th data-i18n-en="Applicant" data-i18n-tr="Başvuran">Applicant</th>
+                                <th data-i18n-en="Position" data-i18n-tr="Pozisyon">Position</th>
+                                <th data-i18n-en="Company" data-i18n-tr="Şirket">Company</th>
+                                <th data-i18n-en="Status" data-i18n-tr="Durum">Status</th>
+                                <th class="text-end" data-i18n-en="Details" data-i18n-tr="Detay">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var app in list)
+                            {
+                                <tr>
+                                    <td class="text-muted small fw-semibold">#@app.Id</td>
+                                    <td>
+                                        <div class="fw-semibold" style="color: var(--ats-navy);">@(app.User?.Name ?? $"User #{app.UserId}")</div>
+                                        <div class="text-muted small">@(app.User?.Email ?? "—")</div>
+                                    </td>
+                                    <td class="fw-semibold">@(app.JobPosting?.Title ?? $"Job #{app.JobPostingId}")</td>
+                                    <td class="text-muted">@(app.JobPosting?.Company ?? "—")</td>
+                                    <td>
+                                        <span class="badge px-2 py-1 text-uppercase" style="background-color: rgba(197, 164, 109, 0.2); color: #8A6D3B; border: 1px solid rgba(197, 164, 109, 0.4); font-size: 0.72rem;">
+                                            @app.Status
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="/JobPosting/Applications/@app.JobPostingId" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-eye me-1"></i>
+                                            <span data-i18n-en="Inspect" data-i18n-tr="İncele">Inspect</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</main>

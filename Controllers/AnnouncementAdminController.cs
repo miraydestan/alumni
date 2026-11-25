@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Alumni.Data;
@@ -5,6 +6,7 @@ using Alumni.Models;
 
 namespace Alumni.Controllers;
 
+[Authorize(Roles = "Administrator")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class AnnouncementAdminController : Controller
 {

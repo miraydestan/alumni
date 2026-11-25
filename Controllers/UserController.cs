@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Alumni.Data;
@@ -24,7 +25,8 @@ public class UserController : Controller
         return View("Index", users);
     }
 
-    // POST: /users  (quick-create form on the Index page — no AntiForgeryToken in that form)
+    // POST: /users  (quick-create form on the Index page — Administrator only)
+    [Authorize(Roles = "Administrator")]
     [HttpPost("/users")]
     public async Task<IActionResult> CreateFromUsersRoute(User user)
     {
@@ -64,6 +66,7 @@ public class UserController : Controller
     }
 
     // GET: /User/Create
+    [Authorize(Roles = "Administrator")]
     [HttpGet]
     public IActionResult Create()
     {
@@ -72,6 +75,7 @@ public class UserController : Controller
     }
 
     // POST: /User/Create
+    [Authorize(Roles = "Administrator")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(User user)
@@ -90,6 +94,7 @@ public class UserController : Controller
     }
 
     // GET: /User/Edit/{id}
+    [Authorize(Roles = "Administrator")]
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
@@ -102,6 +107,7 @@ public class UserController : Controller
     }
 
     // POST: /User/Edit/{id}
+    [Authorize(Roles = "Administrator")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, User updatedUser)
@@ -125,6 +131,7 @@ public class UserController : Controller
     }
 
     // GET: /User/Delete/{id}
+    [Authorize(Roles = "Administrator")]
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
@@ -137,6 +144,7 @@ public class UserController : Controller
     }
 
     // POST: /User/Delete/{id}
+    [Authorize(Roles = "Administrator")]
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)

@@ -1,0 +1,160 @@
+@model Alumni.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Member Login";
+    ViewData["ActivePage"] = "Login";
+}
+
+<!-- Section 1: Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-shield-lock-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Collegiate Access &bull; Member Portal" data-i18n-tr="Üniversite Erişimi &bull; Üye Portalı">
+                        Collegiate Access &bull; Member Portal
+                    </span>
+                </div>
+                <h1 class="hero-title mb-3" data-i18n-en="Institutional Member Sign-In" data-i18n-tr="Kurumsal Üye Girişi">
+                    Institutional Member Sign-In
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="Access the university alumni portal, manage your professional profile, and explore authenticated opportunities." data-i18n-tr="Üniversite mezun portalına erişin, mesleki profilinizi yönetin ve onaylı fırsatları keşfedin.">
+                    Access the university alumni portal, manage your professional profile, and explore authenticated opportunities.
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Section 2: Login Container -->
+<main class="py-5 bg-warm-offwhite" aria-label="Login Form Section">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-md-9 col-lg-6 col-xl-5">
+
+                <!-- Feedback Alert (Success / Info Notifications) -->
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="border-left: 4px solid #198754;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                            <div>@TempData["SuccessMessage"]</div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="border-left: 4px solid #dc3545;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                            <div>@TempData["ErrorMessage"]</div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <div class="card border-0 shadow-sm p-4 p-md-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; border-radius: 4px;">
+
+                    <!-- Card Header -->
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <div class="icon-box m-0" style="width: 48px; height: 48px; font-size: 1.35rem;">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <div>
+                            <span class="academic-overline mb-1" data-i18n-en="Alumni Authentication" data-i18n-tr="Mezun Doğrulama">Alumni Authentication</span>
+                            <h2 class="academic-serif mb-0" style="color: var(--ats-navy); font-size: 1.5rem;" data-i18n-en="Member Login" data-i18n-tr="Üye Girişi">Member Login</h2>
+                        </div>
+                    </div>
+
+                    <!-- Functional Login Form -->
+                    <form asp-action="Login" method="post" novalidate>
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ReturnUrl" />
+
+                        <!-- Validation Summary for Generic Auth Errors -->
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4 rounded" role="alert"></div>
+
+                        <!-- Email Address Input -->
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Institutional Email *" data-i18n-tr="Kurumsal E-posta *">Institutional Email *</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0" style="border-color: var(--ats-gray-light); color: var(--ats-gold);">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                <input asp-for="Email" class="form-control form-control-lg fs-6 border-start-0 ps-0"
+                                       type="email"
+                                       placeholder="name@alumni.edu.tr"
+                                       style="border-color: var(--ats-gray-light); border-radius: 0 4px 4px 0;"
+                                       required autofocus />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <!-- Password Input -->
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Password *" data-i18n-tr="Şifre *">Password *</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0" style="border-color: var(--ats-gray-light); color: var(--ats-gold);">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input asp-for="Password" class="form-control form-control-lg fs-6 border-start-0 ps-0"
+                                       type="password"
+                                       placeholder="••••••••"
+                                       style="border-color: var(--ats-gray-light); border-radius: 0 4px 4px 0;"
+                                       required />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <!-- Remember Me & Security Note -->
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <div class="form-check">
+                                <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMeCheck" />
+                                <label class="form-check-label small text-muted" for="rememberMeCheck" data-i18n-en="Remember this session" data-i18n-tr="Beni hatırla">
+                                    Remember this session
+                                </label>
+                            </div>
+                            <span class="small text-muted" style="font-size: 0.8rem;" data-i18n-en="Encrypted &amp; Salted" data-i18n-tr="Kriptolu ve Güvenli">
+                                <i class="bi bi-shield-check text-success me-1"></i>Encrypted &amp; Salted
+                            </span>
+                        </div>
+
+                        <!-- Submit Button and Navigation Links -->
+                        <div class="d-flex flex-column gap-3 pt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                            <button type="submit" class="btn-academic-gold w-100 py-2 fs-6 fw-semibold border-0">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>
+                                <span data-i18n-en="Sign In to Member Portal" data-i18n-tr="Üye Portalına Giriş Yap">Sign In to Member Portal</span>
+                            </button>
+
+                            <div class="text-center mt-2">
+                                <span class="small text-muted" data-i18n-en="Don't have an institutional account yet?" data-i18n-tr="Henüz bir hesabınız yok mu?">
+                                    Don't have an institutional account yet?
+                                </span>
+                                <a asp-action="Register" class="small fw-semibold ms-1" style="color: var(--ats-navy);" data-i18n-en="Register as Member &rarr;" data-i18n-tr="Üye Olarak Kaydol &rarr;">
+                                    Register as Member &rarr;
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
+                <!-- Auxiliary Back Link -->
+                <div class="text-center mt-4">
+                    <a href="/User" class="btn btn-outline-custom btn-sm">
+                        <i class="bi bi-people me-1" style="color: var(--ats-gold);"></i>
+                        <span data-i18n-en="Browse Alumni Directory" data-i18n-tr="Mezunlar Dizinine Göz At">Browse Alumni Directory</span>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>

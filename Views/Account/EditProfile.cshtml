@@ -1,0 +1,137 @@
+@model Alumni.Models.EditProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+    ViewData["ActivePage"] = "Profile";
+}
+
+<!-- Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-pencil-square" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Member Portal &bull; Profile Management" data-i18n-tr="Üye Portalı &bull; Profil Yönetimi">
+                        Member Portal &bull; Profile Management
+                    </span>
+                </div>
+                <h1 class="hero-title mb-3" data-i18n-en="Edit My Profile" data-i18n-tr="Profilimi Düzenle">
+                    Edit My Profile
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="Update your personal identity details stored in the university alumni registry." data-i18n-tr="Üniversite mezunlar kaydında saklanan kişisel bilgilerinizi güncelleyin.">
+                    Update your personal identity details stored in the university alumni registry.
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="py-5 bg-warm-offwhite" aria-label="Edit Profile Form Section">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-md-9 col-lg-7 col-xl-6">
+
+                <div class="mb-3">
+                    <a href="/Account/Profile" class="btn btn-sm btn-academic-outline text-decoration-none">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        <span data-i18n-en="Back to My Profile" data-i18n-tr="Profilime Dön">Back to My Profile</span>
+                    </a>
+                </div>
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="border-left: 4px solid #dc3545;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <div class="card border-0 shadow-sm p-4 p-md-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; border-radius: 4px;">
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <div class="icon-box m-0" style="width: 48px; height: 48px; font-size: 1.35rem;">
+                            <i class="bi bi-person-gear"></i>
+                        </div>
+                        <div>
+                            <span class="academic-overline mb-1" data-i18n-en="Personal Settings" data-i18n-tr="Kişisel Ayarlar">Personal Settings</span>
+                            <h2 class="academic-serif mb-0" style="color: var(--ats-navy); font-size: 1.45rem;" data-i18n-en="Account Information" data-i18n-tr="Hesap Bilgileri">Account Information</h2>
+                        </div>
+                    </div>
+
+                    <form asp-controller="Account" asp-action="EditProfile" method="post" novalidate>
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4 rounded" role="alert"></div>
+
+                        <!-- Read-Only Identity Metadata -->
+                        <div class="row g-3 mb-4 p-3 rounded" style="background: var(--ats-warm-offwhite); border: 1px solid var(--ats-gray-light);">
+                            <div class="col-6">
+                                <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;" data-i18n-en="Member ID" data-i18n-tr="Üye Numarası">Member ID</div>
+                                <div class="fw-bold" style="color: var(--ats-navy);">#@Model.UserId</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;" data-i18n-en="Account Role (Locked)" data-i18n-tr="Hesap Rolü (Kilitli)">Account Role (Locked)</div>
+                                <div class="fw-bold" style="color: var(--ats-navy);">
+                                    <i class="bi bi-shield-lock me-1" style="color: var(--ats-gold);"></i>@Model.Role
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Full Name -->
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Full Name *" data-i18n-tr="Ad Soyad *">Full Name *</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0" style="border-color: var(--ats-gray-light); color: var(--ats-gold);">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input asp-for="Name" class="form-control form-control-lg fs-6 border-start-0 ps-0"
+                                       style="border-color: var(--ats-gray-light); border-radius: 0 4px 4px 0;"
+                                       required autofocus />
+                            </div>
+                            <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <!-- Email Address -->
+                        <div class="mb-4">
+                            <label asp-for="Email" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Institutional Email *" data-i18n-tr="Kurumsal E-posta *">Institutional Email *</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0" style="border-color: var(--ats-gray-light); color: var(--ats-gold);">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                <input asp-for="Email" type="email" class="form-control form-control-lg fs-6 border-start-0 ps-0"
+                                       style="border-color: var(--ats-gray-light); border-radius: 0 4px 4px 0;"
+                                       required />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+                            <div class="form-text small text-muted" data-i18n-en="Changing your email automatically updates your active sign-in credentials." data-i18n-tr="E-posta adresinizi değiştirdiğinizde aktif oturum bilgileriniz otomatik olarak güncellenir.">
+                                Changing your email automatically updates your active sign-in credentials.
+                            </div>
+                        </div>
+
+                        <div class="alert alert-light border small text-muted mb-4" style="border-color: var(--ats-gray-light) !important;">
+                            <i class="bi bi-info-circle me-1" style="color: var(--ats-gold);"></i>
+                            <span data-i18n-en="For security, account roles and administrative privileges can only be modified by system administrators. Password hashes are never exposed." data-i18n-tr="Güvenlik gereği hesap rolleri ve yönetici yetkileri yalnızca sistem yöneticileri tarafından değiştirilebilir. Şifre özetleri hiçbir zaman görüntülenmez.">
+                                For security, account roles and administrative privileges can only be modified by system administrators. Password hashes are never exposed.
+                            </span>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 pt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                            <a href="/Account/Profile" class="btn btn-academic-outline py-2 px-4 text-center text-decoration-none">
+                                <span data-i18n-en="Cancel" data-i18n-tr="İptal">Cancel</span>
+                            </a>
+                            <button type="submit" class="btn-academic-gold py-2 px-4 border-0 fw-semibold">
+                                <i class="bi bi-check-circle me-1"></i>
+                                <span data-i18n-en="Save Changes" data-i18n-tr="Değişiklikleri Kaydet">Save Changes</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

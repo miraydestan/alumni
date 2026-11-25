@@ -199,13 +199,17 @@ a {
 /* Navigation Links */
 .nav-link-academic {
     font-family: var(--ats-font-sans);
-    font-size: 0.925rem;
+    font-size: 0.875rem;
     font-weight: 500;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
     color: rgba(255, 255, 255, 0.85) !important;
-    padding: 0.5rem 1rem !important;
+    padding: 0.5rem 0.7rem !important;
     position: relative;
     transition: var(--ats-transition);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
 }
 
 .nav-link-academic:hover {
@@ -221,8 +225,8 @@ a {
     content: '';
     position: absolute;
     bottom: 0;
-    left: 1rem;
-    right: 1rem;
+    left: 0.7rem;
+    right: 0.7rem;
     height: 2px;
     background-color: var(--ats-gold);
     transform: scaleX(0);
@@ -232,6 +236,35 @@ a {
 .nav-link-academic:hover::after,
 .nav-link-academic.active::after {
     transform: scaleX(1);
+}
+
+/* Role Identity Pill in Navbar */
+.nav-role-pill {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+    line-height: 1.2;
+}
+
+.nav-role-pill-admin {
+    background: rgba(220, 53, 69, 0.2);
+    color: #FF8A96;
+    border: 1px solid rgba(220, 53, 69, 0.45);
+}
+
+.nav-role-pill-alumni {
+    background: rgba(197, 164, 109, 0.2);
+    color: var(--ats-gold);
+    border: 1px solid rgba(197, 164, 109, 0.45);
+}
+
+.nav-role-pill-student {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6EE7B7;
+    border: 1px solid rgba(16, 185, 129, 0.45);
 }
 
 /* Language Switcher Group */

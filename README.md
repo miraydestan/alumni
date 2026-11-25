@@ -67,6 +67,82 @@ Server Errors (ILogger LogLevel >= Error) --> Console + logs/error.logs (FileErr
 
 The active CRUD controllers use dependency-injected `AlumniDbContext` and persist changes to PostgreSQL. `Models/UserStore.cs` and `Models/AnnouncementStore.cs`, if still present in the repository, should not be described as the active storage mechanism for these controllers.
 
+## Authentication & Authorization
+
+The application uses ASP.NET Core Cookie Authentication and role-based authorization backed by PostgreSQL (`Users` table via `AlumniDbContext`) and `IPasswordHasher<User>`.
+
+### Authentication
+
+- **Cookie Authentication (`Program.cs`):** Configured with `CookieAuthenticationDefaults.AuthenticationScheme` (`Alumni.Auth` cookie), `HttpOnly = true`, `SameSite = SameSiteMode.Lax`, `SecurePolicy = CookieSecurePolicy.SameAsRequest`, and a 7-day sliding expiration (`ExpireTimeSpan = TimeSpan.FromDays(7)`, `SlidingExpiration = true`).
+- **Middleware Pipeline Order:** `Program.cs` executes `app.UseRouting()`, followed by `app.UseAuthentication()`, followed by `app.UseAuthorization()`, before mapping MVC and API endpoints.
+- **Login Flow (`GET`/`POST /Account/Login`, `/login`):** `AccountController.Login` validates submitted credentials using `LoginViewModel` and `[ValidateAntiForgeryToken]`, performs case-insensitive email matching via EF Core, and verifies passwords against `User.PasswordHash` using `IPasswordHasher<User>.VerifyHashedPassword`.
+- **Session Claims & Security:** On successful sign-in, `HttpContext.SignInAsync` issues a signed cookie containing `ClaimTypes.NameIdentifier`, `ClaimTypes.Name`, `ClaimTypes.Email`, and `ClaimTypes.Role` (with optional persistent sessions via `RememberMe`). Invalid logins return a generic error message to prevent user enumeration, return URLs are validated with `Url.IsLocalUrl` to prevent open redirects, and `User.PasswordHash` is decorated with `[JsonIgnore]`.
+
+### Registration
+
+- **Self-Registration (`GET`/`POST /Account/Register`, `/register`):** Handled by `AccountController.Register` and `RegisterViewModel`.
+- **Validation & Hashing:** Validates Full Name, Email Address, Password, Confirm Password, and User Type on both client and server, rejects case-insensitive duplicate emails, and stores only salted PBKDF2-SHA256 password hashes produced by `IPasswordHasher<User>`.
+- **Role Restriction:** Self-registration is limited to `Alumni` and `Student` roles. Attempts to register as `Administrator` are explicitly rejected server-side. Form submission is protected with `[ValidateAntiForgeryToken]`.
+
+### Logout
+
+- **Sign-Out (`POST /Account/Logout`, `/logout`):** Implemented strictly as an anti-forgery-protected `POST` action (`[ValidateAntiForgeryToken]`) in `AccountController.Logout`.
+- Calls `HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme)` to clear the `Alumni.Auth` cookie, sets a confirmation notification in `TempData`, and redirects to `/`. Direct `GET /Account/Logout` requests safely redirect to `/`.
+
+### User Roles
+
+The system supports three authenticated roles stored in `Users.Role` and issued in `ClaimTypes.Role`:
+
+- **`Student`:** Authenticated student member who can browse announcements and job opportunities, submit job applications, review their own application history (`/JobPosting/MyApplications`), and manage their own profile.
+- **`Alumni`:** Authenticated graduate member who can browse announcements and job opportunities, create and manage their own job postings (`/JobPosting/MyJobPostings`), view applications received on their postings (`/JobPosting/ApplicationsReceived`), and manage their own profile.
+- **`Administrator`:** Institutional administrator with access to the Admin Panel (`/Admin`), User Management (`/Admin/Users`), Announcement Management (`/AnnouncementAdmin`), and their own profile.
+
+### Role-Based Access Control
+
+Access restrictions are enforced server-side with ASP.NET Core `[Authorize]` attributes rather than relying on UI link visibility:
+
+| Area / Endpoint | Controller & Action | Authorization Rule |
+|---|---|---|
+| `/Admin`, `/Admin/Users`, User CRUD | `AdminController` | `[Authorize(Roles = "Administrator")]` |
+| `/AnnouncementAdmin` | `AnnouncementAdminController` | `[Authorize(Roles = "Administrator")]` |
+| `/User/Create`, `/User/Edit/{id}`, `/User/Delete/{id}`, `POST /users` | `UserController` write actions | `[Authorize(Roles = "Administrator")]` |
+| `/JobPosting/MyApplications` | `JobPostingController.MyApplications` | `[Authorize(Roles = "Student")]` |
+| `/JobPosting/MyJobPostings`, `POST /JobPosting/Create`, `/JobPosting/ApplicationsReceived` | `JobPostingController` Alumni actions | `[Authorize(Roles = "Alumni")]` |
+| `/Account/Profile`, `/Account/EditProfile` | `AccountController.Profile` / `EditProfile` | `[Authorize]` (any authenticated role) |
+
+- **Redirects:** Unauthenticated requests to protected endpoints are challenged and redirected to `/Account/Login` (`LoginPath`). Authenticated users without the required role are redirected to `/Account/AccessDenied` (`AccessDeniedPath`, `Views/Account/AccessDenied.cshtml`).
+- **Applicant Privacy:** On `/JobPosting/Applications/{id}`, full applicant details are visible only to the posting's `Alumni` owner or an `Administrator`; other authenticated users can view only their own application record.
+
+### Admin Panel
+
+- **Route & Layout:** Accessible at `/Admin` (`AdminController`) using the dedicated responsive administration layout (`Views/Admin/_AdminLayout.cshtml`).
+- **Executive Dashboard (`/Admin`):** Displays live database statistics (total users, alumni, students, administrators, announcements, job postings, and career applications) along with recent user registrations.
+- **User Management CRUD (`/Admin/Users`):** Provides search and role filtering plus Create (`/Admin/Users/Create`), Details (`/Admin/Users/Details/{id}`), Edit with optional password reset and role updates (`/Admin/Users/Edit/{id}`), and Delete confirmation (`/Admin/Users/Delete/{id}`).
+- **Safety Guards:** Prevents administrators from revoking their own `Administrator` role, prevents self-deletion, and blocks deletion of users with active job postings or applications in accordance with the database `ON DELETE RESTRICT` constraints.
+
+### Dynamic Navigation
+
+The shared navigation bar in `Views/Shared/_Layout.cshtml` adapts automatically using `User.Identity.IsAuthenticated` and `User.IsInRole(...)` (with active-page highlighting, Bootstrap icons, user name + role pill badge, and `TR | EN` bilingual support):
+
+- **Guests (Not Logged In):** Home, Login, Register.
+- **Students:** Home, Announcements, Job Opportunities, My Applications, My Profile, Logout.
+- **Alumni:** Home, Announcements, Job Opportunities, My Job Postings, Applications Received, My Profile, Logout.
+- **Administrators:** Home, Admin Dashboard, User Management, Announcement Management, My Profile, Logout.
+
+### User Profile
+
+- **My Profile (`/Account/Profile`, `/profile`):** Displays the authenticated user's persisted information from PostgreSQL (`Id`, `Name`, `Email`, `Role`) and a role-specific personal dashboard (recent application history for Students, published job postings and applicant counts for Alumni, and governance shortcuts for Administrators).
+- **Edit Profile (`/Account/EditProfile`, `/profile/edit`):** Allows authenticated users to update their own `Name` and `Email` via `EditProfileViewModel` and an anti-forgery-protected `POST` form. The target account is always resolved from `ClaimTypes.NameIdentifier` (no `id` parameter is accepted), `UserId` and `Role` are marked `[BindNever]`, `PasswordHash` is never exposed or editable, duplicate emails are rejected, and the authentication cookie claims are refreshed immediately after saving.
+
+### Configuration
+
+Administrator role promotion is configuration-driven without hardcoding credentials:
+
+- **`Admin:Email`** in `appsettings.json`, or
+- **`ADMIN_EMAIL`** as an environment variable (for example, in a local `.env` file or container environment).
+
+When an account matching the configured email already exists in PostgreSQL, both startup seeding (`DatabaseSeeder`) and login (`AccountController.Login`) promote that account to the `Administrator` role without creating duplicate records. Keep real emails, passwords, and secrets out of version control.
+
 ## Database and Persistence
 
 Docker Compose defines the `db` (`alumni-postgres`) PostgreSQL service and the `app` (`alumni-app`) application service. The named volume `alumni_postgres_data` stores PostgreSQL data outside the container, so removing and recreating the container with `docker compose down` followed by `docker compose up -d` preserves the data.

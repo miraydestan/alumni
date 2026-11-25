@@ -1,0 +1,153 @@
+@model IEnumerable<Alumni.Models.JobPosting>
+
+@{
+    ViewData["Title"] = "My Job Postings";
+    ViewData["ActivePage"] = "MyJobPostings";
+    var list = Model?.ToList() ?? new List<Alumni.Models.JobPosting>();
+}
+
+<!-- Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-clipboard-check-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Alumni Career Contribution &bull; Postings" data-i18n-tr="Mezun Kariyer Katkısı &bull; İlanlar">
+                        Alumni Career Contribution &bull; Postings
+                    </span>
+                </div>
+                <h1 class="hero-title mb-3" data-i18n-en="My Job Postings" data-i18n-tr="İş İlanlarım">
+                    My Job Postings
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="Publish new career opportunities for university students and alumni, and monitor incoming applicant activity." data-i18n-tr="Üniversite öğrencileri ve mezunları için yeni kariyer fırsatları yayınlayın ve gelen başvuruları takip edin.">
+                    Publish new career opportunities for university students and alumni, and monitor incoming applicant activity.
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="py-5 bg-warm-offwhite" aria-label="My Job Postings Management">
+    <div class="container py-lg-3">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="border-left: 4px solid #198754;">
+                <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="border-left: 4px solid #dc3545;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+            <!-- Publish New Job Form -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm p-4" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-gold) !important; border-radius: 4px;">
+                    <h3 class="academic-serif mb-1" style="color: var(--ats-navy); font-size: 1.35rem;" data-i18n-en="Publish New Opportunity" data-i18n-tr="Yeni İş İlanı Yayınla">
+                        Publish New Opportunity
+                    </h3>
+                    <p class="text-muted small mb-4" data-i18n-en="Share an open position with the university network." data-i18n-tr="Üniversite ağıyla açık bir pozisyon paylaşın.">
+                        Share an open position with the university network.
+                    </p>
+
+                    <form asp-controller="JobPosting" asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label for="jobTitle" class="form-label fw-semibold small" style="color: var(--ats-navy);" data-i18n-en="Position Title *" data-i18n-tr="Pozisyon Başlığı *">Position Title *</label>
+                            <input type="text" id="jobTitle" name="title" class="form-control" placeholder="e.g. Software Developer" required />
+                        </div>
+                        <div class="mb-4">
+                            <label for="jobCompany" class="form-label fw-semibold small" style="color: var(--ats-navy);" data-i18n-en="Company / Organization *" data-i18n-tr="Şirket / Kurum *">Company / Organization *</label>
+                            <input type="text" id="jobCompany" name="company" class="form-control" placeholder="e.g. TechNova Labs" required />
+                        </div>
+                        <button type="submit" class="btn-academic-gold w-100 py-2 border-0 fw-semibold">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            <span data-i18n-en="Publish Job Posting" data-i18n-tr="İlanı Yayınla">Publish Job Posting</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Existing Postings Table -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm p-4" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; border-radius: 4px;">
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-4 pb-3 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <div>
+                            <h3 class="academic-serif mb-1" style="color: var(--ats-navy); font-size: 1.4rem;" data-i18n-en="Your Published Postings (@list.Count)" data-i18n-tr="Yayınladığınız İlanlar (@list.Count)">
+                                Your Published Postings (@list.Count)
+                            </h3>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="/Account/Profile" class="btn-academic-outline py-1 px-3 small text-decoration-none">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                <span data-i18n-en="Back to Profile" data-i18n-tr="Profile Dön">Back to Profile</span>
+                            </a>
+                            <a href="/JobPosting/ApplicationsReceived" class="btn-academic-outline py-1 px-3 small text-decoration-none">
+                                <i class="bi bi-inbox me-1"></i>
+                                <span data-i18n-en="Applications Received" data-i18n-tr="Gelen Başvurular">Applications Received</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    @if (!list.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-briefcase fs-1 text-muted d-block mb-3"></i>
+                            <p class="text-muted small mb-0" data-i18n-en="You have not published any job postings yet. Use the form on the left to add your first listing." data-i18n-tr="Henüz bir iş ilanı yayınlamadınız. İlk ilanınızı eklemek için soldaki formu kullanabilirsiniz.">
+                                You have not published any job postings yet. Use the form on the left to add your first listing.
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light small text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th data-i18n-en="Position Title" data-i18n-tr="Pozisyon">Position Title</th>
+                                        <th data-i18n-en="Company" data-i18n-tr="Şirket">Company</th>
+                                        <th data-i18n-en="Applicants" data-i18n-tr="Başvuru Sayısı">Applicants</th>
+                                        <th class="text-end" data-i18n-en="Actions" data-i18n-tr="İşlemler">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var job in list)
+                                    {
+                                        <tr>
+                                            <td class="text-muted small fw-semibold">#@job.Id</td>
+                                            <td class="fw-semibold" style="color: var(--ats-navy);">@job.Title</td>
+                                            <td class="text-muted">@job.Company</td>
+                                            <td>
+                                                <span class="badge px-2 py-1" style="background-color: rgba(20, 43, 74, 0.1); color: var(--ats-navy);">
+                                                    @(job.Applications?.Count ?? 0)
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="/JobPosting/Details/@job.Id" class="btn btn-outline-secondary">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="/JobPosting/Applications/@job.Id" class="btn btn-outline-primary">
+                                                        <i class="bi bi-people"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

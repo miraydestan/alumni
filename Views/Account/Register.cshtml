@@ -1,0 +1,186 @@
+@model Alumni.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Member Registration";
+    ViewData["ActivePage"] = "Register";
+}
+
+<!-- Section 1: Institutional Hero Header -->
+<header class="hero-section text-center position-relative overflow-hidden">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-mortarboard-fill" style="color: var(--ats-gold);"></i>
+                    <span data-i18n-en="Collegiate Registry &bull; Member Registration" data-i18n-tr="Üniversite Sicili &bull; Üye Kaydı">
+                        Collegiate Registry &bull; Member Registration
+                    </span>
+                </div>
+                <h1 class="hero-title mb-3" data-i18n-en="Join the Alumni Network" data-i18n-tr="Mezunlar Ağına Katılın">
+                    Join the Alumni Network
+                </h1>
+                <p class="hero-subtitle mb-0" data-i18n-en="Create an authenticated institutional account to engage with fellow graduates, explore curated career opportunities, and preserve collegiate ties." data-i18n-tr="Mezunlarımızla bağlantı kurmak, kariyer fırsatlarını keşfetmek ve üniversite bağlarınızı yaşatmak için kurumsal hesabınızı oluşturun.">
+                    Create an authenticated institutional account to engage with fellow graduates, explore curated career opportunities, and preserve collegiate ties.
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Section 2: Registration Form Container -->
+<main class="py-5 bg-warm-offwhite" aria-label="Registration Form Section">
+    <div class="container py-lg-3">
+        <div class="row justify-content-center">
+            <div class="col-md-9 col-lg-7 col-xl-6">
+                <div class="card border-0 shadow-sm p-4 p-md-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important; border-top: 3px solid var(--ats-navy) !important; border-radius: 4px;">
+
+                    <!-- Card Header -->
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--ats-gray-light) !important;">
+                        <div class="icon-box m-0" style="width: 48px; height: 48px; font-size: 1.35rem;">
+                            <i class="bi bi-person-plus-fill"></i>
+                        </div>
+                        <div>
+                            <span class="academic-overline mb-1" data-i18n-en="Membership Enrollment" data-i18n-tr="Üyelik Başvurusu">Membership Enrollment</span>
+                            <h2 class="academic-serif mb-0" style="color: var(--ats-navy); font-size: 1.5rem;" data-i18n-en="Account Registration" data-i18n-tr="Hesap Kaydı">Account Registration</h2>
+                        </div>
+                    </div>
+
+                    <!-- Registration Form -->
+                    <form asp-action="Register" method="post" novalidate>
+                        @Html.AntiForgeryToken()
+
+                        <!-- Summary Validation Errors -->
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4 rounded" role="alert"></div>
+
+                        <!-- 1. Full Name -->
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Full Name *" data-i18n-tr="Ad Soyad *">Full Name *</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0" style="border-color: var(--ats-gray-light); color: var(--ats-gold);">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input asp-for="Name" class="form-control form-control-lg fs-6 border-start-0 ps-0"
+                                       placeholder="e.g. Dr. Eleanor Vance"
+                                       data-i18n-en="e.g. Dr. Eleanor Vance"
+                                       data-i18n-tr="Örn. Dr. Miray Destan"
+                                       style="border-color: var(--ats-gray-light); border-radius: 0 4px 4px 0;"
+                                       required minlength="2" maxlength="100" />
+                            </div>
+                            <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <!-- 2. Email Address -->
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Email Address *" data-i18n-tr="E-posta Adresi *">Email Address *</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0" style="border-color: var(--ats-gray-light); color: var(--ats-gold);">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                <input asp-for="Email" class="form-control form-control-lg fs-6 border-start-0 ps-0"
+                                       type="email"
+                                       placeholder="eleanor.vance@alumni.edu"
+                                       data-i18n-en="eleanor.vance@alumni.edu"
+                                       data-i18n-tr="miray@alumni.edu"
+                                       style="border-color: var(--ats-gray-light); border-radius: 0 4px 4px 0;"
+                                       required />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <!-- 3. User Type (Student or Alumni only) -->
+                        <div class="mb-3">
+                            <label asp-for="UserType" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Member Affiliation (User Type) *" data-i18n-tr="Üyelik Türü (Kullanıcı Rolü) *">Member Affiliation (User Type) *</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0" style="border-color: var(--ats-gray-light); color: var(--ats-gold);">
+                                    <i class="bi bi-award"></i>
+                                </span>
+                                <select asp-for="UserType" class="form-select form-select-lg fs-6 border-start-0 ps-0"
+                                        style="border-color: var(--ats-gray-light); border-radius: 0 4px 4px 0;" required>
+                                    <option value="Alumni" data-i18n-en="Alumni / University Graduate" data-i18n-tr="Mezun (Üniversite Mezunu)">Alumni / University Graduate</option>
+                                    <option value="Student" data-i18n-en="Student (Currently Enrolled)" data-i18n-tr="Öğrenci (Kayıtlı Öğrenci)">Student (Currently Enrolled)</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="UserType" class="text-danger small mt-1 d-block"></span>
+                            <small class="text-muted d-block mt-1" style="font-size: 0.8rem;" data-i18n-en="Administrative credentials are centrally managed and cannot be self-selected." data-i18n-tr="Yönetici yetkileri merkezi olarak atanır; bu formdan seçilemez.">
+                                Administrative credentials are centrally managed and cannot be self-selected.
+                            </small>
+                        </div>
+
+                        <!-- 4. Password -->
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Password *" data-i18n-tr="Şifre *">Password *</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0" style="border-color: var(--ats-gray-light); color: var(--ats-gold);">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input asp-for="Password" class="form-control form-control-lg fs-6 border-start-0 ps-0"
+                                       type="password"
+                                       placeholder="••••••••"
+                                       style="border-color: var(--ats-gray-light); border-radius: 0 4px 4px 0;"
+                                       required minlength="6" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                            <small class="text-muted d-block mt-1" style="font-size: 0.8rem;" data-i18n-en="Must contain at least 6 characters." data-i18n-tr="En az 6 karakter içermelidir.">
+                                Must contain at least 6 characters.
+                            </small>
+                        </div>
+
+                        <!-- 5. Confirm Password -->
+                        <div class="mb-4">
+                            <label asp-for="ConfirmPassword" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Confirm Password *" data-i18n-tr="Şifreyi Onayla *">Confirm Password *</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0" style="border-color: var(--ats-gray-light); color: var(--ats-gold);">
+                                    <i class="bi bi-lock-fill"></i>
+                                </span>
+                                <input asp-for="ConfirmPassword" class="form-control form-control-lg fs-6 border-start-0 ps-0"
+                                       type="password"
+                                       placeholder="••••••••"
+                                       style="border-color: var(--ats-gray-light); border-radius: 0 4px 4px 0;"
+                                       required />
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <!-- Action Cluster: Submit & Links -->
+                        <div class="d-flex flex-column gap-3 pt-3 border-top" style="border-color: var(--ats-gray-light) !important;">
+                            <button type="submit" class="btn-academic-gold w-100 py-2 fs-6 fw-semibold border-0">
+                                <i class="bi bi-person-check-fill me-1"></i>
+                                <span data-i18n-en="Complete Registration" data-i18n-tr="Kaydı Tamamla">Complete Registration</span>
+                            </button>
+
+                            <div class="text-center mt-2">
+                                <span class="small text-muted" data-i18n-en="Already have an institutional account?" data-i18n-tr="Zaten bir hesabınız var mı?">
+                                    Already have an institutional account?
+                                </span>
+                                <a asp-action="Login" class="small fw-semibold ms-1" style="color: var(--ats-navy);" data-i18n-en="Sign In &rarr;" data-i18n-tr="Giriş Yap &rarr;">
+                                    Sign In &rarr;
+                                </a>
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+
+                <!-- Auxiliary Back Link -->
+                <div class="text-center mt-4">
+                    <a href="/User" class="btn btn-outline-custom btn-sm">
+                        <i class="bi bi-people me-1" style="color: var(--ats-gold);"></i>
+                        <span data-i18n-en="Browse Alumni Directory" data-i18n-tr="Mezunlar Dizinine Göz At">Browse Alumni Directory</span>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>

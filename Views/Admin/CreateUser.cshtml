@@ -1,0 +1,93 @@
+@model Alumni.Models.Admin.AdminUserCreateViewModel
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Add New User";
+    ViewData["ActiveAdminTab"] = "CreateUser";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="admin-card p-4 p-md-5">
+            <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+                <div>
+                    <h4 class="fw-bold mb-1 text-dark">Register System User</h4>
+                    <span class="text-muted small">Create a verified institutional account and assign access role</span>
+                </div>
+                <a href="/Admin/Users" class="btn btn-sm btn-outline-secondary">
+                    &larr; Back to Users
+                </a>
+            </div>
+
+            <form asp-action="CreateUser" method="post" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4 rounded" role="alert"></div>
+
+                <!-- Full Name -->
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label fw-semibold small text-dark">Full Name *</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white text-muted"><i class="bi bi-person"></i></span>
+                        <input asp-for="Name" class="form-control" placeholder="Prof. Jane Doe / Dr. John Smith" autofocus required />
+                    </div>
+                    <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label fw-semibold small text-dark">Institutional Email Address *</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white text-muted"><i class="bi bi-envelope"></i></span>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="user@alumni.edu.tr" required />
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+                    <div class="form-text small text-muted">Must be unique across all system users.</div>
+                </div>
+
+                <!-- Role Selection -->
+                <div class="mb-4">
+                    <label asp-for="Role" class="form-label fw-semibold small text-dark">System Authorization Role *</label>
+                    <select asp-for="Role" class="form-select" required>
+                        <option value="Alumni">Alumni &bull; Verified Graduate</option>
+                        <option value="Student">Student &bull; Active Enrollee</option>
+                        <option value="Administrator">Administrator &bull; Full Governance Privileges</option>
+                    </select>
+                    <span asp-validation-for="Role" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <div class="border-top pt-4 mb-4">
+                    <h6 class="fw-bold mb-3 text-dark">Account Credentials</h6>
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-semibold small text-dark">Password *</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white text-muted"><i class="bi bi-lock"></i></span>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" required />
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                        <div class="form-text small text-muted">Minimum 6 characters. Will be cryptographically salted and hashed.</div>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="mb-3">
+                        <label asp-for="ConfirmPassword" class="form-label fw-semibold small text-dark">Confirm Password *</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white text-muted"><i class="bi bi-lock-fill"></i></span>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="••••••••" required />
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a href="/Admin/Users" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-academic-gold px-4 fw-semibold">
+                        <i class="bi bi-check-circle me-1"></i> Create User Account
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

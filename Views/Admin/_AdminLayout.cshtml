@@ -1,0 +1,257 @@
+@{
+    var activeTab = ViewData["ActiveAdminTab"] as string ?? "Dashboard";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Governance Portal | Alumni</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    <style>
+        :root {
+            --admin-sidebar-bg: #111C33;
+            --admin-sidebar-active: #1B2A4A;
+            --admin-sidebar-hover: #1E335C;
+            --admin-gold: #DDA83B;
+            --admin-border: #E2E8F0;
+        }
+        body {
+            background-color: #F8FAFC;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .admin-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+        .admin-sidebar {
+            width: 260px;
+            background-color: var(--admin-sidebar-bg);
+            color: #FFFFFF;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+        .admin-brand {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(0, 0, 0, 0.15);
+        }
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            color: #CBD5E1;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .admin-nav-item:hover {
+            color: #FFFFFF;
+            background-color: var(--admin-sidebar-hover);
+        }
+        .admin-nav-item.active {
+            color: #FFFFFF;
+            background-color: var(--admin-sidebar-active);
+            border-left-color: var(--admin-gold);
+        }
+        .admin-nav-item i {
+            font-size: 1.15rem;
+            color: var(--admin-gold);
+        }
+        .admin-content-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        .admin-topbar {
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--admin-border);
+            padding: 0.85rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .admin-body {
+            padding: 2rem;
+            flex-grow: 1;
+        }
+        .admin-card {
+            background: #FFFFFF;
+            border: 1px solid var(--admin-border);
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .admin-metric-card {
+            background: #FFFFFF;
+            border: 1px solid var(--admin-border);
+            border-radius: 6px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            transition: transform 0.15s ease;
+        }
+        .admin-metric-card:hover {
+            transform: translateY(-2px);
+        }
+        .admin-metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .badge-role-admin {
+            background-color: #1E293B;
+            color: #F8FAFC;
+            border: 1px solid #334155;
+        }
+        .badge-role-alumni {
+            background-color: rgba(221, 168, 59, 0.15);
+            color: #B45309;
+            border: 1px solid rgba(221, 168, 59, 0.3);
+        }
+        .badge-role-student {
+            background-color: rgba(16, 185, 129, 0.12);
+            color: #047857;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="admin-brand">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-lock-fill" style="color: var(--admin-gold); font-size: 1.5rem;"></i>
+                    <div>
+                        <div class="fw-bold small text-white text-uppercase" style="letter-spacing: 0.05em;">Alumni Governance</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">System Administration</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="py-3 flex-grow-1">
+                <div class="px-3 pb-2 text-uppercase text-muted" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;">Core Management</div>
+
+                <a href="/Admin" class="admin-nav-item @(activeTab == "Dashboard" ? "active" : "")">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="/Admin/Users" class="admin-nav-item @(activeTab == "Users" ? "active" : "")">
+                    <i class="bi bi-people-fill"></i>
+                    <span>User Management</span>
+                </a>
+
+                <a href="/Admin/Users/Create" class="admin-nav-item @(activeTab == "CreateUser" ? "active" : "")">
+                    <i class="bi bi-person-plus-fill"></i>
+                    <span>Add New User</span>
+                </a>
+
+                <div class="px-3 pt-3 pb-2 text-uppercase text-muted" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;">Editorial Modules</div>
+
+                <a href="/AnnouncementAdmin" class="admin-nav-item @(activeTab == "Announcements" ? "active" : "")">
+                    <i class="bi bi-megaphone-fill"></i>
+                    <span>Announcements</span>
+                </a>
+
+                <div class="px-3 pt-3 pb-2 text-uppercase text-muted" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;">System Links</div>
+
+                <a href="/Account/Profile" class="admin-nav-item">
+                    <i class="bi bi-person-badge"></i>
+                    <span>My Profile</span>
+                </a>
+
+                <a href="/" class="admin-nav-item">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    <span>Public Portal</span>
+                </a>
+            </div>
+
+            <!-- Admin Profile & Logout -->
+            <div class="p-3 border-top" style="border-color: rgba(255, 255, 255, 0.08) !important; background: rgba(0, 0, 0, 0.2);">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="d-flex align-items-center gap-2 overflow-hidden">
+                        <i class="bi bi-person-circle fs-5" style="color: var(--admin-gold);"></i>
+                        <div class="text-truncate">
+                            <div class="text-white small fw-semibold text-truncate">@User.Identity?.Name</div>
+                            <span class="badge bg-danger text-white py-0 px-1" style="font-size: 0.65rem;">ADMIN</span>
+                        </div>
+                    </div>
+                </div>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0 p-0">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-light btn-sm w-100 py-1" style="font-size: 0.78rem;">
+                        <i class="bi bi-box-arrow-right me-1"></i> Sign Out
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="admin-content-area">
+            <!-- Topbar -->
+            <header class="admin-topbar">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-muted small">Governance /</span>
+                    <h5 class="mb-0 fw-bold" style="color: var(--ats-navy); font-size: 1.1rem;">@ViewData["Title"]</h5>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="/Admin/Users/Create" class="btn btn-sm btn-academic-gold py-1 px-3">
+                        <i class="bi bi-person-plus-fill me-1"></i> Add User
+                    </a>
+                    <a href="/" class="btn btn-sm btn-outline-secondary py-1 px-3">
+                        <i class="bi bi-globe me-1"></i> Public Site
+                    </a>
+                </div>
+            </header>
+
+            <!-- Body Container -->
+            <main class="admin-body">
+                <!-- Notifications / Alerts -->
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show rounded shadow-sm mb-4" role="alert" style="border-left: 4px solid #198754;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                            <div>@TempData["SuccessMessage"]</div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show rounded shadow-sm mb-4" role="alert" style="border-left: 4px solid #dc3545;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                            <div>@TempData["ErrorMessage"]</div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
