@@ -88,8 +88,18 @@ public class AccountController : Controller
             return View(model);
         }
 
-        // 4. Duplicate Email Prevention (Case-insensitive)
-        var normalizedEmail = model.Email.Trim().ToLowerInvariant();
+        // 4. Block Self-Registration with Reserved Configured Admin Email
+        var trimmedEmail = model.Email.Trim();
+        var configuredAdminEmail = GetConfiguredAdminEmail();
+        if (!string.IsNullOrWhiteSpace(configuredAdminEmail) &&
+            string.Equals(trimmedEmail, configuredAdminEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            ModelState.AddModelError(nameof(model.Email), "This email address is reserved for system administration.");
+            return View(model);
+        }
+
+        // 5. Duplicate Email Prevention (Case-insensitive)
+        var normalizedEmail = trimmedEmail.ToLowerInvariant();
         var emailExists = await _db.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
         if (emailExists)
         {
@@ -97,20 +107,28 @@ public class AccountController : Controller
             return View(model);
         }
 
-        // 5. Construct User Entity with Secure Password Hash
+        // 6. Construct User Entity with Secure Password Hash
         var newUser = new User
         {
             Name = model.Name.Trim(),
-            Email = model.Email.Trim(),
+            Email = trimmedEmail,
             Role = canonicalRole
         };
 
         // Secure password hashing with PBKDF2-SHA256 and cryptographic salt
         newUser.PasswordHash = _passwordHasher.HashPassword(newUser, model.Password);
 
-        // 6. Persist to PostgreSQL Database
+        // 7. Persist to PostgreSQL Database
         _db.Users.Add(newUser);
-        await _db.SaveChangesAsync();
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            ModelState.AddModelError(nameof(model.Email), "An account with this email address is already registered.");
+            return View(model);
+        }
 
         // 7. Clear Feedback and Redirect to Login
         TempData["SuccessMessage"] = $"Registration successful! Welcome to the Alumni Network, {newUser.Name}. You may now sign in.";
@@ -171,21 +189,8 @@ public class AccountController : Controller
             return View(model);
         }
 
-        // 4. Secure Promotion of Configured Administrator
-        var adminEmail = _configuration["Admin:Email"]
-                         ?? Environment.GetEnvironmentVariable("ADMIN_EMAIL")
-                         ?? "admin@alumni.edu.tr";
-
-        if (!string.IsNullOrWhiteSpace(adminEmail) && string.Equals(user.Email, adminEmail, StringComparison.OrdinalIgnoreCase))
-        {
-            if (user.Role != "Administrator")
-            {
-                user.Role = "Administrator";
-                await _db.SaveChangesAsync();
-            }
-        }
-
-        // 5. Construct Claims Principal
+        // 4. Construct Claims Principal strictly from the persisted database Role
+        // (No automatic role promotion by email during login; roles are managed only via DatabaseSeeder or Admin Panel)
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -344,6 +349,16 @@ public class AccountController : Controller
         var trimmedEmail = model.Email.Trim();
         var normalizedEmail = trimmedEmail.ToLowerInvariant();
 
+        // Security: Prevent non-administrators from changing their email to the reserved configured Admin email
+        var configuredAdminEmail = GetConfiguredAdminEmail();
+        if (!string.Equals(user.Role, "Administrator", StringComparison.OrdinalIgnoreCase) &&
+            !string.IsNullOrWhiteSpace(configuredAdminEmail) &&
+            string.Equals(trimmedEmail, configuredAdminEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            ModelState.AddModelError(nameof(model.Email), "This email address is reserved for system administration.");
+            return View(model);
+        }
+
         // Check duplicate email against all OTHER users (case-insensitive)
         var emailInUse = await _db.Users.AnyAsync(u => u.Id != userId && u.Email.ToLower() == normalizedEmail);
         if (emailInUse)
@@ -356,7 +371,15 @@ public class AccountController : Controller
         user.Name = trimmedName;
         user.Email = trimmedEmail;
 
-        await _db.SaveChangesAsync();
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            ModelState.AddModelError(nameof(model.Email), "This email address is already registered to another account.");
+            return View(model);
+        }
 
         // Refresh authentication cookie claims so navbar and session reflect updated Name & Email immediately
         var authResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -394,12 +417,24 @@ public class AccountController : Controller
         return int.TryParse(userIdClaim, out var userId) ? userId : 0;
     }
 
+    private string GetConfiguredAdminEmail()
+    {
+        var envAdminEmail = Environment.GetEnvironmentVariable("ADMIN_EMAIL");
+        var configAdminEmail = _configuration["Admin:Email"];
+        return !string.IsNullOrWhiteSpace(envAdminEmail)
+            ? envAdminEmail.Trim()
+            : !string.IsNullOrWhiteSpace(configAdminEmail)
+                ? configAdminEmail.Trim()
+                : "admin@alumni.edu.tr";
+    }
+
     // GET: /Account/AccessDenied or /access-denied
     [HttpGet]
     [Route("Account/AccessDenied")]
     [Route("access-denied")]
     public IActionResult AccessDenied()
     {
+        Response.StatusCode = StatusCodes.Status403Forbidden;
         ViewData["Title"] = "Access Denied";
         ViewData["ActivePage"] = "AccessDenied";
         return View();

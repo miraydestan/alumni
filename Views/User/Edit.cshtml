@@ -69,13 +69,27 @@
                         </div>
 
                         <!-- Email -->
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label asp-for="Email" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
                                 <span data-i18n-en="Institutional Email Address *" data-i18n-tr="E-posta Adresi *">Institutional Email Address *</span>
                             </label>
                             <input asp-for="Email" class="form-control form-control-lg fs-6" type="email"
                                    style="border-color: var(--ats-gray-light); border-radius: 4px;" required />
                             <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Optional New Password -->
+                        <div class="mb-4">
+                            <label for="userEditNewPassword" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="New Password (Optional)" data-i18n-tr="Yeni Şifre (İsteğe Bağlı)">New Password (Optional)</span>
+                            </label>
+                            <input id="userEditNewPassword" name="newPassword" class="form-control form-control-lg fs-6" type="password"
+                                   placeholder="••••••••"
+                                   minlength="6"
+                                   style="border-color: var(--ats-gray-light); border-radius: 4px;" />
+                            <small class="text-muted d-block mt-1" style="font-size: 0.8rem;" data-i18n-en="Leave blank to keep the existing password (minimum 6 characters if changed)." data-i18n-tr="Mevcut şifreyi korumak için boş bırakın (değiştirilirse en az 6 karakter).">
+                                Leave blank to keep the existing password (minimum 6 characters if changed).
+                            </small>
                         </div>
 
                         <!-- Action Buttons -->

@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = $"{Model.Name} - Alumnus Profile";
     ViewData["ActivePage"] = "Users";
+    var isAdmin = User?.Identity?.IsAuthenticated == true && User.IsInRole("Administrator");
 }
 
 @functions {
@@ -102,18 +103,24 @@
 
                     <!-- Action Controls -->
                     <div class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top" style="border-color: var(--ats-gray-light) !important;">
-                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-academic-gold text-decoration-none py-2 px-4 small">
-                            <i class="bi bi-pencil me-1"></i>
-                            <span data-i18n-en="Edit Profile" data-i18n-tr="Profili Düzenle">Edit Profile</span>
-                        </a>
+                        @if (isAdmin)
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-academic-gold text-decoration-none py-2 px-4 small">
+                                <i class="bi bi-pencil me-1"></i>
+                                <span data-i18n-en="Edit Profile" data-i18n-tr="Profili Düzenle">Edit Profile</span>
+                            </a>
+                        }
                         <a asp-action="Index" class="btn btn-outline-custom py-2 px-3 small">
                             <i class="bi bi-arrow-left me-1"></i>
                             <span data-i18n-en="Back to Directory" data-i18n-tr="Dizine Dön">Back to Directory</span>
                         </a>
-                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger py-2 px-3 small ms-auto" style="border-radius: 4px; font-size: 0.85rem;">
-                            <i class="bi bi-trash me-1"></i>
-                            <span data-i18n-en="Delete Member" data-i18n-tr="Üyeyi Sil">Delete Member</span>
-                        </a>
+                        @if (isAdmin)
+                        {
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger py-2 px-3 small ms-auto" style="border-radius: 4px; font-size: 0.85rem;">
+                                <i class="bi bi-trash me-1"></i>
+                                <span data-i18n-en="Delete Member" data-i18n-tr="Üyeyi Sil">Delete Member</span>
+                            </a>
+                        }
                     </div>
 
                 </div>

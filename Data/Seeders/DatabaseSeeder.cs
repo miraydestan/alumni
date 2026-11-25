@@ -29,9 +29,14 @@ public static class DatabaseSeeder
         }
 
         // Configuration-based Admin account promotion / verification
-        var adminEmail = config?["Admin:Email"]
-                         ?? Environment.GetEnvironmentVariable("ADMIN_EMAIL")
-                         ?? "admin@alumni.edu.tr";
+        // Environment variable (ADMIN_EMAIL from .env or host/container env) takes precedence over appsettings.json
+        var envAdminEmail = Environment.GetEnvironmentVariable("ADMIN_EMAIL");
+        var configAdminEmail = config?["Admin:Email"];
+        var adminEmail = !string.IsNullOrWhiteSpace(envAdminEmail)
+            ? envAdminEmail.Trim()
+            : !string.IsNullOrWhiteSpace(configAdminEmail)
+                ? configAdminEmail.Trim()
+                : "admin@alumni.edu.tr";
 
         if (!string.IsNullOrWhiteSpace(adminEmail))
         {

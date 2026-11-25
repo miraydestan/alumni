@@ -19,7 +19,7 @@
                 </a>
             </div>
 
-            <form asp-action="CreateUser" method="post" novalidate>
+            <form asp-action="CreateUser" method="post">
                 @Html.AntiForgeryToken()
 
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4 rounded" role="alert"></div>
@@ -64,7 +64,7 @@
                         <label asp-for="Password" class="form-label fw-semibold small text-dark">Password *</label>
                         <div class="input-group">
                             <span class="input-group-text bg-white text-muted"><i class="bi bi-lock"></i></span>
-                            <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" required />
+                            <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" minlength="6" required />
                         </div>
                         <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
                         <div class="form-text small text-muted">Minimum 6 characters. Will be cryptographically salted and hashed.</div>

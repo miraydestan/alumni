@@ -198,17 +198,25 @@
                     </div>
 
                     <!-- Application Action Block -->
+                    @{
+                        var isAuthenticated = User?.Identity?.IsAuthenticated == true;
+                        var isStudent = isAuthenticated && User!.IsInRole("Student");
+                        var isAlumni = isAuthenticated && User!.IsInRole("Alumni");
+                        var currentUserIdStr = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                        int.TryParse(currentUserIdStr, out var currentUserId);
+                        var isOwnJob = isAuthenticated && currentUserId > 0 && currentUserId == Model.UserId;
+                    }
                     <div class="p-4 rounded-3 mb-5" style="background: #FAFAF7; border: 1px solid var(--ats-gold-border);">
-                        @if (User?.Identity?.IsAuthenticated == true)
+                        @if (isStudent && !isOwnJob)
                         {
                             <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
                                 <div>
-                                    <h4 class="h6 academic-serif fw-bold mb-1" style="color: var(--ats-navy);" data-i18n-en="Submit Application as Verified Alumnus" data-i18n-tr="Onaylı Mezun Olarak Başvur">
-                                        Submit Application as Verified Alumnus
+                                    <h4 class="h6 academic-serif fw-bold mb-1" style="color: var(--ats-navy);" data-i18n-en="Submit Application as Verified Student" data-i18n-tr="Onaylı Öğrenci Olarak Başvur">
+                                        Submit Application as Verified Student
                                     </h4>
                                     <p class="small text-muted mb-0">
                                         <span data-i18n-en="You are authenticated as:" data-i18n-tr="Oturum açan kullanıcı:">You are authenticated as:</span>
-                                        <strong class="text-dark">@User.Identity.Name</strong>.
+                                        <strong class="text-dark">@User!.Identity!.Name</strong>.
                                     </p>
                                 </div>
                                 <form asp-action="Apply" asp-route-id="@Model.Id" method="post" class="m-0">
@@ -220,24 +228,50 @@
                                 </form>
                             </div>
                         }
+                        else if (isAuthenticated)
+                        {
+                            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+                                <div>
+                                    <h4 class="h6 academic-serif fw-bold mb-1" style="color: var(--ats-navy);" data-i18n-en="Student-Only Application Policy" data-i18n-tr="Yalnızca Öğrenci Başvurusu">
+                                        Student-Only Application Policy
+                                    </h4>
+                                    <p class="small text-muted mb-0" data-i18n-en="Job applications can only be submitted by Student accounts and cannot be submitted to one's own job posting." data-i18n-tr="İş ilanlarına yalnızca Öğrenci hesapları başvurabilir ve kullanıcılar kendi oluşturdukları ilanlara başvuramaz.">
+                                        Job applications can only be submitted by Student accounts and cannot be submitted to one's own job posting.
+                                    </p>
+                                </div>
+                                @if (isAlumni)
+                                {
+                                    <a href="/JobPosting/MyJobPostings" class="btn btn-outline-custom text-nowrap">
+                                        <i class="bi bi-clipboard-check me-1" style="color: var(--ats-gold);"></i>
+                                        <span data-i18n-en="My Job Postings" data-i18n-tr="İlanlarım">My Job Postings</span>
+                                    </a>
+                                }
+                            </div>
+                        }
                         else
                         {
                             <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
                                 <div>
                                     <div class="d-flex align-items-center gap-2 mb-1">
                                         <i class="bi bi-shield-lock text-warning fs-5"></i>
-                                        <h4 class="h6 academic-serif fw-bold mb-0" style="color: var(--ats-navy);" data-i18n-en="Authentication Required to Apply" data-i18n-tr="Başvuru İçin Oturum Açılmalıdır">
-                                            Authentication Required to Apply
+                                        <h4 class="h6 academic-serif fw-bold mb-0" style="color: var(--ats-navy);" data-i18n-en="Sign In Required to Apply" data-i18n-tr="Başvuru İçin Giriş Yapılmalıdır">
+                                            Sign In Required to Apply
                                         </h4>
                                     </div>
-                                    <p class="small text-muted mb-0" data-i18n-en="In accordance with alumni governance and candidate verification standards, candidate applications must be registered under verified alumni session identities." data-i18n-tr="Mezun yönetimi ve aday doğrulama kuralları uyarınca iş başvuruları yalnızca onaylı mezun oturumları üzerinden kabul edilmektedir.">
-                                        In accordance with alumni governance and candidate verification standards, candidate applications must be registered under verified alumni session identities.
+                                    <p class="small text-muted mb-0" data-i18n-en="Please sign in with your Student account to submit an application for this position." data-i18n-tr="Bu pozisyona başvurmak için lütfen Öğrenci hesabınızla giriş yapınız.">
+                                        Please sign in with your Student account to submit an application for this position.
                                     </p>
                                 </div>
-                                <button type="button" class="btn btn-outline-custom text-nowrap" data-bs-toggle="modal" data-bs-target="#loginNoticeModal">
-                                    <i class="bi bi-box-arrow-in-right me-1" style="color: var(--ats-gold);"></i>
-                                    <span data-i18n-en="Member Login Notice" data-i18n-tr="Giriş Bilgisi">Member Login Notice</span>
-                                </button>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="/Account/Login?ReturnUrl=@Uri.EscapeDataString($"/JobPosting/Details/{Model.Id}")" class="btn btn-academic-gold text-decoration-none text-nowrap py-2 px-3 small">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i>
+                                        <span data-i18n-en="Sign In" data-i18n-tr="Giriş Yap">Sign In</span>
+                                    </a>
+                                    <a href="/Account/Register" class="btn btn-outline-custom text-nowrap py-2 px-3 small">
+                                        <i class="bi bi-person-plus me-1" style="color: var(--ats-gold);"></i>
+                                        <span data-i18n-en="Register" data-i18n-tr="Kayıt Ol">Register</span>
+                                    </a>
+                                </div>
                             </div>
                         }
                     </div>

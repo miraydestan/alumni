@@ -3,6 +3,10 @@
 @{
     ViewData["Title"] = "Delete Alumnus Record";
     ViewData["ActivePage"] = "Users";
+    var isCurrentAdmin = ViewBag.IsCurrentAdmin is bool b && b;
+    var jobCount = ViewBag.JobPostingCount is int jc ? jc : 0;
+    var appCount = ViewBag.ApplicationCount is int ac ? ac : 0;
+    var hasDependencies = jobCount > 0 || appCount > 0;
 }
 
 <!-- Section 1: Institutional Hero Header -->
@@ -82,19 +86,53 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
-                        @Html.AntiForgeryToken()
-                        <div class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top" style="border-color: var(--ats-gray-light) !important;">
-                            <button type="submit" class="btn btn-danger py-2 px-4 small" style="border-radius: 4px; font-weight: 600;">
-                                <i class="bi bi-trash me-1"></i>
-                                <span data-i18n-en="Permanently Delete" data-i18n-tr="Kalıcı Olarak Sil">Permanently Delete</span>
-                            </button>
+                    @if (isCurrentAdmin)
+                    {
+                        <div class="alert alert-danger py-3 small mb-3 rounded" role="alert">
+                            <i class="bi bi-shield-x me-1"></i>
+                            <strong data-i18n-en="Self-Deletion Prohibited:" data-i18n-tr="Kendi Hesabınızı Silemezsiniz:">Self-Deletion Prohibited:</strong>
+                            <span data-i18n-en="You cannot delete the active administrator account you are currently logged in with." data-i18n-tr="Şu anda oturum açmış olduğunuz yönetici hesabını silemezsiniz.">You cannot delete the active administrator account you are currently logged in with.</span>
+                        </div>
+                        <div class="pt-2 border-top" style="border-color: var(--ats-gray-light) !important;">
                             <a asp-action="Index" class="btn btn-outline-custom py-2 px-3 small">
-                                <i class="bi bi-x-circle me-1"></i>
-                                <span data-i18n-en="Cancel" data-i18n-tr="İptal">Cancel</span>
+                                <i class="bi bi-arrow-left me-1"></i>
+                                <span data-i18n-en="Back to Directory" data-i18n-tr="Dizine Dön">Back to Directory</span>
                             </a>
                         </div>
-                    </form>
+                    }
+                    else if (hasDependencies)
+                    {
+                        <div class="alert alert-warning py-3 small mb-3 rounded" role="alert">
+                            <i class="bi bi-shield-exclamation me-1"></i>
+                            <strong data-i18n-en="Active Record Dependencies Detected:" data-i18n-tr="Bağlı Kayıtlar Tespit Edildi:">Active Record Dependencies Detected:</strong>
+                            <span data-i18n-en="@jobCount job postings, @appCount applications. Accounts with active records cannot be deleted (ON DELETE RESTRICT)."
+                                  data-i18n-tr="@jobCount iş ilanı, @appCount başvuru bulunmaktadır. Aktif kaydı olan hesaplar silinemez (ON DELETE RESTRICT).">
+                                @jobCount job postings, @appCount applications. Accounts with active records cannot be deleted (ON DELETE RESTRICT).
+                            </span>
+                        </div>
+                        <div class="pt-2 border-top" style="border-color: var(--ats-gray-light) !important;">
+                            <a asp-action="Index" class="btn btn-outline-custom py-2 px-3 small">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                <span data-i18n-en="Back to Directory" data-i18n-tr="Dizine Dön">Back to Directory</span>
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                            @Html.AntiForgeryToken()
+                            <div class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top" style="border-color: var(--ats-gray-light) !important;">
+                                <button type="submit" class="btn btn-danger py-2 px-4 small" style="border-radius: 4px; font-weight: 600;">
+                                    <i class="bi bi-trash me-1"></i>
+                                    <span data-i18n-en="Permanently Delete" data-i18n-tr="Kalıcı Olarak Sil">Permanently Delete</span>
+                                </button>
+                                <a asp-action="Index" class="btn btn-outline-custom py-2 px-3 small">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    <span data-i18n-en="Cancel" data-i18n-tr="İptal">Cancel</span>
+                                </a>
+                            </div>
+                        </form>
+                    }
 
                 </div>
             </div>

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Alumni.Data;
@@ -7,6 +8,7 @@ using Alumni.Models;
 namespace Alumni.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/jobs")]
 [Tags("Jobs")]
 public class ApiJobController : ControllerBase
@@ -18,13 +20,19 @@ public class ApiJobController : ControllerBase
         _db = db;
     }
 
-    // GET: /api/jobs/{id}/applications
-    [HttpGet("{id}/applications")]
+    // GET: /api/jobs/{id}/applications (Administrator or Alumni owner of the job posting)
+    [Authorize(Roles = "Alumni,Administrator")]
+    [HttpGet("{id:int}/applications")]
     public async Task<IActionResult> GetApplicationsByJobId(int id)
     {
         var job = await _db.JobPostings.FindAsync(id);
         if (job == null)
             return NotFound();
+
+        var currentUserId = GetCurrentUserId();
+        var isAdmin = User.IsInRole("Administrator");
+        if (!isAdmin && (currentUserId <= 0 || job.UserId != currentUserId))
+            return Forbid();
 
         var applications = await _db.Applications
             .Where(a => a.JobPostingId == id)
@@ -33,8 +41,8 @@ public class ApiJobController : ControllerBase
         return Ok(applications);
     }
 
-    // GET: /api/jobs/{id}/applications/{applicationId}
-    [HttpGet("{id}/applications/{applicationId}")]
+    // GET: /api/jobs/{id}/applications/{applicationId} (Administrator, Alumni owner of the job, or Student applicant)
+    [HttpGet("{id:int}/applications/{applicationId:int}")]
     public async Task<IActionResult> GetApplicationById(int id, int applicationId)
     {
         var job = await _db.JobPostings.FindAsync(id);
@@ -47,51 +55,51 @@ public class ApiJobController : ControllerBase
         if (application == null)
             return NotFound();
 
+        var currentUserId = GetCurrentUserId();
+        var isAdmin = User.IsInRole("Administrator");
+        var isJobOwner = User.IsInRole("Alumni") && currentUserId > 0 && job.UserId == currentUserId;
+        var isApplicant = User.IsInRole("Student") && currentUserId > 0 && application.UserId == currentUserId;
+
+        if (!isAdmin && !isJobOwner && !isApplicant)
+            return Forbid();
+
         return Ok(application);
     }
 
-    // POST: /api/jobs/{id}/applications
-    [HttpPost("{id}/applications")]
-    public async Task<IActionResult> CreateApplicationForJob(int id, [FromBody] CreateApplicationRequest request)
+    // POST: /api/jobs/{id}/applications (Student only; own identity from claims; cannot apply to own job)
+    [Authorize(Roles = "Student")]
+    [HttpPost("{id:int}/applications")]
+    public async Task<IActionResult> CreateApplicationForJob(int id, [FromBody] CreateApplicationRequest? request)
     {
         var job = await _db.JobPostings.FindAsync(id);
         if (job == null)
             return NotFound();
 
-        if (request == null)
-            return BadRequest();
-
-        // Gerçek kullanıcı kimliği doğrulanamıyorsa başvuru oluşturulmasına izin verilmez (Fail-Closed)
-        if (User?.Identity?.IsAuthenticated != true)
-        {
-            return Unauthorized(new
-            {
-                message = "Authentication is required to apply for a job posting. Client-supplied user_id cannot be accepted as verified identity."
-            });
-        }
-
-        // İleride kimlik doğrulama eklendiğinde kullanıcı kimliği ClaimTypes.NameIdentifier üzerinden alınır
-        var claimValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (!int.TryParse(claimValue, out var authenticatedUserId) || authenticatedUserId <= 0)
+        var authenticatedUserId = GetCurrentUserId();
+        if (authenticatedUserId <= 0)
         {
             return Unauthorized(new { message = "Invalid user identity claim in session." });
         }
 
-        // İstemcinin gönderdiği user_id ile doğrulanmış kullanıcı kimliği eşleşmelidir
-        var applicantId = request.EffectiveUserId;
+        // Reject spoofing attempts if client supplies a mismatched user_id
+        var applicantId = request?.EffectiveUserId ?? 0;
         if (applicantId > 0 && applicantId != authenticatedUserId)
         {
             return Forbid();
         }
 
-        var effectiveUserId = authenticatedUserId;
+        // Prevent self-application
+        if (job.UserId == authenticatedUserId)
+        {
+            return BadRequest(new { message = "You cannot apply to your own job posting." });
+        }
 
-        var user = await _db.Users.FindAsync(effectiveUserId);
+        var user = await _db.Users.FindAsync(authenticatedUserId);
         if (user == null)
             return NotFound(new { message = "Authenticated user does not exist in the database." });
 
         var alreadyApplied = await _db.Applications
-            .AnyAsync(a => a.UserId == effectiveUserId && a.JobPostingId == id);
+            .AnyAsync(a => a.UserId == authenticatedUserId && a.JobPostingId == id);
 
         if (alreadyApplied)
             return Conflict(new { message = "User has already applied for this job posting." });
@@ -99,13 +107,26 @@ public class ApiJobController : ControllerBase
         var application = new Application
         {
             JobPostingId = id,
-            UserId = effectiveUserId,
-            Status = string.IsNullOrWhiteSpace(request.Status) ? "applied" : request.Status.Trim()
+            UserId = authenticatedUserId,
+            Status = "applied"
         };
 
         _db.Applications.Add(application);
-        await _db.SaveChangesAsync();
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return Conflict(new { message = "User has already applied for this job posting." });
+        }
 
         return Created($"/api/jobs/{id}/applications/{application.Id}", application);
+    }
+
+    private int GetCurrentUserId()
+    {
+        var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return int.TryParse(claimValue, out var userId) ? userId : 0;
     }
 }

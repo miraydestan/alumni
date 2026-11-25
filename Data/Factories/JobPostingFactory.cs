@@ -9,9 +9,15 @@ public static class JobPostingFactory
         if (users == null || users.Count == 0)
             return [];
 
-        var u1 = users[0].Id;
-        var u2 = users.Count > 1 ? users[1].Id : u1;
-        var u3 = users.Count > 2 ? users[2].Id : u1;
+        // Assign seeded job postings to Alumni accounts rather than Administrator/Student accounts
+        var alumniUsers = users
+            .Where(u => string.Equals(u.Role, "Alumni", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        var owners = alumniUsers.Count > 0 ? alumniUsers : users;
+
+        var u1 = owners[0].Id;
+        var u2 = owners.Count > 1 ? owners[1].Id : u1;
+        var u3 = owners.Count > 2 ? owners[2].Id : u1;
 
         return
         [

@@ -444,43 +444,6 @@
         });
     </script>
 
-    <!-- Institutional Member Login Information Modal -->
-    <div class="modal fade" id="loginNoticeModal" tabindex="-1" aria-labelledby="loginNoticeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="background-color: var(--ats-navy-dark); color: #FFFFFF; border: 1px solid var(--ats-gold-border) !important;">
-                <div class="modal-header border-0 pb-0">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="brand-emblem" style="width: 32px; height: 32px; font-size: 1rem;">
-                            <i class="bi bi-mortarboard"></i>
-                        </span>
-                        <h5 class="modal-title academic-serif" id="loginNoticeModalLabel" style="color: #FFFFFF;" data-i18n-en="Alumni Portal Access" data-i18n-tr="Mezun Portalı Girişi">Alumni Portal Access</h5>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body py-4">
-                    <div class="p-3 mb-3 rounded" style="background: rgba(197, 164, 109, 0.1); border: 1px solid var(--ats-gold-border);">
-                        <div class="small fw-semibold mb-1" style="color: var(--ats-gold);" data-i18n-en="Single Sign-On (SSO) Notice" data-i18n-tr="Tek Oturum Açma (SSO) Bilgilendirmesi">
-                            Single Sign-On (SSO) Notice
-                        </div>
-                        <p class="small mb-0 text-white-50" data-i18n-en="The institutional member authentication infrastructure is scheduled in the university development roadmap. Direct alumni login will be enabled once institutional identity integration is complete." data-i18n-tr="Üye kimlik doğrulama altyapısı üniversite geliştirme takviminde planlanmaktadır. Kurumsal kimlik entegrasyonu tamamlandığında mezun portalı girişi aktifleşecektir.">
-                            The institutional member authentication infrastructure is scheduled in the university development roadmap. Direct alumni login will be enabled once institutional identity integration is complete.
-                        </p>
-                    </div>
-                    <p class="small text-white-50 mb-0" data-i18n-en="Public visitors can freely browse the alumni directory, read campus announcements, and explore career postings without logging in." data-i18n-tr="Ziyaretçilerimiz oturum açmaya gerek kalmadan mezunlar dizinini inceleyebilir, duyuruları okuyabilir ve kariyer fırsatlarını görüntüleyebilir.">
-                        Public visitors can freely browse the alumni directory, read campus announcements, and explore career postings without logging in.
-                    </p>
-                </div>
-                <div class="modal-footer border-0 pt-0 d-flex justify-content-between">
-                    <a href="/Account/Register" class="btn-academic-gold py-2 px-3 small text-decoration-none" data-i18n-en="Register as Member" data-i18n-tr="Üye Olarak Kaydol">
-                        <i class="bi bi-person-plus-fill me-1"></i>
-                        <span data-i18n-en="Register as Member" data-i18n-tr="Üye Olarak Kaydol">Register as Member</span>
-                    </a>
-                    <button type="button" class="btn-academic-outline py-2 px-3 small" data-bs-dismiss="modal" data-i18n-en="Close" data-i18n-tr="Kapat">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

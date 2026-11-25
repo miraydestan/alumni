@@ -84,7 +84,8 @@ public class JobPostingController : Controller
         return View(job);
     }
 
-    // POST: /JobPosting/Apply/{id}
+    // POST: /JobPosting/Apply/{id} (Student Only; cannot apply to own job posting)
+    [Authorize(Roles = "Student")]
     [HttpPost]
     [Route("JobPosting/Apply/{id}")]
     [ValidateAntiForgeryToken]
@@ -94,19 +95,12 @@ public class JobPostingController : Controller
         if (job == null)
             return NotFound();
 
-        // Oturum açılmamışsa başka kullanıcı adına başvuruya izin verilmez
-        if (User?.Identity?.IsAuthenticated != true)
-        {
-            TempData["ErrorMessage"] = "Başvuru yapabilmek için sisteme giriş yapmış olmanız gerekmektedir. Başka bir kullanıcı adına başvuru yapılamaz.";
-            return RedirectToAction(nameof(Applications), new { id });
-        }
-
         // Kullanıcı kimliği form parametresinden değil, güvenilir oturum claim'inden alınır
-        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (!int.TryParse(userIdClaim, out var userId) || userId <= 0)
+        var userId = GetCurrentUserId();
+        if (userId <= 0)
         {
             TempData["ErrorMessage"] = "Geçersiz kullanıcı oturumu. Lütfen tekrar giriş yapınız.";
-            return RedirectToAction(nameof(Applications), new { id });
+            return RedirectToAction("Login", "Account");
         }
 
         var user = await _db.Users.FindAsync(userId);
@@ -114,6 +108,13 @@ public class JobPostingController : Controller
         {
             TempData["ErrorMessage"] = "Oturum açmış kullanıcı sistemde bulunamadı.";
             return RedirectToAction(nameof(Applications), new { id });
+        }
+
+        // Kullanıcı kendi oluşturduğu ilana başvuramaz
+        if (job.UserId == userId)
+        {
+            TempData["ErrorMessage"] = "Kendi oluşturduğunuz iş ilanına başvuramazsınız.";
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         var alreadyApplied = await _db.Applications
@@ -133,7 +134,15 @@ public class JobPostingController : Controller
         };
 
         _db.Applications.Add(application);
-        await _db.SaveChangesAsync();
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            TempData["ErrorMessage"] = "Bu ilana daha önce başvurdunuz. Aynı ilana mükerrer başvuru yapılamaz.";
+            return RedirectToAction(nameof(Applications), new { id });
+        }
 
         TempData["SuccessMessage"] = $"Sayın {user.Name}, başvurunuz başarıyla alındı!";
         return RedirectToAction(nameof(Applications), new { id });

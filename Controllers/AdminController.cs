@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -146,7 +148,15 @@ public class AdminController : Controller
         newUser.PasswordHash = _passwordHasher.HashPassword(newUser, model.Password);
 
         _db.Users.Add(newUser);
-        await _db.SaveChangesAsync();
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            ModelState.AddModelError(nameof(model.Email), "A user with this email address is already registered.");
+            return View(model);
+        }
 
         TempData["SuccessMessage"] = $"User '{newUser.Name}' ({newUser.Email}) was successfully created as {newUser.Role}.";
         return RedirectToAction(nameof(Users));
@@ -270,7 +280,44 @@ public class AdminController : Controller
             user.PasswordHash = _passwordHasher.HashPassword(user, model.NewPassword);
         }
 
-        await _db.SaveChangesAsync();
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            ModelState.AddModelError(nameof(model.Email), "Another user with this email address already exists.");
+            return View(model);
+        }
+
+        // Refresh authentication cookie claims if the administrator updated their own profile
+        if (model.IsCurrentAdmin)
+        {
+            var authResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var isPersistent = authResult.Properties?.IsPersistent ?? false;
+            var expiresUtc = authResult.Properties?.ExpiresUtc;
+
+            var updatedClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
+            };
+
+            var updatedIdentity = new ClaimsIdentity(updatedClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var updatedPrincipal = new ClaimsPrincipal(updatedIdentity);
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = isPersistent,
+                ExpiresUtc = isPersistent ? (expiresUtc ?? DateTimeOffset.UtcNow.AddDays(7)) : null
+            };
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                updatedPrincipal,
+                authProperties);
+        }
 
         TempData["SuccessMessage"] = $"User '{user.Name}' was successfully updated.";
         return RedirectToAction(nameof(Users));
@@ -338,9 +385,16 @@ public class AdminController : Controller
         }
 
         _db.Users.Remove(user);
-        await _db.SaveChangesAsync();
+        try
+        {
+            await _db.SaveChangesAsync();
+            TempData["SuccessMessage"] = $"User '{user.Name}' ({user.Email}) was successfully removed.";
+        }
+        catch (DbUpdateException)
+        {
+            TempData["ErrorMessage"] = $"Cannot delete user '{user.Name}' because related records still reference this account.";
+        }
 
-        TempData["SuccessMessage"] = $"User '{user.Name}' ({user.Email}) was successfully removed.";
         return RedirectToAction(nameof(Users));
     }
 

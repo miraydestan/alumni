@@ -9,6 +9,7 @@
 
     var currentLang = Context.Request.Cookies["alumni_language"] ?? "en";
     var isTr = currentLang == "tr";
+    var isAdmin = User?.Identity?.IsAuthenticated == true && User.IsInRole("Administrator");
 }
 
 <!-- Section 1: Institutional Hero Header -->
@@ -66,17 +67,20 @@
                     </select>
                 </div>
 
-                <!-- Action Cluster: Manage in Admin & Publish Action -->
-                <div class="col-12 col-sm-6 col-md-4 col-lg-4 text-sm-end d-flex justify-content-start justify-content-sm-end gap-2 flex-wrap">
-                    <a asp-controller="AnnouncementAdmin" asp-action="Index" class="btn btn-outline-custom">
-                        <i class="bi bi-gear me-1" style="color: var(--ats-gold);"></i>
-                        <span data-i18n-en="Manage Bulletins" data-i18n-tr="Duyuruları Yönet">Manage Bulletins</span>
-                    </a>
-                    <a asp-controller="AnnouncementAdmin" asp-action="Create" class="btn-academic-gold text-decoration-none py-2 px-3 small">
-                        <i class="bi bi-plus-circle me-1"></i>
-                        <span data-i18n-en="Publish" data-i18n-tr="Yayımla">Publish</span>
-                    </a>
-                </div>
+                <!-- Action Cluster: Manage in Admin & Publish Action (Administrator Only) -->
+                @if (isAdmin)
+                {
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-4 text-sm-end d-flex justify-content-start justify-content-sm-end gap-2 flex-wrap">
+                        <a asp-controller="AnnouncementAdmin" asp-action="Index" class="btn btn-outline-custom">
+                            <i class="bi bi-gear me-1" style="color: var(--ats-gold);"></i>
+                            <span data-i18n-en="Manage Bulletins" data-i18n-tr="Duyuruları Yönet">Manage Bulletins</span>
+                        </a>
+                        <a asp-controller="AnnouncementAdmin" asp-action="Create" class="btn-academic-gold text-decoration-none py-2 px-3 small">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            <span data-i18n-en="Publish" data-i18n-tr="Yayımla">Publish</span>
+                        </a>
+                    </div>
+                }
             </div>
 
             <!-- Active Directory Counter Strip -->
@@ -108,9 +112,12 @@
                 <p class="academic-lead mx-auto mb-4" style="max-width: 520px;" data-i18n-en="There are currently no published campus announcements or official communiqués in the platform database." data-i18n-tr="Sistemde henüz yayımlanmış bir kampüs duyurusu veya resmî üniversite tebliği bulunmamaktadır.">
                     There are currently no published campus announcements or official communiqués in the platform database.
                 </p>
-                <a asp-controller="AnnouncementAdmin" asp-action="Create" class="btn-academic-gold" data-i18n-en="Post First Announcement" data-i18n-tr="İlk Duyuruyu Yayımla">
-                    Post First Announcement
-                </a>
+                @if (isAdmin)
+                {
+                    <a asp-controller="AnnouncementAdmin" asp-action="Create" class="btn-academic-gold" data-i18n-en="Post First Announcement" data-i18n-tr="İlk Duyuruyu Yayımla">
+                        Post First Announcement
+                    </a>
+                }
             </div>
         }
         else
@@ -188,9 +195,12 @@
                                         <a asp-action="Details" asp-route-id="@featured.Id" class="btn-academic-gold text-decoration-none px-4 py-2">
                                             <span data-i18n-en="Read Full Announcement &rarr;" data-i18n-tr="Duyurunun Tamamını Oku &rarr;">Read Full Announcement &rarr;</span>
                                         </a>
-                                        <a asp-controller="AnnouncementAdmin" asp-action="Edit" asp-route-id="@featured.Id" class="btn btn-outline-secondary btn-sm" title="Edit in Admin">
-                                            <i class="bi bi-pencil me-1"></i> <span data-i18n-en="Edit" data-i18n-tr="Düzenle">Edit</span>
-                                        </a>
+                                        @if (isAdmin)
+                                        {
+                                            <a asp-controller="AnnouncementAdmin" asp-action="Edit" asp-route-id="@featured.Id" class="btn btn-outline-secondary btn-sm" title="Edit in Admin">
+                                                <i class="bi bi-pencil me-1"></i> <span data-i18n-en="Edit" data-i18n-tr="Düzenle">Edit</span>
+                                            </a>
+                                        }
                                     </div>
                                 </div>
 
@@ -286,9 +296,12 @@
                                             <span data-i18n-en="Read Details" data-i18n-tr="Detayları Oku">Read Details</span>
                                         </a>
 
-                                        <a asp-controller="AnnouncementAdmin" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm" title="Edit Announcement">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
+                                        @if (isAdmin)
+                                        {
+                                            <a asp-controller="AnnouncementAdmin" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm" title="Edit Announcement">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        }
                                     </div>
                                 </div>
                             </div>

@@ -14,6 +14,7 @@
 
     var wordCount = (isTr ? contentTr : contentEn).Split(new[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Length;
     var readTimeMin = Math.Max(1, (int)Math.Ceiling(wordCount / 160.0));
+    var isAdmin = User?.Identity?.IsAuthenticated == true && User.IsInRole("Administrator");
 }
 
 <!-- Section 1: Institutional Article Header -->
@@ -128,12 +129,15 @@
                             <span data-i18n-en="Back to Announcements" data-i18n-tr="Tüm Duyurulara Dön">Back to Announcements</span>
                         </a>
 
-                        <div class="d-flex align-items-center gap-2">
-                            <a asp-controller="AnnouncementAdmin" asp-action="Edit" asp-route-id="@Model.Id" class="btn-academic-gold text-decoration-none py-2 px-3 small">
-                                <i class="bi bi-pencil me-1"></i>
-                                <span data-i18n-en="Edit in Admin" data-i18n-tr="Yönetici Panelinde Düzenle">Edit in Admin</span>
-                            </a>
-                        </div>
+                        @if (isAdmin)
+                        {
+                            <div class="d-flex align-items-center gap-2">
+                                <a asp-controller="AnnouncementAdmin" asp-action="Edit" asp-route-id="@Model.Id" class="btn-academic-gold text-decoration-none py-2 px-3 small">
+                                    <i class="bi bi-pencil me-1"></i>
+                                    <span data-i18n-en="Edit in Admin" data-i18n-tr="Yönetici Panelinde Düzenle">Edit in Admin</span>
+                                </a>
+                            </div>
+                        }
                     </div>
                 </article>
 

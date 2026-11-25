@@ -138,12 +138,36 @@
                     </select>
                 </div>
 
-                <!-- Info Pill Button -->
+                <!-- Role-Aware Action Button -->
                 <div class="col-12 col-sm-6 col-md-2 col-lg-3 text-sm-end">
-                    <button type="button" class="btn btn-outline-custom w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#loginNoticeModal">
-                        <i class="bi bi-info-circle me-1" style="color: var(--ats-gold);"></i>
-                        <span data-i18n-en="Post Opportunity" data-i18n-tr="İlan Yayınla">Post Opportunity</span>
-                    </button>
+                    @if (User?.Identity?.IsAuthenticated == true && User.IsInRole("Alumni"))
+                    {
+                        <a href="/JobPosting/MyJobPostings" class="btn btn-academic-gold text-decoration-none w-100 w-sm-auto py-2 px-3 small">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            <span data-i18n-en="Post Opportunity" data-i18n-tr="İlan Yayınla">Post Opportunity</span>
+                        </a>
+                    }
+                    else if (User?.Identity?.IsAuthenticated == true && User.IsInRole("Student"))
+                    {
+                        <a href="/JobPosting/MyApplications" class="btn btn-outline-custom w-100 w-sm-auto">
+                            <i class="bi bi-file-earmark-check me-1" style="color: var(--ats-gold);"></i>
+                            <span data-i18n-en="My Applications" data-i18n-tr="Başvurularım">My Applications</span>
+                        </a>
+                    }
+                    else if (User?.Identity?.IsAuthenticated == true && User.IsInRole("Administrator"))
+                    {
+                        <a href="/Admin" class="btn btn-outline-custom w-100 w-sm-auto">
+                            <i class="bi bi-speedometer2 me-1" style="color: var(--ats-gold);"></i>
+                            <span data-i18n-en="Admin Panel" data-i18n-tr="Yönetici Paneli">Admin Panel</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/Account/Login?ReturnUrl=%2FJobPosting" class="btn btn-outline-custom w-100 w-sm-auto">
+                            <i class="bi bi-box-arrow-in-right me-1" style="color: var(--ats-gold);"></i>
+                            <span data-i18n-en="Sign In" data-i18n-tr="Giriş Yap">Sign In</span>
+                        </a>
+                    }
                 </div>
             </div>
 

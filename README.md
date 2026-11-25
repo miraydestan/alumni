@@ -39,7 +39,7 @@ NotFoundGuardianMiddleware      --> Returns JSON 404 with reason for API / JSON 
 MVC 404 Re-Execution (non-API)  --> Re-executes /Home/NotFound (Views/Shared/NotFound.cshtml) on 404
         |
         v
-ASP.NET Core Routing & Controllers
+ASP.NET Core Routing -> Authentication -> Authorization -> Controllers
         |
         v
 AlumniDbContext (EF Core + Npgsql) --> PostgreSQL Database
@@ -52,10 +52,12 @@ Server Errors (ILogger LogLevel >= Error) --> Console + logs/error.logs (FileErr
 
 ## Current Features
 
-- **User management:** MVC CRUD pages (`/User`, `/users`) and a REST API (`/api/users`).
+- **Authentication & Authorization:** Cookie-based authentication (`Alumni.Auth`), PBKDF2-SHA256 password hashing (`IPasswordHasher<User>`), self-registration (`/Account/Register`), login/logout (`/Account/Login`, `POST /Account/Logout`), personal profile management (`/Account/Profile`, `/Account/EditProfile`), and role-based access control (`Administrator`, `Alumni`, `Student`) across both MVC and Web API controllers.
+- **Admin Panel:** Dedicated administration portal (`/Admin`, `/Admin/Users`) with executive dashboard statistics, full user CRUD with role management and safety guards, plus Announcement Administration (`/AnnouncementAdmin`).
+- **User management:** Public Alumni directory (`/User`, `/users`, `/User/Details/{id}`), Administrator-protected write actions, and role/ownership-protected REST API (`/api/users`).
 - **Announcements:** Public announcement list and details pages (`/Announcement`, `/Announcement/Details/{id}`).
-- **Announcement administration:** Create, view, edit, and delete announcements (`/AnnouncementAdmin`).
-- **Job postings and applications:** MVC views (`/JobPosting`, `/jobs`) and REST API endpoints (`/api/users/{id}/jobs`, `/api/jobs/{id}/applications`, `/api/applications`), with fail-closed `401 Unauthorized` protection on application creation endpoints until authentication is implemented.
+- **Announcement administration:** Create, view, edit, and delete announcements (`/AnnouncementAdmin`, Administrator only).
+- **Job postings and applications:** Public job listings (`/JobPosting`, `/jobs`), Alumni job management (`/JobPosting/MyJobPostings`, `/JobPosting/ApplicationsReceived`), Student applications (`/JobPosting/MyApplications`, `POST /JobPosting/Apply/{id}`), and authenticated role/ownership-scoped REST API endpoints (`/api/users/{id}/jobs`, `/api/users/{id}/applications`, `/api/jobs/{id}/applications`, `/api/applications`).
 - **Health and utility endpoints:** `/api/health`, `/hello`, `/hello/miray`, and `/sum/{number1}/{number2}`.
 - **Swagger UI:** `/api/swagger` (with `/swagger` redirecting to `/api/swagger`).
 - **Request Logger Middleware (`Middleware/RequestLoggingMiddleware.cs`):** Measures request duration with `Stopwatch` and logs every completed MVC and Web API request once to the console in the format `HH:mm:ss METHOD /route restype STATUS DURATIONms`.
@@ -63,7 +65,7 @@ Server Errors (ILogger LogLevel >= Error) --> Console + logs/error.logs (FileErr
 - **404 Guardian Middleware (`Middleware/NotFoundGuardianMiddleware.cs`):** Intercepts unstarted `404` responses on API requests (or `Accept: application/json`) and returns a structured JSON error payload (`statusCode`, `title`, `reason`, `path`).
 - **Generic MVC 404 Page (`Views/Shared/NotFound.cshtml` via `HomeController.PageNotFound`):** Displays a Bootstrap-styled `"404 – Page Not Found"` view with a **Back to Home** button (`href="/"`) for invalid browser/MVC requests while preserving JSON `404` responses for API clients.
 - **File Error Logging (`Logging/FileErrorLoggerProvider.cs`):** Hooks into `ILogger` (`ILoggerProvider`) to automatically create `logs/` and persist server-side error logs (`LogLevel.Error` / `LogLevel.Critical`) into `logs/error.logs` with thread-safe appends and credential sanitization, alongside existing console logging.
-- **Database migrations and seeding:** EF Core migrations (`InitialCreate`, `AddJobPostings`, `AddApplications`) in `Migrations/`, and `DatabaseSeeder` inserting initial users, announcements, and job postings when tables are empty.
+- **Database migrations and seeding:** EF Core migrations (`InitialCreate`, `AddJobPostings`, `AddApplications`, `AddBilingualAnnouncementFields`, `AddUserAuthenticationAndRoles`) in `Migrations/`, and `DatabaseSeeder` inserting initial users (with hashed passwords), announcements, and job postings when tables are empty.
 
 The active CRUD controllers use dependency-injected `AlumniDbContext` and persist changes to PostgreSQL. `Models/UserStore.cs` and `Models/AnnouncementStore.cs`, if still present in the repository, should not be described as the active storage mechanism for these controllers.
 
@@ -73,7 +75,7 @@ The application uses ASP.NET Core Cookie Authentication and role-based authoriza
 
 ### Authentication
 
-- **Cookie Authentication (`Program.cs`):** Configured with `CookieAuthenticationDefaults.AuthenticationScheme` (`Alumni.Auth` cookie), `HttpOnly = true`, `SameSite = SameSiteMode.Lax`, `SecurePolicy = CookieSecurePolicy.SameAsRequest`, and a 7-day sliding expiration (`ExpireTimeSpan = TimeSpan.FromDays(7)`, `SlidingExpiration = true`).
+- **Cookie Authentication (`Program.cs`):** Configured with `CookieAuthenticationDefaults.AuthenticationScheme` (`Alumni.Auth` cookie), `HttpOnly = true`, `SameSite = SameSiteMode.Lax`, `SecurePolicy = CookieSecurePolicy.SameAsRequest`, and a 7-day sliding expiration (`ExpireTimeSpan = TimeSpan.FromDays(7)`, `SlidingExpiration = true`). Custom `CookieAuthenticationEvents` (`OnRedirectToLogin` and `OnRedirectToAccessDenied`) return structured JSON `401 Unauthorized` and `403 Forbidden` responses for `/api/*` (or `Accept: application/json`) requests instead of HTML redirects.
 - **Middleware Pipeline Order:** `Program.cs` executes `app.UseRouting()`, followed by `app.UseAuthentication()`, followed by `app.UseAuthorization()`, before mapping MVC and API endpoints.
 - **Login Flow (`GET`/`POST /Account/Login`, `/login`):** `AccountController.Login` validates submitted credentials using `LoginViewModel` and `[ValidateAntiForgeryToken]`, performs case-insensitive email matching via EF Core, and verifies passwords against `User.PasswordHash` using `IPasswordHasher<User>.VerifyHashedPassword`.
 - **Session Claims & Security:** On successful sign-in, `HttpContext.SignInAsync` issues a signed cookie containing `ClaimTypes.NameIdentifier`, `ClaimTypes.Name`, `ClaimTypes.Email`, and `ClaimTypes.Role` (with optional persistent sessions via `RememberMe`). Invalid logins return a generic error message to prevent user enumeration, return URLs are validated with `Url.IsLocalUrl` to prevent open redirects, and `User.PasswordHash` is decorated with `[JsonIgnore]`.
@@ -81,8 +83,8 @@ The application uses ASP.NET Core Cookie Authentication and role-based authoriza
 ### Registration
 
 - **Self-Registration (`GET`/`POST /Account/Register`, `/register`):** Handled by `AccountController.Register` and `RegisterViewModel`.
-- **Validation & Hashing:** Validates Full Name, Email Address, Password, Confirm Password, and User Type on both client and server, rejects case-insensitive duplicate emails, and stores only salted PBKDF2-SHA256 password hashes produced by `IPasswordHasher<User>`.
-- **Role Restriction:** Self-registration is limited to `Alumni` and `Student` roles. Attempts to register as `Administrator` are explicitly rejected server-side. Form submission is protected with `[ValidateAntiForgeryToken]`.
+- **Validation & Hashing:** Uses HTML5 form validation attributes together with server-side DataAnnotations and controller validation for Full Name, Email Address, Password, Confirm Password, and User Type, rejects case-insensitive duplicate emails, and stores only salted PBKDF2-SHA256 password hashes produced by `IPasswordHasher<User>`.
+- **Role Restriction:** Self-registration is limited to `Alumni` and `Student` roles (default `Alumni`). Attempts to register as `Administrator` or with the reserved `ADMIN_EMAIL` address are explicitly rejected server-side. Form submission is protected with `[ValidateAntiForgeryToken]`.
 
 ### Logout
 
@@ -105,43 +107,47 @@ Access restrictions are enforced server-side with ASP.NET Core `[Authorize]` att
 |---|---|---|
 | `/Admin`, `/Admin/Users`, User CRUD | `AdminController` | `[Authorize(Roles = "Administrator")]` |
 | `/AnnouncementAdmin` | `AnnouncementAdminController` | `[Authorize(Roles = "Administrator")]` |
-| `/User/Create`, `/User/Edit/{id}`, `/User/Delete/{id}`, `POST /users` | `UserController` write actions | `[Authorize(Roles = "Administrator")]` |
-| `/JobPosting/MyApplications` | `JobPostingController.MyApplications` | `[Authorize(Roles = "Student")]` |
-| `/JobPosting/MyJobPostings`, `POST /JobPosting/Create`, `/JobPosting/ApplicationsReceived` | `JobPostingController` Alumni actions | `[Authorize(Roles = "Alumni")]` |
-| `/Account/Profile`, `/Account/EditProfile` | `AccountController.Profile` / `EditProfile` | `[Authorize]` (any authenticated role) |
+| `/User/Create`, `/User/Edit/{id}`, `/User/Delete/{id}`, `POST /users` | `UserController` write actions | `[Authorize(Roles = "Administrator")]` + `[ValidateAntiForgeryToken]` |
+| `/JobPosting/MyApplications`, `POST /JobPosting/Apply/{id}` | `JobPostingController` Student actions | `[Authorize(Roles = "Student")]` (blocks self-application & duplicates) |
+| `/JobPosting/MyJobPostings`, `POST /JobPosting/Create`, `/JobPosting/ApplicationsReceived` | `JobPostingController` Alumni actions | `[Authorize(Roles = "Alumni")]` (owner-scoped via `NameIdentifier`) |
+| `/Account/Profile`, `/Account/EditProfile` | `AccountController.Profile` / `EditProfile` | `[Authorize]` (any authenticated role; self-only via `NameIdentifier`) |
+| `GET/POST/DELETE /api/users`, `PUT/PATCH/GET /api/users/{id}` | `ApiUserController` | `[Authorize]` (`Administrator` for listing/create/delete; `Administrator` or self for single-user read/update; non-admins cannot alter roles and must verify `CurrentPassword` to change password; self-updates refresh auth cookie claims) |
+| `GET/POST /api/users/{id}/jobs`, `GET /api/users/{id}/applications` | `ApiUserController` | Role + ownership verified (`Alumni`/`Administrator` for jobs, target user must have `Alumni` role on `POST`; `Student`/`Administrator` for applications; `403` on ID mismatch) |
+| `GET/POST /api/jobs/{id}/applications`, `GET/POST /api/applications` | `ApiJobController`, `ApiApplicationController` | `[Authorize]` + role/ownership checks (`Student` only for `POST` applications; `Alumni` owner / `Student` applicant / `Administrator` for reads) |
 
-- **Redirects:** Unauthenticated requests to protected endpoints are challenged and redirected to `/Account/Login` (`LoginPath`). Authenticated users without the required role are redirected to `/Account/AccessDenied` (`AccessDeniedPath`, `Views/Account/AccessDenied.cshtml`).
+- **Redirects & API Status Codes:** Unauthenticated browser requests to protected MVC endpoints are redirected to `/Account/Login` (`LoginPath`), while authenticated users lacking the required role are redirected to `/Account/AccessDenied` (`AccessDeniedPath`, HTTP `403`). Unauthenticated or unauthorized `/api/*` requests receive JSON `401 Unauthorized` or `403 Forbidden` responses.
 - **Applicant Privacy:** On `/JobPosting/Applications/{id}`, full applicant details are visible only to the posting's `Alumni` owner or an `Administrator`; other authenticated users can view only their own application record.
 
 ### Admin Panel
 
-- **Route & Layout:** Accessible at `/Admin` (`AdminController`) using the dedicated responsive administration layout (`Views/Admin/_AdminLayout.cshtml`).
+- **Route & Layout:** Accessible at `/Admin` (`AdminController`) using the dedicated responsive administration layout (`Views/Admin/_AdminLayout.cshtml`, loaded with Bootstrap 5 CDN and `~/css/site.css`).
 - **Executive Dashboard (`/Admin`):** Displays live database statistics (total users, alumni, students, administrators, announcements, job postings, and career applications) along with recent user registrations.
 - **User Management CRUD (`/Admin/Users`):** Provides search and role filtering plus Create (`/Admin/Users/Create`), Details (`/Admin/Users/Details/{id}`), Edit with optional password reset and role updates (`/Admin/Users/Edit/{id}`), and Delete confirmation (`/Admin/Users/Delete/{id}`).
-- **Safety Guards:** Prevents administrators from revoking their own `Administrator` role, prevents self-deletion, and blocks deletion of users with active job postings or applications in accordance with the database `ON DELETE RESTRICT` constraints.
+- **Safety Guards:** Prevents administrators from revoking their own `Administrator` role, prevents self-deletion, refreshes the authentication cookie when an administrator updates their own profile, and blocks deletion of users with active job postings or applications in accordance with the database `ON DELETE RESTRICT` constraints.
 
 ### Dynamic Navigation
 
 The shared navigation bar in `Views/Shared/_Layout.cshtml` adapts automatically using `User.Identity.IsAuthenticated` and `User.IsInRole(...)` (with active-page highlighting, Bootstrap icons, user name + role pill badge, and `TR | EN` bilingual support):
 
-- **Guests (Not Logged In):** Home, Login, Register.
-- **Students:** Home, Announcements, Job Opportunities, My Applications, My Profile, Logout.
-- **Alumni:** Home, Announcements, Job Opportunities, My Job Postings, Applications Received, My Profile, Logout.
+- **Guests (Not Logged In):** Home, Announcements, Alumni, Login, Register.
+- **Students:** Home, Announcements, Alumni, Job Opportunities, My Applications, My Profile, Logout.
+- **Alumni:** Home, Announcements, Alumni, Job Opportunities, My Job Postings, Applications Received, My Profile, Logout.
 - **Administrators:** Home, Admin Dashboard, User Management, Announcement Management, My Profile, Logout.
 
 ### User Profile
 
 - **My Profile (`/Account/Profile`, `/profile`):** Displays the authenticated user's persisted information from PostgreSQL (`Id`, `Name`, `Email`, `Role`) and a role-specific personal dashboard (recent application history for Students, published job postings and applicant counts for Alumni, and governance shortcuts for Administrators).
-- **Edit Profile (`/Account/EditProfile`, `/profile/edit`):** Allows authenticated users to update their own `Name` and `Email` via `EditProfileViewModel` and an anti-forgery-protected `POST` form. The target account is always resolved from `ClaimTypes.NameIdentifier` (no `id` parameter is accepted), `UserId` and `Role` are marked `[BindNever]`, `PasswordHash` is never exposed or editable, duplicate emails are rejected, and the authentication cookie claims are refreshed immediately after saving.
+- **Edit Profile (`/Account/EditProfile`, `/profile/edit`):** Allows authenticated users to update their own `Name` and `Email` via `EditProfileViewModel` and an anti-forgery-protected `POST` form. The target account is always resolved from `ClaimTypes.NameIdentifier` (no `id` parameter is accepted), `UserId` and `Role` are marked `[BindNever]`, `PasswordHash` is never exposed or editable, duplicate emails and reserved admin emails (for non-admins) are rejected, and the authentication cookie claims are refreshed immediately after saving.
 
 ### Configuration
 
-Administrator role promotion is configuration-driven without hardcoding credentials:
+Initial administrator seeding is configuration-driven without hardcoding credentials. Configuration precedence is:
 
-- **`Admin:Email`** in `appsettings.json`, or
-- **`ADMIN_EMAIL`** as an environment variable (for example, in a local `.env` file or container environment).
+1. **`ADMIN_EMAIL`** environment variable (loaded from a local `.env` file, host environment, or Docker Compose container environment), taking precedence over appsettings;
+2. **`Admin:Email`** in `appsettings.json`;
+3. Fallback default `admin@alumni.edu.tr` if neither is configured.
 
-When an account matching the configured email already exists in PostgreSQL, both startup seeding (`DatabaseSeeder`) and login (`AccountController.Login`) promote that account to the `Administrator` role without creating duplicate records. Keep real emails, passwords, and secrets out of version control.
+`ADMIN_EMAIL` is evaluated **only** during startup database seeding (`DatabaseSeeder`) to ensure the configured institutional admin account has the `Administrator` role without duplicating records. **Login (`AccountController.Login`) never auto-promotes accounts based on email**—user roles are read strictly from the persisted database record and managed solely by `DatabaseSeeder` or an existing `Administrator` through the Admin Panel. Public self-registration (`/Account/Register`) and non-admin profile updates reject the configured `ADMIN_EMAIL` address. Keep real emails, passwords, and secrets out of version control.
 
 ## Database and Persistence
 
@@ -158,6 +164,7 @@ The application reads database settings from environment variables (including lo
 - `POSTGRES_DB`
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
+- `ADMIN_EMAIL` *(optional; overrides `Admin:Email` in `appsettings.json` for startup seeding in `DatabaseSeeder`; never triggers automatic promotion on login)*
 
 The `.env` file contains local configuration and must not be committed. `.env.example` documents the expected variable names and can be used as a template. Replace example credentials with your own local values. Never publish real passwords or secrets.
 
@@ -230,24 +237,32 @@ Assuming the application is running locally at `http://localhost:5067`:
 | `/` | Home page (`HomeController.Index`) |
 | `/about` | About page (`HomeController.About`) |
 | `/Home/NotFound` | Custom `"404 – Page Not Found"` page (`HomeController.PageNotFound`) |
-| `/User` (and `/users`) | User management pages |
-| `/Announcement` | Public announcements |
-| `/Announcement/Details/{id}` | Announcement details |
-| `/AnnouncementAdmin` | Announcement administration |
-| `/JobPosting` (and `/jobs`) | Job postings list, details, and applications |
+| `/Account/Register` (and `/register`) | Self-registration (`Student` / `Alumni`) |
+| `/Account/Login` (and `/login`) | Member sign-in (`AccountController.Login`) |
+| `/Account/Logout` (and `/logout`) | Anti-forgery `POST` sign-out (`AccountController.Logout`) |
+| `/Account/Profile` (and `/profile`) | Authenticated user's personal profile & role dashboard (`[Authorize]`) |
+| `/Account/EditProfile` (and `/profile/edit`) | Authenticated user's self-profile editor (`[Authorize]`) |
+| `/Account/AccessDenied` (and `/access-denied`) | HTTP `403` access denied page |
+| `/Admin`, `/Admin/Users` | Administrator dashboard and full User CRUD (`[Authorize(Roles = "Administrator")]`) |
+| `/User` (and `/users`) | Public Alumni directory (write actions require `Administrator`) |
+| `/Announcement`, `/Announcement/Details/{id}` | Public announcements list and details |
+| `/AnnouncementAdmin` | Announcement administration (`[Authorize(Roles = "Administrator")]`) |
+| `/JobPosting` (and `/jobs`) | Public job listings, details, and applicant privacy-filtered view |
+| `/JobPosting/MyApplications` | Student's own submitted applications (`[Authorize(Roles = "Student")]`) |
+| `/JobPosting/MyJobPostings`, `/JobPosting/ApplicationsReceived` | Alumni's own job postings & received candidates (`[Authorize(Roles = "Alumni")]`) |
 
 ### Web API & Utility Routes
 
 | Route | Methods | Purpose |
 |---|---|---|
-| `/api/users` | `GET`, `POST` | List or create users |
-| `/api/users/{id}` | `GET`, `PUT`, `PATCH`, `DELETE` | Read, update, patch, or delete a user |
-| `/api/users/{id}/jobs` | `GET`, `POST` | List or create job postings for a user |
-| `/api/users/{id}/applications` | `GET` | List applications submitted by a user |
-| `/api/jobs/{id}/applications` | `GET`, `POST` | List or submit applications for a job posting (`POST` returns `401` without auth) |
-| `/api/jobs/{id}/applications/{applicationId}` | `GET` | Read a specific application for a job posting |
-| `/api/applications` | `GET`, `POST` | List or submit applications (`POST` returns `401` without auth) |
-| `/api/applications/{id}` | `GET` | Read a specific application |
+| `/api/users` | `GET`, `POST` | List or create users (`Administrator` only; `POST` requires `CreateUserRequest` with `name`, `email`, `password`, optional `role`) |
+| `/api/users/{id}` | `GET`, `PUT`, `PATCH`, `DELETE` | Read/update own account (non-admin password changes require `currentPassword`; refreshes cookie on self-update) or any user as `Administrator`; `DELETE` is `Administrator` only |
+| `/api/users/{id}/jobs` | `GET`, `POST` | List or create job postings (`Alumni` for own ID only, or `Administrator` for an `Alumni` target user) |
+| `/api/users/{id}/applications` | `GET` | List user's submitted applications (`Student` for own ID only, or `Administrator`) |
+| `/api/jobs/{id}/applications` | `GET`, `POST` | `GET`: posting owner (`Alumni`) or `Administrator`; `POST`: `Student` only (`401`/`403` on unauthorized) |
+| `/api/jobs/{id}/applications/{applicationId}` | `GET` | Read a specific application (`Administrator`, posting owner `Alumni`, or applicant `Student`) |
+| `/api/applications` | `GET`, `POST` | `GET`: role-scoped list (`Admin` all, `Student` own, `Alumni` received); `POST`: `Student` only |
+| `/api/applications/{id}` | `GET` | Read a specific application (`Administrator`, posting owner `Alumni`, or applicant `Student`) |
 | `/api/health` | `GET`, `POST` | Health check (`{"status":"ok"}`) |
 | `/api/swagger` | `GET` | Swagger UI (open `/swagger` to redirect here) |
 | `/hello`, `/hello/miray`, `/sum/{number1}/{number2}` | `GET` | Utility endpoints in `AlumniController` |
@@ -267,12 +282,13 @@ Unmatched `/api/*` requests (or requests with `Accept: application/json`) return
 }
 ```
 
-Matched `[ApiController]` endpoints returning `NotFound()` (e.g., `GET /api/users/99999`) preserve ASP.NET Core's `ProblemDetails` JSON (`application/problem+json`).
+Matched `[ApiController]` endpoints returning `NotFound()` (e.g., `GET /api/users/99999` with an authenticated `Administrator` cookie) preserve ASP.NET Core's `ProblemDetails` JSON (`application/problem+json`). Unauthenticated requests to protected `/api/*` endpoints return `401 Unauthorized` JSON, and unauthorized roles return `403 Forbidden` JSON.
 
-**Example Postman tests (`404` JSON):**
+**Example Postman tests (`404` / `401` JSON):**
 - `GET http://localhost:5067/api/invalid-endpoint` → `404 Not Found` (`NotFoundGuardianMiddleware` JSON)
 - `GET http://localhost:5067/api/jobs` → `404 Not Found` (`NotFoundGuardianMiddleware` JSON)
-- `GET http://localhost:5067/api/users/99999` → `404 Not Found` (`ProblemDetails` JSON)
+- `GET http://localhost:5067/api/users/99999` (unauthenticated) → `401 Unauthorized` (CookieAuth API JSON)
+- `GET http://localhost:5067/api/users/99999` (with `Administrator` `Alumni.Auth` cookie) → `404 Not Found` (`ProblemDetails` JSON)
 - `GET http://localhost:5067/nonexistent-page` with header `Accept: application/json` → `404 Not Found` (`NotFoundGuardianMiddleware` JSON)
 
 ### 2. Custom MVC 404 Page (`Views/Shared/NotFound.cshtml`)
@@ -289,16 +305,17 @@ When a browser navigates to a non-existing non-API URL or an MVC controller retu
 
 Unhandled exceptions return a safe JSON `500` payload (`statusCode`, `title`, `reason`, `path`) without leaking exception messages, stack traces, or database credentials, while the full exception is logged to both the Console and `logs/error.logs`.
 
-**Example Postman test (`500` JSON + `logs/error.logs`):**
-- `POST http://localhost:5067/api/users` with `Content-Type: application/json` and an already-existing seeded user `"id"` (for example, `2`):
+**Example Authenticated Admin API Request (`POST /api/users` with `CreateUserRequest`):**
+- Requires an authenticated `Administrator` `Alumni.Auth` session cookie (`401` unauthenticated, `403` non-admin, `409` duplicate email):
   ```json
   {
-    "id": 2,
-    "name": "Duplicate Test",
-    "email": "dup@example.com"
+    "name": "New Member",
+    "email": "new.member@alumni.edu.tr",
+    "password": "StrongPassword123!",
+    "role": "Alumni"
   }
   ```
-- Inspect the persisted log file in PowerShell:
+- Inspect server-side error logs in PowerShell:
   ```powershell
   Get-Content .\logs\error.logs
   ```
@@ -306,17 +323,20 @@ Unhandled exceptions return a safe JSON `500` payload (`statusCode`, `title`, `r
 ### 4. Request Console Logging & Normal Endpoints
 
 Each request logs one line to the terminal via `RequestLoggingMiddleware` (`time method route restype status duration`), for example:
-`10:25:44 GET /api/users user 200 36ms`
+`10:25:44 GET /api/health health 200 12ms`
 
 **Example normal checks (`200 OK`):**
 - Browser: `http://localhost:5067/`, `http://localhost:5067/about`, `http://localhost:5067/User`
-- Postman: `GET http://localhost:5067/api/health`, `GET http://localhost:5067/api/users`
+- Postman (public): `GET http://localhost:5067/api/health`
+- Postman (authenticated `Administrator` cookie): `GET http://localhost:5067/api/users`
 
 ## Project Structure
 
 ```text
 alumni/
 ├── Controllers/
+│   ├── AccountController.cs
+│   ├── AdminController.cs
 │   ├── AlumniController.cs
 │   ├── AnnouncementAdminController.cs
 │   ├── AnnouncementController.cs
@@ -329,8 +349,8 @@ alumni/
 │   └── UserController.cs
 ├── Data/
 │   ├── AlumniDbContext.cs
-│   ├── Factories/           # Seed data factories (Users, Announcements, JobPostings)
-│   └── Seeders/             # Database seed logic
+│   ├── Factories/           # Seed data factories (Users with hashed passwords, Announcements, JobPostings)
+│   └── Seeders/             # Idempotent database seed & ADMIN_EMAIL promotion logic
 ├── Logging/
 │   └── FileErrorLoggerProvider.cs
 ├── Middleware/
@@ -338,16 +358,25 @@ alumni/
 │   ├── RequestLoggingMiddleware.cs
 │   └── ServerErrorGuardianMiddleware.cs
 ├── Migrations/              # EF Core migration files and model snapshot
-├── Models/                  # User, Announcement, JobPosting, Application, and request DTOs
+├── Models/
+│   ├── Admin/               # AdminDashboardViewModel, AdminUserCreate/Edit/DetailsViewModel
+│   └── ...                  # User, Announcement, JobPosting, Application, Auth ViewModels & API DTOs
 ├── Views/
+│   ├── Account/             # Register, Login, Profile, EditProfile, AccessDenied
+│   ├── Admin/               # _AdminLayout, Index, Users, CreateUser, EditUser, UserDetails, DeleteUser
+│   ├── Announcement/        # Public announcement list and details
+│   ├── AnnouncementAdmin/   # Admin-only announcement CRUD
+│   ├── Home/                # Index, About
+│   ├── JobPosting/          # Index, Details, Applications, MyApplications, MyJobPostings, ApplicationsReceived
+│   ├── User/                # Public alumni directory and Admin-only CRUD views
 │   └── Shared/
-│       ├── _Layout.cshtml
+│       ├── _Layout.cshtml   # Dynamic role-based navigation layout
 │       └── NotFound.cshtml  # Generic MVC 404 page
-├── wwwroot/                 # Static assets
+├── wwwroot/                 # Static assets (css/site.css, images/)
 ├── logs/                    # Runtime-created directory containing error.logs
 ├── Alumni.csproj            # .NET project and package references
 ├── Alumni.http              # Sample HTTP requests
-├── Program.cs               # DI, logging, middleware pipeline, and routing
+├── Program.cs               # DI, Cookie Auth, PasswordHasher, logging, middleware pipeline, and routing
 ├── docker-compose.yml       # PostgreSQL and app services
 ├── Dockerfile               # Multi-stage container build for application service
 ├── .env.example             # Example environment variable names and values
@@ -357,9 +386,9 @@ alumni/
 
 ## Implemented and Planned Scope
 
-**Implemented (current project):** ASP.NET Core MVC and Web API, `User`, `Announcement`, `JobPosting`, and `Application` entities, PostgreSQL connection, EF Core migrations and database seeding, MVC and REST API flows (with fail-closed `401` protection on application creation endpoints), `RequestLoggingMiddleware`, `ServerErrorGuardianMiddleware`, `NotFoundGuardianMiddleware`, generic MVC 404 page (`Views/Shared/NotFound.cshtml`), file-based error logging (`logs/error.logs`), Docker Compose (`db` and `app`), and Swagger UI.
+**Implemented (current project):** ASP.NET Core MVC and Web API, `User`, `Announcement`, `JobPosting`, and `Application` entities, PostgreSQL persistence, EF Core migrations (`InitialCreate`, `AddJobPostings`, `AddApplications`, `AddBilingualAnnouncementFields`, `AddUserAuthenticationAndRoles`) and idempotent seeding, Cookie Authentication (`Alumni.Auth`) with `IPasswordHasher<User>` (PBKDF2-SHA256), role-based authorization (`Administrator`, `Alumni`, `Student`) across MVC and REST API controllers, Admin Panel (`/Admin`), dynamic role-based navigation, user-specific pages (`/Account/Profile`, `/Account/EditProfile`, `/JobPosting/MyApplications`, `/JobPosting/MyJobPostings`, `/JobPosting/ApplicationsReceived`), `RequestLoggingMiddleware`, `ServerErrorGuardianMiddleware`, `NotFoundGuardianMiddleware`, generic MVC 404 page (`Views/Shared/NotFound.cshtml`), file-based error logging (`logs/error.logs`), Docker Compose (`db` and `app`), and Swagger UI.
 
-**Planned / not yet implemented:** alumni profiles, departments, graduation details, job experience, full authentication/authorization (`AddAuthentication` / user login & claims), and additional search/filtering or dashboard features. These should be marked implemented only after their models, routes, and persistence are present in the codebase.
+**Planned / not yet implemented:** extended alumni academic profiles (departments, graduation details, job experience), self-service password reset / email verification, job posting edit/delete UI, JWT Bearer authentication for external stateless API clients, and external university Single Sign-On (SSO). These should be marked implemented only after their models, routes, and persistence are present in the codebase.
 
 ## Brand & Design Guidelines
 

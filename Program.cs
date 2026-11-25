@@ -88,6 +88,43 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
         options.SlidingExpiration = true;
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnRedirectToLogin = async context =>
+            {
+                if (IsApiOrJsonRequest(context.Request))
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    await context.Response.WriteAsJsonAsync(new
+                    {
+                        statusCode = StatusCodes.Status401Unauthorized,
+                        title = "Unauthorized",
+                        reason = "Authentication is required to access this resource.",
+                        path = context.Request.Path.Value ?? "/"
+                    });
+                    return;
+                }
+
+                context.Response.Redirect(context.RedirectUri);
+            },
+            OnRedirectToAccessDenied = async context =>
+            {
+                if (IsApiOrJsonRequest(context.Request))
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    await context.Response.WriteAsJsonAsync(new
+                    {
+                        statusCode = StatusCodes.Status403Forbidden,
+                        title = "Forbidden",
+                        reason = "You do not have permission to access this resource.",
+                        path = context.Request.Path.Value ?? "/"
+                    });
+                    return;
+                }
+
+                context.Response.Redirect(context.RedirectUri);
+            }
+        };
     });
 
 builder.Services.AddControllersWithViews();
@@ -200,3 +237,10 @@ catch (Exception ex)
 }
 
 app.Run();
+
+static bool IsApiOrJsonRequest(HttpRequest request)
+{
+    return request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase)
+        || request.Headers.Accept.Any(accept =>
+            accept is not null && accept.Contains("application/json", StringComparison.OrdinalIgnoreCase));
+}

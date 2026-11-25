@@ -78,6 +78,33 @@
     }
 }
 
+<!-- Feedback Notifications (Login / Logout / System Messages) -->
+@if (TempData["SuccessMessage"] != null || TempData["ErrorMessage"] != null)
+{
+    <div style="position: fixed; top: 88px; right: 20px; z-index: 1055; max-width: 440px; width: calc(100% - 40px);">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-lg mb-2" role="alert" style="border-left: 4px solid #198754;">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                    <div>@TempData["SuccessMessage"]</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-lg mb-2" role="alert" style="border-left: 4px solid #dc3545;">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                    <div>@TempData["ErrorMessage"]</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+    </div>
+}
+
 <!-- ========================================================================
      SECTION 1 – HERO (Cinematic, Full-Width Campus Photography)
      ======================================================================== -->

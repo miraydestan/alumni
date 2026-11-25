@@ -13,11 +13,11 @@
                         Security Protocol &bull; Authorization Gate
                     </span>
                 </div>
-                <h1 class="hero-title mb-3" data-i18n-en="Restricted Administrative Access" data-i18n-tr="Kısıtlı Yönetici Erişimi">
-                    Restricted Administrative Access
+                <h1 class="hero-title mb-3" data-i18n-en="Access Denied" data-i18n-tr="Erişim Reddedildi">
+                    Access Denied
                 </h1>
-                <p class="hero-subtitle mb-0" data-i18n-en="You do not possess the required administrative clearance to access this resource." data-i18n-tr="Bu kaynağa erişmek için gerekli yönetici yetkisine sahip değilsiniz.">
-                    You do not possess the required administrative clearance to access this resource.
+                <p class="hero-subtitle mb-0" data-i18n-en="You do not have permission to access the requested page or resource." data-i18n-tr="Talep ettiğiniz sayfa veya kaynağa erişim yetkiniz bulunmamaktadır.">
+                    You do not have permission to access the requested page or resource.
                 </p>
             </div>
         </div>
@@ -33,22 +33,22 @@
                         <i class="bi bi-lock-fill"></i>
                     </div>
 
-                    <h2 class="academic-serif mb-3" style="color: var(--ats-navy); font-size: 1.5rem;" data-i18n-en="HTTP 403 &bull; Administrator Role Required" data-i18n-tr="HTTP 403 &bull; Yönetici Rolü Gereklidir">
-                        HTTP 403 &bull; Administrator Role Required
+                    <h2 class="academic-serif mb-3" style="color: var(--ats-navy); font-size: 1.5rem;" data-i18n-en="HTTP 403 &bull; Access Denied" data-i18n-tr="HTTP 403 &bull; Yetkisiz Erişim">
+                        HTTP 403 &bull; Access Denied
                     </h2>
 
-                    <p class="text-muted mb-4 small" style="line-height: 1.6;" data-i18n-en="The administrative portal and data governance controls are strictly restricted to verified system administrators. Your account is currently authenticated with standard privileges." data-i18n-tr="Yönetici paneli ve veri yönetim kontrolleri yalnızca doğrulanmış sistem yöneticilerine açıktır. Hesabınız şu anda standart yetkilerle doğrulanmıştır.">
-                        The administrative portal and data governance controls are strictly restricted to verified system administrators. Your account is currently authenticated with standard privileges.
+                    <p class="text-muted mb-4 small" style="line-height: 1.6;" data-i18n-en="Your account is signed in, but your current role does not grant permission to view this page or perform this action. Please return to the homepage or switch to an authorized account." data-i18n-tr="Hesabınızla oturum açtınız ancak mevcut rolünüz bu sayfayı görüntüleme veya bu işlemi gerçekleştirme yetkisine sahip değildir. Ana sayfaya dönebilir veya yetkili bir hesaba geçiş yapabilirsiniz.">
+                        Your account is signed in, but your current role does not grant permission to view this page or perform this action. Please return to the homepage or switch to an authorized account.
                     </p>
 
                     <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
-                        <a href="/" class="btn btn-academic-gold py-2 px-4 small text-decoration-none" data-i18n-en="Return to Homepage" data-i18n-tr="Ana Sayfaya Dön">
+                        <a href="/" class="btn btn-academic-gold py-2 px-4 small text-decoration-none">
                             <i class="bi bi-house-door me-1"></i>
                             <span data-i18n-en="Return to Homepage" data-i18n-tr="Ana Sayfaya Dön">Return to Homepage</span>
                         </a>
                         <form asp-controller="Account" asp-action="Logout" method="post" class="m-0 p-0 d-inline">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-academic-outline py-2 px-4 small w-100" data-i18n-en="Switch Account" data-i18n-tr="Hesap Değiştir">
+                            <button type="submit" class="btn btn-academic-outline py-2 px-4 small w-100">
                                 <i class="bi bi-box-arrow-right me-1"></i>
                                 <span data-i18n-en="Switch Account" data-i18n-tr="Hesap Değiştir">Switch Account</span>
                             </button>

@@ -73,7 +73,7 @@
                         </div>
 
                         <!-- Email -->
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label asp-for="Email" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
                                 <span data-i18n-en="Institutional Email Address *" data-i18n-tr="E-posta Adresi *">Institutional Email Address *</span>
                             </label>
@@ -83,6 +83,20 @@
                                    data-i18n-tr="aylin.kaya@alumni.edu"
                                    style="border-color: var(--ats-gray-light); border-radius: 4px;" required />
                             <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-4">
+                            <label for="userCreatePassword" class="form-label fw-semibold" style="color: var(--ats-navy); font-size: 0.9rem;">
+                                <span data-i18n-en="Initial Password *" data-i18n-tr="İlk Şifre *">Initial Password *</span>
+                            </label>
+                            <input id="userCreatePassword" name="password" class="form-control form-control-lg fs-6" type="password"
+                                   placeholder="••••••••"
+                                   minlength="6"
+                                   style="border-color: var(--ats-gray-light); border-radius: 4px;" required />
+                            <small class="text-muted d-block mt-1" style="font-size: 0.8rem;" data-i18n-en="Minimum 6 characters. Stored securely with cryptographic hashing." data-i18n-tr="En az 6 karakter. Kriptografik özetleme ile güvenli şekilde saklanır.">
+                                Minimum 6 characters. Stored securely with cryptographic hashing.
+                            </small>
                         </div>
 
                         <!-- Action Buttons -->

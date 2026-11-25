@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Alumni Directory";
     ViewData["ActivePage"] = "Users";
+    var isAdmin = User?.Identity?.IsAuthenticated == true && User.IsInRole("Administrator");
 }
 
 @functions {
@@ -41,6 +42,22 @@
 <main class="py-5 bg-warm-offwhite" aria-label="Alumni Directory Section">
     <div class="container py-lg-3">
 
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="border-left: 4px solid #198754;">
+                <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert" style="border-left: 4px solid #dc3545;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
         <!-- Controls Toolbar: Search, Filters & Registration Action -->
         <div class="card border-0 shadow-sm rounded-3 p-3 p-md-4 mb-5" style="background: #FFFFFF; border: 1px solid var(--ats-card-border) !important;">
             <div class="row g-3 align-items-center justify-content-between">
@@ -70,16 +87,19 @@
                     </select>
                 </div>
 
-                <!-- Action Cluster: Quick Register Toggle & Full Page Link -->
-                <div class="col-12 col-sm-6 col-md-4 col-lg-4 text-sm-end d-flex justify-content-start justify-content-sm-end gap-2 flex-wrap">
-                    <button class="btn btn-outline-custom" type="button" data-bs-toggle="collapse" data-bs-target="#quickRegisterCollapse" aria-expanded="false" aria-controls="quickRegisterCollapse">
-                        <i class="bi bi-person-plus me-1" style="color: var(--ats-gold);"></i>
-                        <span data-i18n-en="Quick Add" data-i18n-tr="Hızlı Ekle">Quick Add</span>
-                    </button>
-                    <a asp-action="Create" class="btn-academic-gold text-decoration-none py-2 px-3 small">
-                        <span data-i18n-en="New Registration" data-i18n-tr="Yeni Kayıt">New Registration</span>
-                    </a>
-                </div>
+                <!-- Action Cluster: Quick Register Toggle & Full Page Link (Administrator Only) -->
+                @if (isAdmin)
+                {
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-4 text-sm-end d-flex justify-content-start justify-content-sm-end gap-2 flex-wrap">
+                        <button class="btn btn-outline-custom" type="button" data-bs-toggle="collapse" data-bs-target="#quickRegisterCollapse" aria-expanded="false" aria-controls="quickRegisterCollapse">
+                            <i class="bi bi-person-plus me-1" style="color: var(--ats-gold);"></i>
+                            <span data-i18n-en="Quick Add" data-i18n-tr="Hızlı Ekle">Quick Add</span>
+                        </button>
+                        <a asp-action="Create" class="btn-academic-gold text-decoration-none py-2 px-3 small">
+                            <span data-i18n-en="New Registration" data-i18n-tr="Yeni Kayıt">New Registration</span>
+                        </a>
+                    </div>
+                }
             </div>
 
             <!-- Active Directory Counter Strip -->
@@ -97,60 +117,74 @@
             </div>
         </div>
 
-        <!-- Collapsible Quick Register Form (Preserves POST /users action) -->
-        <div class="collapse mb-5" id="quickRegisterCollapse">
-            <div class="card border-0 shadow-sm rounded-3 p-4 p-md-4" style="background: #FFFFFF; border-left: 4px solid var(--ats-gold) !important; border: 1px solid var(--ats-card-border);">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="icon-box m-0" style="width: 36px; height: 36px; font-size: 1rem;">
-                            <i class="bi bi-person-plus-fill"></i>
-                        </span>
-                        <div>
-                            <h2 class="h5 academic-serif mb-0" style="color: var(--ats-navy);" data-i18n-en="Quick Alumni Registration" data-i18n-tr="Hızlı Mezun Kaydı">
-                                Quick Alumni Registration
-                            </h2>
-                            <span class="small" style="color: var(--ats-gray-muted);" data-i18n-en="Add a verified graduate directly to the platform database" data-i18n-tr="Doğrulanmış mezunu doğrudan veritabanına kaydedin">
-                                Add a verified graduate directly to the platform database
+        @if (isAdmin)
+        {
+            <!-- Collapsible Quick Register Form (Preserves POST /users action — Administrator Only) -->
+            <div class="collapse mb-5" id="quickRegisterCollapse">
+                <div class="card border-0 shadow-sm rounded-3 p-4 p-md-4" style="background: #FFFFFF; border-left: 4px solid var(--ats-gold) !important; border: 1px solid var(--ats-card-border);">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="icon-box m-0" style="width: 36px; height: 36px; font-size: 1rem;">
+                                <i class="bi bi-person-plus-fill"></i>
                             </span>
+                            <div>
+                                <h2 class="h5 academic-serif mb-0" style="color: var(--ats-navy);" data-i18n-en="Quick Alumni Registration" data-i18n-tr="Hızlı Mezun Kaydı">
+                                    Quick Alumni Registration
+                                </h2>
+                                <span class="small" style="color: var(--ats-gray-muted);" data-i18n-en="Add a verified graduate directly to the platform database" data-i18n-tr="Doğrulanmış mezunu doğrudan veritabanına kaydedin">
+                                    Add a verified graduate directly to the platform database
+                                </span>
+                            </div>
                         </div>
+                        <a asp-action="Create" class="small text-decoration-none" style="color: var(--ats-navy);" data-i18n-en="Open Full Form &rarr;" data-i18n-tr="Detaylı Form &rarr;">
+                            Open Full Form &rarr;
+                        </a>
                     </div>
-                    <a asp-action="Create" class="small text-decoration-none" style="color: var(--ats-navy);" data-i18n-en="Open Full Form &rarr;" data-i18n-tr="Detaylı Form &rarr;">
-                        Open Full Form &rarr;
-                    </a>
-                </div>
 
-                <form action="/users" method="post">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-5">
-                            <label for="userName" class="form-label fw-semibold small text-dark" data-i18n-en="Full Name" data-i18n-tr="Ad Soyad">
-                                Full Name
-                            </label>
-                            <input type="text" id="userName" name="Name" class="form-control" 
-                                   placeholder="e.g. Dr. Eleanor Vance" 
-                                   data-i18n-en="e.g. Dr. Eleanor Vance" 
-                                   data-i18n-tr="Örn. Dr. Miray Destan" 
-                                   required />
+                    <form action="/users" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label for="userName" class="form-label fw-semibold small text-dark" data-i18n-en="Full Name" data-i18n-tr="Ad Soyad">
+                                    Full Name
+                                </label>
+                                <input type="text" id="userName" name="name" class="form-control"
+                                       placeholder="e.g. Dr. Eleanor Vance"
+                                       data-i18n-en="e.g. Dr. Eleanor Vance"
+                                       data-i18n-tr="Örn. Dr. Miray Destan"
+                                       minlength="2" maxlength="100" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label for="userEmail" class="form-label fw-semibold small text-dark" data-i18n-en="Email Address" data-i18n-tr="E-posta Adresi">
+                                    Email Address
+                                </label>
+                                <input type="email" id="userEmail" name="email" class="form-control"
+                                       placeholder="e.g. eleanor.vance@alumni.edu"
+                                       data-i18n-en="e.g. eleanor.vance@alumni.edu"
+                                       data-i18n-tr="örn. miray@alumni.edu"
+                                       maxlength="150" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label for="userPassword" class="form-label fw-semibold small text-dark" data-i18n-en="Initial Password" data-i18n-tr="İlk Şifre">
+                                    Initial Password
+                                </label>
+                                <input type="password" id="userPassword" name="password" class="form-control"
+                                       placeholder="Min. 6 characters"
+                                       data-i18n-en="Min. 6 characters"
+                                       data-i18n-tr="En az 6 karakter"
+                                       minlength="6" required />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn-academic-gold w-100 py-2">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    <span data-i18n-en="Register" data-i18n-tr="Kaydet">Register</span>
+                                </button>
+                            </div>
                         </div>
-                        <div class="col-md-5">
-                            <label for="userEmail" class="form-label fw-semibold small text-dark" data-i18n-en="Institutional or Personal Email" data-i18n-tr="Kurumsal veya Kişisel E-posta">
-                                Institutional or Personal Email
-                            </label>
-                            <input type="email" id="userEmail" name="Email" class="form-control" 
-                                   placeholder="e.g. eleanor.vance@alumni.edu" 
-                                   data-i18n-en="e.g. eleanor.vance@alumni.edu" 
-                                   data-i18n-tr="örn. miray@alumni.edu" 
-                                   required />
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn-academic-gold w-100 py-2">
-                                <i class="bi bi-check-circle me-1"></i>
-                                <span data-i18n-en="Register" data-i18n-tr="Kaydet">Register</span>
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-        </div>
+        }
 
         <!-- Directory Grid / List -->
         @if (!Model.Any())
@@ -165,9 +199,12 @@
                 <p class="academic-lead mx-auto mb-4" style="max-width: 520px;" data-i18n-en="The alumni directory is currently empty. Be the first to register and establish your permanent institutional record." data-i18n-tr="Mezunlar dizini şu anda boştur. İlk kaydı oluşturarak kurumsal mezun sicilinizi başlatabilirsiniz.">
                     The alumni directory is currently empty. Be the first to register and establish your permanent institutional record.
                 </p>
-                <a asp-action="Create" class="btn-academic-gold" data-i18n-en="Register First Graduate" data-i18n-tr="İlk Mezun Kaydını Yap">
-                    Register First Graduate
-                </a>
+                @if (isAdmin)
+                {
+                    <a asp-action="Create" class="btn-academic-gold" data-i18n-en="Register First Graduate" data-i18n-tr="İlk Mezun Kaydını Yap">
+                        Register First Graduate
+                    </a>
+                }
             </div>
         }
         else
@@ -249,15 +286,18 @@
                                     <span data-i18n-en="View Profile" data-i18n-tr="Profili İncele">View Profile</span>
                                 </a>
 
-                                <!-- Management Action Menu (Edit / Delete) -->
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-outline-secondary btn-sm" title="Edit Profile">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-outline-secondary btn-sm text-danger" title="Remove Record">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </div>
+                                <!-- Management Action Menu (Edit / Delete — Administrator Only) -->
+                                @if (isAdmin)
+                                {
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-outline-secondary btn-sm" title="Edit Profile">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-outline-secondary btn-sm text-danger" title="Remove Record">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                }
                             </div>
                         </div>
                     </div>

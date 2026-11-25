@@ -58,7 +58,7 @@
                         </div>
                     </div>
 
-                    <form asp-controller="Account" asp-action="EditProfile" method="post" novalidate>
+                    <form asp-controller="Account" asp-action="EditProfile" method="post">
                         @Html.AntiForgeryToken()
 
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-4 rounded" role="alert"></div>
@@ -88,7 +88,7 @@
                                 </span>
                                 <input asp-for="Name" class="form-control form-control-lg fs-6 border-start-0 ps-0"
                                        style="border-color: var(--ats-gray-light); border-radius: 0 4px 4px 0;"
-                                       required autofocus />
+                                       minlength="2" maxlength="100" required autofocus />
                             </div>
                             <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
                         </div>
@@ -104,7 +104,7 @@
                                 </span>
                                 <input asp-for="Email" type="email" class="form-control form-control-lg fs-6 border-start-0 ps-0"
                                        style="border-color: var(--ats-gray-light); border-radius: 0 4px 4px 0;"
-                                       required />
+                                       maxlength="150" required />
                             </div>
                             <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
                             <div class="form-text small text-muted" data-i18n-en="Changing your email automatically updates your active sign-in credentials." data-i18n-tr="E-posta adresinizi değiştirdiğinizde aktif oturum bilgileriniz otomatik olarak güncellenir.">
